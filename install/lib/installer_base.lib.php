@@ -1927,10 +1927,10 @@ class installer_base {
 				$content = rf('tpl/apache_ispconfig_fcgi_starter.master');
 				$content = str_replace('{fastcgi_bin}', $conf['fastcgi']['fastcgi_bin'], $content);
 				$content = str_replace('{fastcgi_phpini_path}', $conf['fastcgi']['fastcgi_phpini_path'], $content);
-				mkdir('/var/www/php-fcgi-scripts/ispconfig', 0755, true);
+				@mkdir('/var/www/php-fcgi-scripts/ispconfig', 0755, true);
 				wf('/var/www/php-fcgi-scripts/ispconfig/.php-fcgi-starter', $content);
 				exec('chmod +x /var/www/php-fcgi-scripts/ispconfig/.php-fcgi-starter');
-				symlink($install_dir.'/interface/web','/var/www/ispconfig');
+				@symlink($install_dir.'/interface/web','/var/www/ispconfig');
 				exec('chown -R ispconfig:ispconfig /var/www/php-fcgi-scripts/ispconfig');
 			//}
 		}
