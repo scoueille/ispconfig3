@@ -60,7 +60,8 @@ class db extends mysqli
     $this->dbClientFlags = $conf[$prefix.'db_client_flags'];
     parent::__construct($conf[$prefix.'db_host'], $conf[$prefix.'db_user'],$conf[$prefix.'db_password'],$conf[$prefix.'db_database']);
     $try = 0;
-    while(!is_null($this->connect_error) && $try < 5) {
+    //while(!is_null($this->connect_error) && $try < 5) {
+	while(mysqli_connect_error() && $try < 5) {
       if($try > 0) sleep(1);
       
       $try++;
@@ -69,7 +70,9 @@ class db extends mysqli
       parent::__construct($conf[$prefix.'db_host'], $conf[$prefix.'db_user'],$conf[$prefix.'db_password'],$conf[$prefix.'db_database']);
     }
     
-    if(is_null($this->connect_error)) $this->isConnected = true;
+    //if(is_null($this->connect_error)) $this->isConnected = true;
+    //else return false;
+	if(!mysqli_connect_error()) $this->isConnected = true;
     else return false;
     
     $this->setCharacterEncoding();
@@ -83,6 +86,7 @@ class db extends mysqli
   public function updateError($location) {
     global $app;
 
+	/*
     if(!is_null($this->connect_error)) {
       $this->errorNumber = $this->connect_errno;
       $this->errorMessage = $this->connect_error;
@@ -90,6 +94,15 @@ class db extends mysqli
       $this->errorNumber = $this->errno;
       $this->errorMessage = $this->error;
     }
+	*/
+	if(mysqli_connect_error()) {
+      $this->errorNumber = mysqli_connect_errno();
+      $this->errorMessage = mysqli_connect_error();
+    } else {
+      $this->errorNumber = mysqli_errno($this);
+      $this->errorMessage = mysqli_error($this);
+    }
+
 
     $this->errorLocation = $location;
     if($this->errorNumber) {
