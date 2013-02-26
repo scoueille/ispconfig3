@@ -610,8 +610,8 @@ class installer extends installer_base
 		
 			$this->write_config_file("$vhost_conf_dir/apps.vhost", $content);
 		
-			if ( !is_file($conf['web']['website_basedir'].'/php-fcgi-scripts/apps/.php-fcgi-starter') ) 
-			{
+			//if ( !is_file($conf['web']['website_basedir'].'/php-fcgi-scripts/apps/.php-fcgi-starter') ) 
+			//{
 				$content = rf('tpl/apache_apps_fcgi_starter.master');
 				$content = str_replace('{fastcgi_bin}', $conf['fastcgi']['fastcgi_bin'], $content);
 				$content = str_replace('{fastcgi_phpini_path}', $conf['fastcgi']['fastcgi_phpini_path'], $content);
@@ -621,7 +621,7 @@ class installer extends installer_base
 				exec('chmod +x '.$conf['web']['website_basedir'].'/php-fcgi-scripts/apps/.php-fcgi-starter');
 				exec('chown -R ispapps:ispapps '.$conf['web']['website_basedir'].'/php-fcgi-scripts/apps');
 			
-			}
+			//}
 		}
 		if($conf['nginx']['installed'] == true){
 			$apps_vhost_user = escapeshellcmd($conf['web']['apps_vhost_user']);

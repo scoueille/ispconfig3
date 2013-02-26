@@ -1039,7 +1039,7 @@ class installer_dist extends installer_base {
 			
 				replaceLine('/var/www/php-fcgi-scripts/ispconfig/.php-fcgi-starter','PHPRC=','PHPRC=/etc/',0,0);
 				*/
-				if(!is_file('/var/www/php-fcgi-scripts/ispconfig/.php-fcgi-starter')) {
+				//if(!is_file('/var/www/php-fcgi-scripts/ispconfig/.php-fcgi-starter')) {
 					$content = rf('tpl/apache_ispconfig_fcgi_starter.master');
 					$content = str_replace('{fastcgi_bin}', $conf['fastcgi']['fastcgi_bin'], $content);
 					$content = str_replace('{fastcgi_phpini_path}', $conf['fastcgi']['fastcgi_phpini_path'], $content);
@@ -1048,7 +1048,7 @@ class installer_dist extends installer_base {
 					exec('chmod +x /var/www/php-fcgi-scripts/ispconfig/.php-fcgi-starter');
 					exec('ln -s /usr/local/ispconfig/interface/web /var/www/ispconfig');
 					exec('chown -R ispconfig:ispconfig /var/www/php-fcgi-scripts/ispconfig');
-				}
+				//}
 			}
 		}
 		

@@ -1923,7 +1923,7 @@ class installer_base {
 					symlink($vhost_conf_dir.'/ispconfig.vhost',$vhost_conf_enabled_dir.'/000-ispconfig.vhost');
 				}
 			}
-			if(!is_file('/var/www/php-fcgi-scripts/ispconfig/.php-fcgi-starter')) {
+			//if(!is_file('/var/www/php-fcgi-scripts/ispconfig/.php-fcgi-starter')) {
 				$content = rf('tpl/apache_ispconfig_fcgi_starter.master');
 				$content = str_replace('{fastcgi_bin}', $conf['fastcgi']['fastcgi_bin'], $content);
 				$content = str_replace('{fastcgi_phpini_path}', $conf['fastcgi']['fastcgi_phpini_path'], $content);
@@ -1932,7 +1932,7 @@ class installer_base {
 				exec('chmod +x /var/www/php-fcgi-scripts/ispconfig/.php-fcgi-starter');
 				symlink($install_dir.'/interface/web','/var/www/ispconfig');
 				exec('chown -R ispconfig:ispconfig /var/www/php-fcgi-scripts/ispconfig');
-			}
+			//}
 		}
 
 		if($conf['nginx']['installed'] == true && $this->install_ispconfig_interface == true){
