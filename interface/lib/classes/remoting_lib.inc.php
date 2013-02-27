@@ -467,7 +467,9 @@ class remoting_lib {
                                         }
                                 break;
                                 case 'UNIQUE':
-                                        if($this->action == 'NEW') {
+										if($validator['allowempty'] != 'y') $validator['allowempty'] = 'n';
+										if($validator['allowempty'] == 'n' || ($validator['allowempty'] == 'y' && $field_value != '')){
+											if($this->action == 'NEW') {
                                                 $num_rec = $app->db->queryOneRecord("SELECT count(*) as number FROM ".$escape.$this->formDef['db_table'].$escape. " WHERE $field_name = '".$app->db->quote($field_value)."'");
                                                 if($num_rec["number"] > 0) {
                                                         $errmsg = $validator['errmsg'];
@@ -477,7 +479,7 @@ class remoting_lib {
 															$this->errorMessage .= $errmsg."<br />\r\n";
 														}
                                                 }
-                                        } else {
+											} else {
                                                 $num_rec = $app->db->queryOneRecord("SELECT count(*) as number FROM ".$escape.$this->formDef['db_table'].$escape. " WHERE $field_name = '".$app->db->quote($field_value)."' AND ".$this->formDef['db_table_idx']." != ".$this->primary_id);
                                                 if($num_rec["number"] > 0) {
                                                         $errmsg = $validator['errmsg'];
@@ -487,7 +489,8 @@ class remoting_lib {
 															$this->errorMessage .= $errmsg."<br />\r\n";
 														}
                                                 }
-                                        }
+											}
+										}
                                 break;
                                 case 'NOTEMPTY':
                                         if(empty($field_value)) {
@@ -571,31 +574,44 @@ class remoting_lib {
 										}
                                 break;
 								case 'ISIP':
-								//* Check if its a IPv4 or IPv6 address
-								if(function_exists('filter_var')) {
-									if(!filter_var($field_value,FILTER_VALIDATE_IP)) {
-										$errmsg = $validator['errmsg'];
-										if(isset($this->wordbook[$errmsg])) {
-											$this->errorMessage .= $this->wordbook[$errmsg]."<br />\r\n";
-										} else {
-											$this->errorMessage .= $errmsg."<br />\r\n";
-										}
-									}
+								if($validator['allowempty'] != 'y') $validator['allowempty'] = 'n';
+								if($validator['allowempty'] == 'y' && $field_value == '') {
+									//* Do nothing
 								} else {
-									//* Check content with regex, if we use php < 5.2
-									$ip_ok = 0;
-									if(preg_match("/^(\:\:([a-f0-9]{1,4}\:){0,6}?[a-f0-9]{0,4}|[a-f0-9]{1,4}(\:[a-f0-9]{1,4}){0,6}?\:\:|[a-f0-9]{1,4}(\:[a-f0-9]{1,4}){1,6}?\:\:([a-f0-9]{1,4}\:){1,6}?[a-f0-9]{1,4})(\/\d{1,3})?$/i", $field_value)){
-										$ip_ok = 1;
+								//* Check if its a IPv4 or IPv6 address
+									if(isset($validator['separator']) && $validator['separator'] != '') {
+										//* When the field may contain several IP addresses, split them by the char defined as separator
+										$field_value_array = explode($validator['separator'],$field_value);
+									} else {
+										$field_value_array[] = $field_value;
 									}
-									if(preg_match("/^[0-9]{1,3}(\.)[0-9]{1,3}(\.)[0-9]{1,3}(\.)[0-9]{1,3}$/", $field_value)){
-										$ip_ok = 1;
-									}
-									if($ip_ok == 0) {
-										$errmsg = $validator['errmsg'];
-										if(isset($this->wordbook[$errmsg])) {
-											$this->errorMessage .= $this->wordbook[$errmsg]."<br />\r\n";
+									foreach($field_value_array as $field_value) {
+										if(function_exists('filter_var')) {
+											if(!filter_var($field_value,FILTER_VALIDATE_IP)) {
+												$errmsg = $validator['errmsg'];
+												if(isset($this->wordbook[$errmsg])) {
+													$this->errorMessage .= $this->wordbook[$errmsg]."<br />\r\n";
+												} else {
+													$this->errorMessage .= $errmsg."<br />\r\n";
+												}
+											}
 										} else {
-											$this->errorMessage .= $errmsg."<br />\r\n";
+											//* Check content with regex, if we use php < 5.2
+											$ip_ok = 0;
+											if(preg_match("/^(\:\:([a-f0-9]{1,4}\:){0,6}?[a-f0-9]{0,4}|[a-f0-9]{1,4}(\:[a-f0-9]{1,4}){0,6}?\:\:|[a-f0-9]{1,4}(\:[a-f0-9]{1,4}){1,6}?\:\:([a-f0-9]{1,4}\:){1,6}?[a-f0-9]{1,4})(\/\d{1,3})?$/i", $field_value)){
+												$ip_ok = 1;
+											}
+											if(preg_match("/^[0-9]{1,3}(\.)[0-9]{1,3}(\.)[0-9]{1,3}(\.)[0-9]{1,3}$/", $field_value)){
+												$ip_ok = 1;
+											}
+											if($ip_ok == 0) {
+												$errmsg = $validator['errmsg'];
+												if(isset($this->wordbook[$errmsg])) {
+													$this->errorMessage .= $this->wordbook[$errmsg]."<br />\r\n";
+												} else {
+													$this->errorMessage .= $errmsg."<br />\r\n";
+												}
+											}
 										}
 									}
 								}
