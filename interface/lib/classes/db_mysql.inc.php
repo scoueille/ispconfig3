@@ -108,10 +108,10 @@ class db extends mysqli
     if($this->errorNumber) {
       $error_msg = $this->errorLocation .' '. $this->errorMessage;
       // This right here will allow us to use the samefile for server & interface
-      if($this->show_error_messages) {
-	echo $error_msg;
+      if($this->show_error_messages && $conf['demo_mode'] != true) {
+		echo $error_msg;
       } else if(is_object($app) && method_exists($app, 'log')) {
-	$app->log($error_msg, LOGLEVEL_WARN);
+		$app->log($error_msg, LOGLEVEL_WARN);
       }
     }
   }
