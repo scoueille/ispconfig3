@@ -84,7 +84,7 @@ class db extends mysqli
 
   // error handler
   public function updateError($location) {
-    global $app;
+    global $app, $conf;
 
 	/*
     if(!is_null($this->connect_error)) {
@@ -108,7 +108,7 @@ class db extends mysqli
     if($this->errorNumber) {
       $error_msg = $this->errorLocation .' '. $this->errorMessage;
       // This right here will allow us to use the samefile for server & interface
-      if($this->show_error_messages && $conf['demo_mode'] != true) {
+      if($this->show_error_messages && $conf['demo_mode'] === false) {
 		echo $error_msg;
       } else if(is_object($app) && method_exists($app, 'log')) {
 		$app->log($error_msg, LOGLEVEL_WARN);
@@ -123,7 +123,8 @@ class db extends mysqli
   }
 
   public function query($queryString) {
-    if($this->isConnected == false) return false;
+    global $conf;
+	if($this->isConnected == false) return false;
     $try = 0;
     do {
         $try++;
@@ -144,7 +145,7 @@ class db extends mysqli
     } while($ok == false);
 	$this->queryId = parent::query($queryString);
     $this->updateError('DB::query('.$queryString.') -> mysqli_query');
-    if($this->errorNumber) debug_print_backtrace();
+    if($this->errorNumber && $conf['demo_mode'] === false) debug_print_backtrace();
     if(!$this->queryId) {
       return false;
     }

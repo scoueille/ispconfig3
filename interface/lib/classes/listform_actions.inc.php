@@ -149,7 +149,7 @@ class listform_actions {
 		if($this->SQLExtWhere != '') {
 			$sql_where .= ' '.$this->SQLExtWhere.' and';
 		}
-
+		
 		$sql_where = $app->listform->getSearchSQL($sql_where);
 		$app->tpl->setVar($app->listform->searchValues);
 		
