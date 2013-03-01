@@ -462,7 +462,7 @@ class apache2_plugin {
                 exec('chown --recursive --from='.escapeshellcmd($data['old']['system_user']).':'.escapeshellcmd($data['old']['system_group']).' '.escapeshellcmd($data['new']['system_user']).':'.escapeshellcmd($data['new']['system_group']).' '.$new_dir);
 
                 //* Change the home directory and group of the website user
-                $command = 'killall -u '.escapeshellcmd($data['new']['system_user']).' && usermod';
+                $command = 'killall -u '.escapeshellcmd($data['new']['system_user']).' ; usermod';
                 $command .= ' --home '.escapeshellcmd($data['new']['document_root']);
                 $command .= ' --gid '.escapeshellcmd($data['new']['system_group']);
                 $command .= ' '.escapeshellcmd($data['new']['system_user']).' 2>/dev/null';
@@ -823,6 +823,8 @@ class apache2_plugin {
 			$data['new']['custom_php_ini'] .= "\nopen_basedir = '".$data['new']['php_open_basedir']."'\n";
 		}
 		
+		$fastcgi_config = $app->getconf->get_server_config($conf['server_id'], 'fastcgi');
+		
 		if(trim($data['new']['fastcgi_php_version']) != ''){
 			list($custom_fastcgi_php_name, $custom_fastcgi_php_executable, $custom_fastcgi_php_ini_dir) = explode(':', trim($data['new']['fastcgi_php_version']));
 			if(is_file($custom_fastcgi_php_ini_dir)) $custom_fastcgi_php_ini_dir = dirname($custom_fastcgi_php_ini_dir);
@@ -1114,7 +1116,6 @@ class apache2_plugin {
 		 */
 
 		if ($data['new']['php'] == 'fast-cgi') {
-			$fastcgi_config = $app->getconf->get_server_config($conf['server_id'], 'fastcgi');
 
 			$fastcgi_starter_path = str_replace('[system_user]',$data['new']['system_user'],$fastcgi_config['fastcgi_starter_path']);
 			$fastcgi_starter_path = str_replace('[client_id]',$client_id,$fastcgi_starter_path);
@@ -1183,7 +1184,6 @@ class apache2_plugin {
 		} else {
 			//remove the php fastgi starter script if available
 			if ($data['old']['php'] == 'fast-cgi') {
-                $fastcgi_config = $app->getconf->get_server_config($conf['server_id'], 'fastcgi');
                 $fastcgi_starter_path = str_replace('[system_user]',$data['old']['system_user'],$fastcgi_config['fastcgi_starter_path']);
                 $fastcgi_starter_path = str_replace('[client_id]',$client_id,$fastcgi_starter_path);
                 if($data['old']['type'] == 'vhost') {
@@ -1563,6 +1563,7 @@ class apache2_plugin {
 		$app->uses('getconf');
 		$app->uses('system');
 		$web_config = $app->getconf->get_server_config($conf['server_id'], 'web');
+		$fastcgi_config = $app->getconf->get_server_config($conf['server_id'], 'fastcgi');
 		
 		if($data['old']['type'] == 'vhost' || $data['old']['type'] == 'vhostsubdomain') $app->system->web_folder_protection($data['old']['document_root'],false);
 
@@ -1625,10 +1626,12 @@ class apache2_plugin {
 		if($data['old']['type'] == 'vhost' || $data['old']['type'] == 'vhostsubdomain'){
 			if(is_array($log_folders) && !empty($log_folders)){
 				foreach($log_folders as $log_folder){
-					if($app->system->is_mounted($data['old']['document_root'].'/'.$log_folder)) exec('umount '.escapeshellarg($data['old']['document_root'].'/'.$log_folder));
+					//if($app->system->is_mounted($data['old']['document_root'].'/'.$log_folder)) exec('umount '.escapeshellarg($data['old']['document_root'].'/'.$log_folder));
+					exec('umount '.escapeshellarg($data['old']['document_root'].'/'.$log_folder).' 2>/dev/null');
 				}
 			} else {
-				if($app->system->is_mounted($data['old']['document_root'].'/'.$log_folder)) exec('umount '.escapeshellarg($data['old']['document_root'].'/'.$log_folder));
+				//if($app->system->is_mounted($data['old']['document_root'].'/'.$log_folder)) exec('umount '.escapeshellarg($data['old']['document_root'].'/'.$log_folder));
+				exec('umount '.escapeshellarg($data['old']['document_root'].'/'.$log_folder).' 2>/dev/null');
 			}
 		}
 		
@@ -1742,13 +1745,13 @@ class apache2_plugin {
 			
                 //remove the php fastgi starter script if available
                 if ($data['old']['php'] == 'fast-cgi') {
-                    $fastcgi_starter_path = str_replace('[system_user]',$data['old']['system_user'],$web_config['fastcgi_starter_path']);
+                    $fastcgi_starter_path = str_replace('[system_user]',$data['old']['system_user'],$fastcgi_config['fastcgi_starter_path']);
                     if($data['old']['type'] == 'vhost') {
                         if (is_dir($fastcgi_starter_path)) {
                             exec('rm -rf '.$fastcgi_starter_path);
                         }
                     } else {
-                        $fcgi_starter_script = $fastcgi_starter_path.$web_config['fastcgi_starter_script'].'_web'.$data['old']['domain_id'];
+                        $fcgi_starter_script = $fastcgi_starter_path.$fastcgi_config['fastcgi_starter_script'].'_web'.$data['old']['domain_id'];
                         if (file_exists($fcgi_starter_script)) {
                             exec('rm -f '.$fcgi_starter_script);
                         }
@@ -1808,7 +1811,7 @@ class apache2_plugin {
             
             if($data['old']['type'] == 'vhost') {
                 //delete the web user
-                $command = 'killall -u '.escapeshellcmd($data['old']['system_user']).' && userdel';
+                $command = 'killall -u '.escapeshellcmd($data['old']['system_user']).' ; userdel';
                 $command .= ' '.escapeshellcmd($data['old']['system_user']);
                 exec($command);
                 if($apache_chrooted) $this->_exec('chroot '.escapeshellcmd($web_config['website_basedir']).' '.$command);
