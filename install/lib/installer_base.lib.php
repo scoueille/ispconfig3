@@ -567,22 +567,6 @@ class installer_base {
 				}
 			}
 		}
-		
-		$config_dir = $conf['mailman']['config_dir'].'/';
-		$full_file_name = $config_dir.'virtual_to_transport.sh';
-		
-		//* Backup exiting virtual_to_transport.sh script
-		if(is_file($full_file_name)) {
-			copy($full_file_name, $config_dir.'virtual_to_transport.sh~');
-		}
-		
-		if(is_dir('/etc/mailman')) {
-			copy('tpl/mailman-virtual_to_transport.sh',$full_file_name);
-			chgrp($full_file_name,'list');
-			chmod($full_file_name,0750);
-		}
-		
-		exec('/usr/lib/mailman/bin/genaliases 2>/dev/null');
 
 		$virtual_domains = '';
 		if($status == 'update')
@@ -607,8 +591,27 @@ class installer_base {
 		if(!isset($old_options['DEFAULT_SERVER_LANGUAGE'])) $old_options['DEFAULT_SERVER_LANGUAGE'] = '';
 		$content = str_replace('{default_language}', $old_options['DEFAULT_SERVER_LANGUAGE'], $content);
 		$content = str_replace('{virtual_domains}', $virtual_domains, $content);
-
+		
 		wf($full_file_name, $content);
+		
+		//* Write virtual_to_transport.sh script
+		$config_dir = $conf['mailman']['config_dir'].'/';
+		$full_file_name = $config_dir.'virtual_to_transport.sh';
+		
+		//* Backup exiting virtual_to_transport.sh script
+		if(is_file($full_file_name)) {
+			copy($full_file_name, $config_dir.'virtual_to_transport.sh~');
+		}
+		
+		if(is_dir('/etc/mailman')) {
+			copy('tpl/mailman-virtual_to_transport.sh',$full_file_name);
+			chgrp($full_file_name,'list');
+			chmod($full_file_name,0750);
+		}
+		
+		//* Create aliasaes
+		exec('/usr/lib/mailman/bin/genaliases 2>/dev/null');
+		
 	}
 
 	public function configure_postfix($options = '') {
