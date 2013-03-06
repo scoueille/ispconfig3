@@ -44,7 +44,7 @@ class db extends mysqli
   private $errorNumber = 0;	// last error number
   public $errorMessage = '';	// last error message
   private $errorLocation = '';// last error location
-  public $show_error_messages = true; // false in server, true in interface
+  public $show_error_messages = false; // false in server, true in interface
   private $isConnected = false; // needed to know if we have a valid mysqli object from the constructor
 
   // constructor
@@ -107,7 +107,7 @@ class db extends mysqli
     $this->errorLocation = $location;
     if($this->errorNumber) {
       $error_msg = $this->errorLocation .' '. $this->errorMessage;
-      // This right here will allow us to use the samefile for server & interface
+      // This right here will allow us to use the same file for server & interface
       if($this->show_error_messages && $conf['demo_mode'] === false) {
 		echo $error_msg;
       } else if(is_object($app) && method_exists($app, 'log')) {
