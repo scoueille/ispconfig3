@@ -1329,6 +1329,11 @@ class apache2_plugin {
 		if($data['new']['ssl_domain'] != '' && $data['new']['ssl'] == 'y' && @is_file($crt_file) && @is_file($key_file) && (@filesize($crt_file)>0)  && (@filesize($key_file)>0)) {
 			$tmp_vhost_arr = array('ip_address' => $data['new']['ip_address'], 'ssl_enabled' => 1, 'port' => '443');
 			if(count($rewrite_rules) > 0)  $tmp_vhost_arr = $tmp_vhost_arr + array('redirects' => $rewrite_rules);
+			if(is_array($alias_seo_redirects) && !empty($alias_seo_redirects)){
+				for($i=0;$i<count($alias_seo_redirects);$i++){
+					$alias_seo_redirects[$i]['ssl_enabled'] = 1;
+				}
+			}
 			if(count($alias_seo_redirects) > 0) $tmp_vhost_arr = $tmp_vhost_arr + array('alias_seo_redirects' => $alias_seo_redirects);
 			$vhosts[] = $tmp_vhost_arr;
 			unset($tmp_vhost_arr);
@@ -1359,6 +1364,11 @@ class apache2_plugin {
 			if($data['new']['ssl_domain'] != '' && $data['new']['ssl'] == 'y' && @is_file($crt_file) && @is_file($key_file) && (@filesize($crt_file)>0)  && (@filesize($key_file)>0)) {
 				$tmp_vhost_arr = array('ip_address' => '['.$data['new']['ipv6_address'].']', 'ssl_enabled' => 1, 'port' => '443');
 				if(count($rewrite_rules) > 0)  $tmp_vhost_arr = $tmp_vhost_arr + array('redirects' => $rewrite_rules);
+				if(is_array($alias_seo_redirects) && !empty($alias_seo_redirects)){
+					for($i=0;$i<count($alias_seo_redirects);$i++){
+						$alias_seo_redirects[$i]['ssl_enabled'] = 1;
+					}
+				}
 				if(count($alias_seo_redirects) > 0) $tmp_vhost_arr = $tmp_vhost_arr + array('alias_seo_redirects' => $alias_seo_redirects);
 				$vhosts[] = $tmp_vhost_arr;
 				unset($tmp_vhost_arr);
