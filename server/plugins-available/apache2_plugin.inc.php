@@ -1329,14 +1329,15 @@ class apache2_plugin {
 		if($data['new']['ssl_domain'] != '' && $data['new']['ssl'] == 'y' && @is_file($crt_file) && @is_file($key_file) && (@filesize($crt_file)>0)  && (@filesize($key_file)>0)) {
 			$tmp_vhost_arr = array('ip_address' => $data['new']['ip_address'], 'ssl_enabled' => 1, 'port' => '443');
 			if(count($rewrite_rules) > 0)  $tmp_vhost_arr = $tmp_vhost_arr + array('redirects' => $rewrite_rules);
-			if(is_array($alias_seo_redirects) && !empty($alias_seo_redirects)){
-				for($i=0;$i<count($alias_seo_redirects);$i++){
-					$alias_seo_redirects[$i]['ssl_enabled'] = 1;
+			$ipv4_ssl_alias_seo_redirects = $alias_seo_redirects;
+			if(is_array($ipv4_ssl_alias_seo_redirects) && !empty($ipv4_ssl_alias_seo_redirects)){
+				for($i=0;$i<count($ipv4_ssl_alias_seo_redirects);$i++){
+					$ipv4_ssl_alias_seo_redirects[$i]['ssl_enabled'] = 1;
 				}
 			}
-			if(count($alias_seo_redirects) > 0) $tmp_vhost_arr = $tmp_vhost_arr + array('alias_seo_redirects' => $alias_seo_redirects);
+			if(count($ipv4_ssl_alias_seo_redirects) > 0) $tmp_vhost_arr = $tmp_vhost_arr + array('alias_seo_redirects' => $ipv4_ssl_alias_seo_redirects);
 			$vhosts[] = $tmp_vhost_arr;
-			unset($tmp_vhost_arr);
+			unset($tmp_vhost_arr, $ipv4_ssl_alias_seo_redirects);
 			$app->log('Enable SSL for: '.$domain,LOGLEVEL_DEBUG);
 		}
 		
@@ -1364,14 +1365,15 @@ class apache2_plugin {
 			if($data['new']['ssl_domain'] != '' && $data['new']['ssl'] == 'y' && @is_file($crt_file) && @is_file($key_file) && (@filesize($crt_file)>0)  && (@filesize($key_file)>0)) {
 				$tmp_vhost_arr = array('ip_address' => '['.$data['new']['ipv6_address'].']', 'ssl_enabled' => 1, 'port' => '443');
 				if(count($rewrite_rules) > 0)  $tmp_vhost_arr = $tmp_vhost_arr + array('redirects' => $rewrite_rules);
-				if(is_array($alias_seo_redirects) && !empty($alias_seo_redirects)){
-					for($i=0;$i<count($alias_seo_redirects);$i++){
-						$alias_seo_redirects[$i]['ssl_enabled'] = 1;
+				$ipv6_ssl_alias_seo_redirects = $alias_seo_redirects;
+				if(is_array($ipv6_ssl_alias_seo_redirects) && !empty($ipv6_ssl_alias_seo_redirects)){
+					for($i=0;$i<count($ipv6_ssl_alias_seo_redirects);$i++){
+						$ipv6_ssl_alias_seo_redirects[$i]['ssl_enabled'] = 1;
 					}
 				}
-				if(count($alias_seo_redirects) > 0) $tmp_vhost_arr = $tmp_vhost_arr + array('alias_seo_redirects' => $alias_seo_redirects);
+				if(count($ipv6_ssl_alias_seo_redirects) > 0) $tmp_vhost_arr = $tmp_vhost_arr + array('alias_seo_redirects' => $ipv6_ssl_alias_seo_redirects);
 				$vhosts[] = $tmp_vhost_arr;
-				unset($tmp_vhost_arr);
+				unset($tmp_vhost_arr, $ipv6_ssl_alias_seo_redirects);
 				$app->log('Enable SSL for IPv6: '.$domain,LOGLEVEL_DEBUG);
 			}
 		}
