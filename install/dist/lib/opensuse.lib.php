@@ -1280,7 +1280,7 @@ class installer_dist extends installer_base {
 			$existing_cron_jobs = file('crontab.txt');
 		
 			$cron_jobs = array(
-                '*/5 * * * * /usr/local/bin/run-getmail.sh > /dev/null 2>> /var/log/ispconfig/cron.log'
+                '*/5 * * * * /usr/local/bin/run-getmail.sh > /dev/null 2>> /dev/null'
             );
 		
 			// remove existing ispconfig cronjobs, in case the syntax has changed
@@ -1299,7 +1299,7 @@ class installer_dist extends installer_base {
 		}
 		
 		exec('touch /var/log/ispconfig/cron.log');
-		exec('chmod 666 /var/log/ispconfig/cron.log');
+		exec('chmod 660 /var/log/ispconfig/cron.log');
 	}
 
 }
