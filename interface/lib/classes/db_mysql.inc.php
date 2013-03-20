@@ -190,11 +190,11 @@ class db extends mysqli
 
   // returns number of rows returned by the last select query
   public function numRows() {
-    return $this->queryId->num_rows;
+    return intval($this->queryId->num_rows);
   }
   
   public function affectedRows() {
-	return $this->queryId->affected_rows;
+	return intval($this->queryId->affected_rows);
   }
 
   // returns mySQL insert id
