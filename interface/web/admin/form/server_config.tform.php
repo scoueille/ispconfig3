@@ -319,6 +319,10 @@ $form["tabs"]['mail'] = array(
 			'datatype' => 'VARCHAR',
 			'formtype' => 'TEXT',
 			'default' => '',
+			'validators'	=> array ( 	0 => array (	'type'	=> 'REGEX',
+														'regex' => '/^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])(,\s*(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9]))*$/',
+														'errmsg'=> 'rbl_error_regex'),
+									),
 			'value' => '',
 			'width' => '40',
 			'maxlength' => '255'
