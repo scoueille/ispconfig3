@@ -655,8 +655,8 @@ class nginx_plugin {
 			exec('chown -R '.$data['new']['system_user'].':'.$data['new']['system_group'].' '.$error_page_path);
 		}  // end copy error docs
 
-		// Set the quota for the user
-		if($username != '' && $app->system->is_user($username)) {
+		// Set the quota for the user, but only for vhosts, not vhostsubdomains
+		if($username != '' && $app->system->is_user($username) && $data['new']['type'] == 'vhost') {
 			if($data['new']['hd_quota'] > 0) {
 				$blocks_soft = $data['new']['hd_quota'] * 1024;
 				$blocks_hard = $blocks_soft + 1024;

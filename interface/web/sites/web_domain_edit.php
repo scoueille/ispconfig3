@@ -505,7 +505,7 @@ class page_action extends tform_actions {
             
 			//* Check the website quota of the client
 			if(isset($_POST["hd_quota"]) && $client["limit_web_quota"] >= 0) {
-				$tmp = $app->db->queryOneRecord("SELECT sum(hd_quota) as webquota FROM web_domain WHERE domain_id != ".$app->functions->intval($this->id)." AND ".$app->tform->getAuthSQL('u'));
+				$tmp = $app->db->queryOneRecord("SELECT sum(hd_quota) as webquota FROM web_domain WHERE domain_id != ".$app->functions->intval($this->id)." AND type = 'vhost' AND ".$app->tform->getAuthSQL('u'));
 				$webquota = $tmp["webquota"];
 				$new_web_quota = $app->functions->intval($this->dataRecord["hd_quota"]);
 				if(($webquota + $new_web_quota > $client["limit_web_quota"]) || ($new_web_quota < 0 && $client["limit_web_quota"] >= 0)) {
@@ -541,7 +541,7 @@ class page_action extends tform_actions {
 
 				//* Check the website quota of the client
 				if(isset($_POST["hd_quota"]) && $reseller["limit_web_quota"] >= 0) {
-					$tmp = $app->db->queryOneRecord("SELECT sum(hd_quota) as webquota FROM web_domain WHERE domain_id != ".$app->functions->intval($this->id)." AND ".$app->tform->getAuthSQL('u'));
+					$tmp = $app->db->queryOneRecord("SELECT sum(hd_quota) as webquota FROM web_domain WHERE domain_id != ".$app->functions->intval($this->id)." AND type = 'vhost' AND ".$app->tform->getAuthSQL('u'));
 					$webquota = $tmp["webquota"];
 					$new_web_quota = $app->functions->intval($this->dataRecord["hd_quota"]);
 					if(($webquota + $new_web_quota > $reseller["limit_web_quota"]) || ($new_web_quota < 0 && $reseller["limit_web_quota"] >= 0)) {
