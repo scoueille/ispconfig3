@@ -19,7 +19,7 @@ $app->load('listform_actions');
 
 // $tmp_rec = $app->db->queryOneRecord("SELECT data from monitor_data WHERE type = 'harddisk_quota' ORDER BY created DESC");
 // $monitor_data = unserialize($app->db->unquote($tmp_rec['data']));
-$tmp_rec =  $app->db->queryAllRecords("SELECT data from monitor_data WHERE type = 'email_quota' ORDER BY created DESC LIMIT 0,1");
+$tmp_rec =  $app->db->queryAllRecords("SELECT data from monitor_data WHERE type = 'email_quota' ORDER BY created DESC");
 $monitor_data = array();
 if(is_array($tmp_rec)) {
 	foreach ($tmp_rec as $tmp_mon) {
@@ -27,7 +27,7 @@ if(is_array($tmp_rec)) {
 		$tmp_array = unserialize($app->db->unquote($tmp_mon['data']));
 		if(is_array($tmp_array)) {
 			foreach($tmp_array as $username => $data) {
-				$monitor_data[$username]['used'] += $data['used'];
+				if(!$monitor_data[$username]['used']) $monitor_data[$username]['used'] = $data['used'];
 			}
 		}
 	}
