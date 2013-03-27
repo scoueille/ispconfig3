@@ -608,6 +608,9 @@ class system{
 			exec($cmd, $output, $return_var);
 			if($return_var != 0 || !$output[0]) return false;
 			list($f1, $f2, $f3, $f4) = explode(':', $output[0]);
+			$f2 = trim($f2);
+			$f3 = trim($f3);
+			$f4 = trim($f4);
 			if($f4 != ''){
 				$members = explode(',', $f4);
 			} else {
