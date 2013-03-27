@@ -598,6 +598,32 @@ class system{
 	}
 	
 	/**
+	* Return info about a group by name
+	*
+	*/
+	function posix_getgrnam($group) {
+		if(!function_exists('posix_getgrnam')){
+			$group_datei = $this->server_conf['group_datei'];
+			$cmd = 'grep -m 1 "^'.$group.':" '.$group_datei;
+			exec($cmd, $output, $return_var);
+			if($return_var != 0 || !$output[0]) return false;
+			list($f1, $f2, $f3, $f4) = explode(':', $output[0]);
+			if($f4 != ''){
+				$members = explode(',', $f4);
+			} else {
+				$members = array();
+			}
+			$group_details = array(	'name' => $group,
+									'passwd' => $f2,
+									'members' => $members,
+									'gid' => $f3);
+			return $group_details;	
+		} else {
+			return posix_getgrnam($group);
+		}
+    }
+	
+	/**
 	 * Get all information from a user
 	 *
 	 */
