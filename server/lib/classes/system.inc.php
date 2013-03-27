@@ -575,6 +575,29 @@ class system{
 	}
 	
 	/**
+	 * Get the group id from an group
+	 *
+	 */
+	function getgid($group){
+		global $app;
+	  	if($this->is_group($group)){
+		    $group_datei = $this->server_conf['group_datei'];
+			$groups = $app->file->no_comments($group_datei);
+			$lines = explode("\n", $groups);
+			if(is_array($lines)){
+		    foreach($lines as $line){
+					if(trim($line) != ""){
+						list($f1, $f2, $f3, $f4) = explode(':', $line);
+						if($f1 == $group) return $f3;
+					}
+				}
+			}
+	  	} else {
+		    return false;
+	  	}
+	}
+	
+	/**
 	 * Get all information from a user
 	 *
 	 */
