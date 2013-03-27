@@ -418,7 +418,7 @@ CREATE TABLE `dns_slave` (
   `active` enum('N','Y') NOT NULL,
   `xfer` varchar(255) NOT NULL,
   PRIMARY KEY  (`id`),
-  UNIQUE KEY `origin` (`origin`),
+  UNIQUE KEY `slave` (`origin`,`server_id`),
   KEY `active` (`active`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
