@@ -99,7 +99,7 @@ class installer_dist extends installer_base {
 		
 		if(is_dir('/etc/mailman')) {
 			copy('tpl/mailman-virtual_to_transport.sh',$full_file_name);
-			chgrp($full_file_name,'list');
+			chgrp($full_file_name,'mailman');
 			chmod($full_file_name,0750);
 		}
 		
