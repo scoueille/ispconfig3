@@ -357,6 +357,16 @@ class listform {
 							}
 						}
                         break;
+					case 'DATETIMETSTAMP':
+                        if ($record[$key] > 0) {
+							// is value int?
+							if (preg_match("/^[0-9]+[\.]?[0-9]*$/", $record[$key], $p)) {
+	                        	$record[$key] = date($this->lng('conf_format_datetime'), $record[$key]);
+							} else {
+	                        	$record[$key] = date($this->lng('conf_format_datetime'), strtotime($record[$key]));
+							}
+						}
+                        break;
 					case 'DATE':
                         if ($record[$key] > 0) {
 							// is value int?
@@ -420,6 +430,12 @@ class listform {
 					case 'DATETSTAMP':
                         if($record[$key] > 0) {
 						    $record[$key] = date('Y-m-d',strtotime($record[$key]));
+                        }
+                        break;
+						
+					case 'DATETIMETSTAMP':
+                        if($record[$key] > 0) {
+						    $record[$key] = date('Y-m-d H:i:s',strtotime($record[$key]));
                         }
                         break;
 					
