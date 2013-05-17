@@ -503,6 +503,8 @@ class mysql_clientdb_plugin {
         $host_list = array('localhost');
         // get all databases this user was active for
         $db_list = $app->db->queryAllRecords("SELECT `remote_access`, `remote_ips` FROM `web_database` WHERE `database_user_id` = '" . intval($data['old']['database_user_id']) . "'");
+        if(count($db_list) < 1) return; // nothing to do on this server for this db user
+        
         foreach($db_list as $database) {
             if($database['remote_access'] != 'y') continue;
             

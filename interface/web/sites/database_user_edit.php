@@ -147,7 +147,7 @@ class page_action extends tform_actions {
 			$this->dataRecord['database_user'] = substr($dbuser_prefix . $this->dataRecord['database_user'], 0, 16);
 		}
 		
-        $this->dataRecord['server_id'] = $conf['server_id'];
+        $this->dataRecord['server_id'] = 0;
         
 		parent::onBeforeUpdate();
 	}
