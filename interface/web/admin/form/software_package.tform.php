@@ -59,15 +59,15 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-$form["title"] 			= "Software Repository";
-$form["description"] 	= "Software Repository which may contain addons or updates";
-$form["name"] 			= "software_repo";
-$form["action"]			= "software_repo_edit.php";
-$form["db_table"]		= "software_repo";
-$form["db_table_idx"]	= "software_repo_id";
+$form["title"] 			= "Software Package";
+$form["description"] 	= "Modify software package details";
+$form["name"] 			= "software_package";
+$form["action"]			= "software_package_edit.php";
+$form["db_table"]		= "software_package";
+$form["db_table_idx"]	= "package_id";
 $form["db_history"]		= "no";
-$form["tab_default"]	= "software_repo";
-$form["list_default"]	= "software_repo_list.php";
+$form["tab_default"]	= "software_package";
+$form["list_default"]	= "software_package_list.php";
 $form["auth"]			= 'yes';
 
 $form["auth_preset"]["userid"]  = 0; // 0 = id of the user, > 0 id must match with id of current user
@@ -76,22 +76,18 @@ $form["auth_preset"]["perm_user"] = 'riud'; //r = read, i = insert, u = update, 
 $form["auth_preset"]["perm_group"] = 'riud'; //r = read, i = insert, u = update, d = delete
 $form["auth_preset"]["perm_other"] = ''; //r = read, i = insert, u = update, d = delete
 
-$form["tabs"]['software_repo'] = array (
-	'title' 	=> "Repository",
+$form["tabs"]['software_package'] = array (
+	'title' 	=> "Software Package",
 	'width' 	=> 80,
-	'template' 	=> "templates/software_repo_edit.htm",
+	'template' 	=> "templates/software_package_edit.htm",
 	'fields' 	=> array (
 	##################################
 	# Beginn Datenbankfelder
 	##################################
-		'repo_name' => array (
+		'package_title' => array (
 			'datatype'	=> 'VARCHAR',
 			'formtype'	=> 'TEXT',
-			'validators'	=> array ( 	0 => array (	'type'	=> 'NOTEMPTY',
-														'errmsg'=> 'repo_name_empty'),
-										1 => array (	'type'	=> 'UNIQUE',
-														'errmsg'=> 'repo_name_unique'),
-									),
+			'validators'	=> '',
 			'default'	=> '',
 			'value'		=> '',
 			'separator'	=> '',
@@ -100,14 +96,10 @@ $form["tabs"]['software_repo'] = array (
 			'rows'		=> '',
 			'cols'		=> ''
 		),
-		'repo_url' => array (
+		'package_key' => array (
 			'datatype'	=> 'VARCHAR',
 			'formtype'	=> 'TEXT',
-			'validators'	=> array ( 	0 => array (	'type'	=> 'NOTEMPTY',
-														'errmsg'=> 'repo_name_empty'),
-										1 => array (	'type'	=> 'UNIQUE',
-														'errmsg'=> 'repo_name_unique'),
-									),
+			'validators'	=> '',
 			'default'	=> '',
 			'value'		=> '',
 			'separator'	=> '',
@@ -115,35 +107,6 @@ $form["tabs"]['software_repo'] = array (
 			'maxlength'	=> '40',
 			'rows'		=> '',
 			'cols'		=> ''
-		),
-		'repo_username' => array (
-			'datatype'	=> 'VARCHAR',
-			'formtype'	=> 'TEXT',
-			'default'	=> '',
-			'value'		=> '',
-			'separator'	=> '',
-			'width'		=> '30',
-			'maxlength'	=> '30',
-			'rows'		=> '',
-			'cols'		=> ''
-		),
-		'repo_password' => array (
-			'datatype'	=> 'VARCHAR',
-			'formtype'	=> 'PASSWORD',
-			'encryption' => 'CLEARTEXT',
-			'default'	=> '',
-			'value'		=> '',
-			'separator'	=> '',
-			'width'		=> '30',
-			'maxlength'	=> '30',
-			'rows'		=> '',
-			'cols'		=> ''
-		),
-		'active' => array (
-			'datatype'	=> 'VARCHAR',
-			'formtype'	=> 'CHECKBOX',
-			'default'	=> 'y',
-			'value'		=> array(0 => 'n',1 => 'y')
 		),
 	##################################
 	# ENDE Datenbankfelder
