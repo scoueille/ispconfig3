@@ -100,7 +100,7 @@ class apache2_plugin {
 		$app->uses('getconf');
 		$web_config = $app->getconf->get_server_config($conf['server_id'], 'web');
 		if ($web_config['CA_path']!='' && !file_exists($web_config['CA_path'].'/openssl.cnf'))
-			$app->log("CA path error, file does not exist:".$web_config['CA_path'].'/openssl.conf',LOGLEVEL_ERROR);	
+			$app->log("CA path error, file does not exist:".$web_config['CA_path'].'/openssl.cnf',LOGLEVEL_ERROR);	
 		
 		//* Only vhosts can have a ssl cert
 		if($data["new"]["type"] != "vhost" && $data["new"]["type"] != "vhostsubdomain") return;
