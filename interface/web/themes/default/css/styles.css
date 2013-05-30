@@ -1841,3 +1841,26 @@ a.link-page.current-page {
     background-color: #DFDFDF;
     font-weight: bold;
 }
+
+.command {
+    padding: 1em;
+    border: 1px dashed #2f6fab;
+    color: black;
+    background-color: #f9f9f9;
+    line-height: 1.1em;
+    font-family: Courier New, Courier, mono;
+    font-size: 12px;
+    font-style: italic;
+}
+.system {
+    color: black;
+    font-family: Courier New, Courier, mono;
+    font-size: 12px;
+    font-style: italic;
+}
+.highlight {
+    color: #FF0000;
+    font-family: Georgia, "Times New Roman", Times, serif;
+    font-size: 12px;
+    text-decoration: underline;
+}
