@@ -55,10 +55,10 @@ class page_action extends tform_actions {
         $old_record = $app->tform->getDataRecord($this->id);
         
         /* we cannot use datalogDelete here, as we need to set server_id to 0 */
-        $this->query("DELETE FROM `web_database_user` WHERE $index_field = '$index_value'");
+        $app->db->query("DELETE FROM `web_database_user` WHERE $index_field = '$index_value'");
         $new_rec = array();
         $old_record['server_id'] = 0;
-        $this->datalogSave('web_database_user', 'DELETE', 'database_user_id', $this->id, $old_record, $new_rec);
+        $app->db->datalogSave('web_database_user', 'DELETE', 'database_user_id', $this->id, $old_record, $new_rec);
     }
     
     function onAfterDelete() { // this has to be done on AFTER delete, because we need the db user still in the database when the server plugin processes the datalog
