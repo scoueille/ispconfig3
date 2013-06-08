@@ -678,6 +678,9 @@ class nginx_plugin {
 			}
 		}
 
+		//* add the nginx user to the client group if this is a vhost and security level is set to high, no matter if this is an insert or update and regardless of set_folder_permissions_on_update
+		if($data['new']['type'] == 'vhost' && $web_config['security_level'] == 20) $app->system->add_user_to_group($groupname, escapeshellcmd($web_config['nginx_user']));
+		
 		//* If the security level is set to high
 		if(($this->action == 'insert' && $data['new']['type'] == 'vhost') or ($web_config['set_folder_permissions_on_update'] == 'y' && $data['new']['type'] == 'vhost')) {
 		
@@ -716,13 +719,10 @@ class nginx_plugin {
 					//* add the nginx user to the client group in the chroot environment
 					$tmp_groupfile = $app->system->server_conf['group_datei'];
 					$app->system->server_conf['group_datei'] = $web_config['website_basedir'].'/etc/group';
-					$app->system->add_user_to_group($groupname, escapeshellcmd($web_config['user']));
+					$app->system->add_user_to_group($groupname, escapeshellcmd($web_config['nginx_user']));
 					$app->system->server_conf['group_datei'] = $tmp_groupfile;
 					unset($tmp_groupfile);
 				}
-
-				//* add the nginx user to the client group
-				$app->system->add_user_to_group($groupname, escapeshellcmd($web_config['nginx_user']));
 				
 				//* Chown all default directories
 				$app->system->chown($data['new']['document_root'],'root');
