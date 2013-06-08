@@ -2142,7 +2142,7 @@ class remoting {
             return false;
         }
 
-        $rec = $app->db->queryOneRecord("SELECT id FROM dns_soa WHERE origin like '".$origin.'%');
+        $rec = $app->db->queryOneRecord("SELECT id FROM dns_soa WHERE origin like '".$origin."%'");
         if(isset($rec['id'])) {
             return $app->functions->intval($rec['id']);
         } else {
