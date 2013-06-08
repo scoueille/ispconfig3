@@ -2137,7 +2137,7 @@ class remoting {
             return false;
         }
         
-        if (preg_match('/^[a-z0-9][a-z0-9\-]+[a-z0-9](\.[a-z]{2,4})+$/i', $origin)) {
+        if(!preg_match('/^[a-z0-9][a-z0-9\-]+[a-z0-9](\.[a-z]{2,4})+$/i', $origin)){
             $this->server->fault('no_domain_found', 'Invalid domain name.');
             return false;
         }
