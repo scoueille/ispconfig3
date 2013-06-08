@@ -2032,7 +2032,7 @@ INSERT INTO `country` (`iso`, `name`, `printable_name`, `iso3`, `numcode`) VALUE
 ('ST', 'SAO TOME AND PRINCIPE', 'Sao Tome and Principe', 'STP', 678),
 ('SA', 'SAUDI ARABIA', 'Saudi Arabia', 'SAU', 682),
 ('SN', 'SENEGAL', 'Senegal', 'SEN', 686),
-('CS', 'SERBIA AND MONTENEGRO', 'Serbia and Montenegro', NULL, NULL),
+('RS', 'SERBIA', 'Serbia', 'SRB', 381),
 ('SC', 'SEYCHELLES', 'Seychelles', 'SYC', 690),
 ('SL', 'SIERRA LEONE', 'Sierra Leone', 'SLE', 694),
 ('SG', 'SINGAPORE', 'Singapore', 'SGP', 702),
@@ -2082,7 +2082,8 @@ INSERT INTO `country` (`iso`, `name`, `printable_name`, `iso3`, `numcode`) VALUE
 ('EH', 'WESTERN SAHARA', 'Western Sahara', 'ESH', 732),
 ('YE', 'YEMEN', 'Yemen', 'YEM', 887),
 ('ZM', 'ZAMBIA', 'Zambia', 'ZMB', 894),
-('ZW', 'ZIMBABWE', 'Zimbabwe', 'ZWE', 716);
+('ZW', 'ZIMBABWE', 'Zimbabwe', 'ZWE', 716),
+('ME', 'MONTENEGRO', 'Montenegro', 'MNE', 382);
 
 -- --------------------------------------------------------
 
