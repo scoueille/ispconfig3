@@ -204,6 +204,7 @@ CREATE TABLE `client` (
   `limit_aps` int(11) NOT NULL DEFAULT '-1',
   `default_dnsserver` int(11) unsigned NOT NULL DEFAULT '1',
   `limit_dns_zone` int(11) NOT NULL DEFAULT '-1',
+  `default_slave_dnsserver` int(11) unsigned NOT NULL DEFAULT '1',
   `limit_dns_slave_zone` int(11) NOT NULL DEFAULT '-1',
   `limit_dns_record` int(11) NOT NULL DEFAULT '-1',
   `default_dbserver` int(11) NOT NULL DEFAULT '1',

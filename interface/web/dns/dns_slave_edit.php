@@ -123,7 +123,7 @@ class page_action extends tform_actions {
 		if($_SESSION["s"]["user"]["typ"] != 'admin') {
 			// Get the limits of the client
 			$client_group_id = $_SESSION["s"]["user"]["default_group"];
-			$client = $app->db->queryOneRecord("SELECT limit_dns_slave_zone, default_dnsserver FROM sys_group, client WHERE sys_group.client_id = client.client_id and sys_group.groupid = $client_group_id");
+			$client = $app->db->queryOneRecord("SELECT limit_dns_slave_zone, default_slave_dnsserver FROM sys_group, client WHERE sys_group.client_id = client.client_id and sys_group.groupid = $client_group_id");
 		
 			// When the record is updated
 			if($this->id > 0) {
@@ -134,7 +134,7 @@ class page_action extends tform_actions {
 			// When the record is inserted
 			} else {
 				// set the server ID to the default dnsserver of the client
-				$this->dataRecord["server_id"] = $client["default_dnsserver"];
+				$this->dataRecord["server_id"] = $client["default_slave_dnsserver"];
 				
 				// Check if the user may add anoter secondary domain.
 				if(!$app->tform->checkClientLimit('limit_dns_slave_zone')) {
