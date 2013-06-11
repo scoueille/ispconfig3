@@ -2766,8 +2766,10 @@ class apache2_plugin {
 				$app->log('Removed client directory: '.$client_dir,LOGLEVEL_DEBUG);
 			}
 			
-			$this->_exec('groupdel client'.$client_id);
-			$app->log('Removed group client'.$client_id,LOGLEVEL_DEBUG);
+			if($app->system->is_group('client'.$client_id)){
+				$this->_exec('groupdel client'.$client_id);
+				$app->log('Removed group client'.$client_id,LOGLEVEL_DEBUG);
+			}
 		}
 		
 	}
