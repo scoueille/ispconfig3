@@ -341,7 +341,7 @@ class page_action extends tform_actions {
         
         $app->uses('sites_database_plugin');
         
-        $app->sites_database_plugin->processDatabaseInsert($this);
+        //$app->sites_database_plugin->processDatabaseInsert($this);
         
         $app->db->query($sql);
         if($app->db->errorMessage != '') die($app->db->errorMessage);
@@ -355,7 +355,7 @@ class page_action extends tform_actions {
         if(!empty($sql) && !$app->tform->isReadonlyTab($app->tform->getCurrentTab(),$this->id)) {
             
             $app->uses('sites_database_plugin');
-            $app->sites_database_plugin->processDatabaseUpdate($this);
+            //$app->sites_database_plugin->processDatabaseUpdate($this);
 
             $app->db->query($sql);
             if($app->db->errorMessage != '') die($app->db->errorMessage);

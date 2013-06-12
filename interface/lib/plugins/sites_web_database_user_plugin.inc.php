@@ -36,6 +36,6 @@ class sites_web_database_user_plugin {
             $client_group_id = $app->functions->intval($page_form->dataRecord["client_group_id"]);
             $app->db->query("UPDATE web_database_user SET sys_groupid = $client_group_id, sys_perm_group = 'riud' WHERE database_user_id = ".$page_form->id);
         }
-        $app->db->query("UPDATE web_database_user SET server_id = '" . $app->functions->intval($conf['server_id']) . "' WHERE database_user_id = ".$page_form->id);
+        //$app->db->query("UPDATE web_database_user SET server_id = '" . $app->functions->intval($conf['server_id']) . "' WHERE database_user_id = ".$page_form->id);
 	}
 }              	
