@@ -243,6 +243,7 @@ class nginx_plugin {
 			if(trim($data["new"]["ssl_cert"]) != '') $app->system->file_put_contents($crt_file,$data["new"]["ssl_cert"]);
 			//if(trim($data["new"]["ssl_bundle"]) != '') $app->system->file_put_contents($bundle_file,$data["new"]["ssl_bundle"]);
 			if(trim($data["new"]["ssl_key"]) != '') $app->system->file_put_contents($key_file2,$data["new"]["ssl_key"]);
+			$app->system->chmod($key_file2,0400);
 			
 			// for nginx, bundle files have to be appended to the certificate file
 			if(trim($data["new"]["ssl_bundle"]) != ''){				

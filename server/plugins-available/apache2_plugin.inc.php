@@ -247,6 +247,7 @@ class apache2_plugin {
 			//* Write the key file, if field is empty then import the key into the db
 			if(trim($data["new"]["ssl_key"]) != '') {
 				$app->system->file_put_contents($key_file2,$data["new"]["ssl_key"]);
+				$app->system->chmod($key_file2,0400);
 			} else {
 				$ssl_key2 = $app->db->quote($app->system->file_get_contents($key_file2));
 				/* Update the DB of the (local) Server */
