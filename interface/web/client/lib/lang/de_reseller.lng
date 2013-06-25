@@ -142,5 +142,5 @@ $wb['bank_account_swift_txt'] = 'BIC';
 $wb['aps_limits_txt'] = 'APS Installationsassistent Limits';
 $wb['limit_aps_txt'] = 'Max. Anzahl an APS-Instanzen';
 $wb['limit_aps_error_notint'] = 'Das APS Instanzen Limit muss eine Zahl sein.';
-$wb["default_slave_dnsserver_txt"] = 'Standard Secondary DNS Server';
+$wb['default_slave_dnsserver_txt'] = 'Standard Secondary DNS Server';
 ?>
