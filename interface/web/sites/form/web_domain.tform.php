@@ -504,7 +504,7 @@ $form["tabs"]['backup'] = array (
 			'datatype'	=> 'VARCHAR',
 			'formtype'	=> 'SELECT',
 			'default'	=> '',
-			'value'		=> array('none' => 'No backup', 'daily' => 'Daily', 'weekly' => 'Weekly', 'monthly' => 'Monthly')
+			'value'		=> array('none' => 'no_backup_txt', 'daily' => 'daily_backup_txt', 'weekly' => 'weekly_backup_txt', 'monthly' => 'monthly_backup_txt')
 		),
 		'backup_copies' => array (
 			'datatype'	=> 'INTEGER',
