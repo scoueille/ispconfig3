@@ -180,9 +180,10 @@ class listform {
         if(@is_array($this->listDef['item'])) { 
             foreach($this->listDef['item'] as $i) {
                 $field = $i['field'];
+				$table = $i['table'];
                 // if($_REQUEST[$search_prefix.$field] != '') $sql_where .= " $field ".$i["op"]." '".$i["prefix"].$_REQUEST[$search_prefix.$field].$i["suffix"]."' and";
 		        if(isset($_SESSION['search'][$list_name][$search_prefix.$field]) && $_SESSION['search'][$list_name][$search_prefix.$field] != ''){
-                    $sql_where .= " $field ".$i['op']." '".$app->db->quote($i['prefix'].$_SESSION['search'][$list_name][$search_prefix.$field].$i['suffix'])."' and";
+                    $sql_where .= " ".($table != ''? $table.'.' : $this->listDef['table'].'.')."$field ".$i['op']." '".$app->db->quote($i['prefix'].$_SESSION['search'][$list_name][$search_prefix.$field].$i['suffix'])."' and";
                 }
             }
         }
@@ -216,7 +217,7 @@ class listform {
         if($this->searchChanged == 1) $_SESSION['search'][$list_name]['page'] = 0;
 
         $sql_von = $app->functions->intval($_SESSION['search'][$list_name]['page'] * $records_per_page);
-        $record_count = $app->db->queryOneRecord("SELECT count(*) AS anzahl FROM $table WHERE $sql_where");
+        $record_count = $app->db->queryOneRecord("SELECT count(*) AS anzahl FROM $table".($app->listform->listDef['additional_tables'] != ''? ','.$app->listform->listDef['additional_tables'] : '')." WHERE $sql_where");
         $pages = $app->functions->intval(($record_count['anzahl'] - 1) / $records_per_page);
 
 
