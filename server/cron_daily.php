@@ -817,23 +817,27 @@ if($backup_dir != '') {
 				if($backup_mode == 'userzip') {
 					//* Create a .zip backup as web user and include also files owned by apache / nginx user
 					$web_backup_file = 'web'.$web_id.'_'.date('Y-m-d_H-i').'.zip';
-					exec('cd '.escapeshellarg($web_path).' && sudo -u '.escapeshellarg($web_user).' find . -group '.escapeshellarg($web_group).' -print 2> /dev/null | zip -b /tmp --exclude=backup\* --symlinks '.escapeshellarg($web_backup_dir.'/'.$web_backup_file).' -@');
-					exec('cd '.escapeshellarg($web_path).' && sudo -u '.escapeshellarg($web_user).' find . -user '.escapeshellarg($http_server_user).' -print 2> /dev/null | zip -b /tmp --exclude=backup\* --update --symlinks '.escapeshellarg($web_backup_dir.'/'.$web_backup_file).' -@');
+					exec('cd '.escapeshellarg($web_path).' && sudo -u '.escapeshellarg($web_user).' find . -group '.escapeshellarg($web_group).' -print 2> /dev/null | zip -b /tmp --exclude=backup\* --symlinks '.escapeshellarg($web_backup_dir.'/'.$web_backup_file).' -@', $tmp_output, $retval);
+					if($retval == 0) exec('cd '.escapeshellarg($web_path).' && sudo -u '.escapeshellarg($web_user).' find . -user '.escapeshellarg($http_server_user).' -print 2> /dev/null | zip -b /tmp --exclude=backup\* --update --symlinks '.escapeshellarg($web_backup_dir.'/'.$web_backup_file).' -@', $tmp_output, $retval);
 				} else {
 					//* Create a tar.gz backup as root user
 					$web_backup_file = 'web'.$web_id.'_'.date('Y-m-d_H-i').'.tar.gz';
-					exec('tar pczf '.escapeshellarg($web_backup_dir.'/'.$web_backup_file).' --exclude=backup\* --directory '.escapeshellarg($web_path).' .');
+					exec('tar pczf '.escapeshellarg($web_backup_dir.'/'.$web_backup_file).' --exclude=backup\* --directory '.escapeshellarg($web_path).' .', $tmp_output, $retval);
 				}
-				chown($web_backup_dir.'/'.$web_backup_file, 'root');
-				chgrp($web_backup_dir.'/'.$web_backup_file, 'root');
-				chmod($web_backup_dir.'/'.$web_backup_file, 0750);
+				if($retval == 0){
+					chown($web_backup_dir.'/'.$web_backup_file, 'root');
+					chgrp($web_backup_dir.'/'.$web_backup_file, 'root');
+					chmod($web_backup_dir.'/'.$web_backup_file, 0750);
 
-				//* Insert web backup record in database
-				//$insert_data = "(server_id,parent_domain_id,backup_type,backup_mode,tstamp,filename) VALUES (".$conf['server_id'].",".$web_id.",'web','".$backup_mode."',".time().",'".$app->db->quote($web_backup_file)."')";
-				//$app->dbmaster->datalogInsert('web_backup', $insert_data, 'backup_id');
-				$sql = "INSERT INTO web_backup (server_id,parent_domain_id,backup_type,backup_mode,tstamp,filename) VALUES (".$conf['server_id'].",".$web_id.",'web','".$backup_mode."',".time().",'".$app->db->quote($web_backup_file)."')";
-				$app->db->query($sql);
-				if($app->db->dbHost != $app->dbmaster->dbHost) $app->dbmaster->query($sql);
+					//* Insert web backup record in database
+					//$insert_data = "(server_id,parent_domain_id,backup_type,backup_mode,tstamp,filename) VALUES (".$conf['server_id'].",".$web_id.",'web','".$backup_mode."',".time().",'".$app->db->quote($web_backup_file)."')";
+					//$app->dbmaster->datalogInsert('web_backup', $insert_data, 'backup_id');
+					$sql = "INSERT INTO web_backup (server_id,parent_domain_id,backup_type,backup_mode,tstamp,filename) VALUES (".$conf['server_id'].",".$web_id.",'web','".$backup_mode."',".time().",'".$app->db->quote($web_backup_file)."')";
+					$app->db->query($sql);
+					if($app->db->dbHost != $app->dbmaster->dbHost) $app->dbmaster->query($sql);
+				} else {
+					if(is_file($web_backup_dir.'/'.$web_backup_file)) unlink($web_backup_dir.'/'.$web_backup_file);
+				}
 				
 				//* Remove old backups
 				$backup_copies = intval($rec['backup_copies']);
@@ -918,23 +922,28 @@ if($backup_dir != '') {
 				$db_name = $rec['database_name'];
 				$db_backup_file = 'db_'.$db_name.'_'.date('Y-m-d_H-i').'.sql';
 				$command = "mysqldump -h '".escapeshellcmd($clientdb_host)."' -u '".escapeshellcmd($clientdb_user)."' -p'".escapeshellcmd($clientdb_password)."' -c --add-drop-table --create-options --quick --result-file='".$db_backup_dir.'/'.$db_backup_file."' '".$db_name."'";
-				exec($command);
+				exec($command, $tmp_output, $retval);
 
 				//* Compress the backup with gzip
-				exec("gzip -c '".escapeshellcmd($db_backup_dir.'/'.$db_backup_file)."' > '".escapeshellcmd($db_backup_dir.'/'.$db_backup_file).".gz'");
-				chmod($db_backup_dir.'/'.$db_backup_file.'.gz', 0750);
-				chown($db_backup_dir.'/'.$db_backup_file.'.gz', fileowner($db_backup_dir));
-				chgrp($db_backup_dir.'/'.$db_backup_file.'.gz', filegroup($db_backup_dir));
+				if($retval == 0) exec("gzip -c '".escapeshellcmd($db_backup_dir.'/'.$db_backup_file)."' > '".escapeshellcmd($db_backup_dir.'/'.$db_backup_file).".gz'", $tmp_output, $retval);
+				
+				if($retval == 0){
+					chmod($db_backup_dir.'/'.$db_backup_file.'.gz', 0750);
+					chown($db_backup_dir.'/'.$db_backup_file.'.gz', fileowner($db_backup_dir));
+					chgrp($db_backup_dir.'/'.$db_backup_file.'.gz', filegroup($db_backup_dir));
 
-				//* Insert web backup record in database
-				//$insert_data = "(server_id,parent_domain_id,backup_type,backup_mode,tstamp,filename) VALUES (".$conf['server_id'].",$web_id,'mysql','sqlgz',".time().",'".$app->db->quote($db_backup_file).".gz')";
-				//$app->dbmaster->datalogInsert('web_backup', $insert_data, 'backup_id');
-				$sql = "INSERT INTO web_backup (server_id,parent_domain_id,backup_type,backup_mode,tstamp,filename) VALUES (".$conf['server_id'].",$web_id,'mysql','sqlgz',".time().",'".$app->db->quote($db_backup_file).".gz')";
-				$app->db->query($sql);
-				if($app->db->dbHost != $app->dbmaster->dbHost) $app->dbmaster->query($sql);
+					//* Insert web backup record in database
+					//$insert_data = "(server_id,parent_domain_id,backup_type,backup_mode,tstamp,filename) VALUES (".$conf['server_id'].",$web_id,'mysql','sqlgz',".time().",'".$app->db->quote($db_backup_file).".gz')";
+					//$app->dbmaster->datalogInsert('web_backup', $insert_data, 'backup_id');
+					$sql = "INSERT INTO web_backup (server_id,parent_domain_id,backup_type,backup_mode,tstamp,filename) VALUES (".$conf['server_id'].",$web_id,'mysql','sqlgz',".time().",'".$app->db->quote($db_backup_file).".gz')";
+					$app->db->query($sql);
+					if($app->db->dbHost != $app->dbmaster->dbHost) $app->dbmaster->query($sql);
 
+				} else {
+					if(is_file($db_backup_dir.'/'.$db_backup_file.'.gz')) unlink($db_backup_dir.'/'.$db_backup_file.'.gz');
+				}
 				//* Remove the uncompressed file
-				unlink($db_backup_dir.'/'.$db_backup_file);
+				if(is_file($db_backup_dir.'/'.$db_backup_file)) unlink($db_backup_dir.'/'.$db_backup_file);
 
 				//* Remove old backups
 				$backup_copies = intval($rec['backup_copies']);
