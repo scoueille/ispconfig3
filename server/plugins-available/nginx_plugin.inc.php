@@ -2401,6 +2401,12 @@ class nginx_plugin {
 		if(is_array($lines) && !empty($lines)){
 			$linecount = sizeof($lines);
 			for($h=0;$h<$linecount;$h++){
+				// remove comments
+				if(substr(trim($lines[$h]),0,1) == '#'){
+					unset($lines[$h]);
+					continue;
+				}
+				
 				$lines[$h] = rtrim($lines[$h]);
 				/*
 				if(substr(ltrim($lines[$h]), 0, 8) == 'location' && strpos($lines[$h], '{') !== false && strpos($lines[$h], ';') !== false){
