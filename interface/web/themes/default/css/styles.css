@@ -832,7 +832,7 @@ span.small { font-size: 0.9em; }
 .selectInput.formLengthLimit { width: 85px !important; }
 .formLengthDate { width: 75px !important; }
 .formLengthIPv4 { width: 125px !important; }
-.formLengthIPv6 { width: 100% !important; }
+.formLengthIPv6 { }
 .formLengthEmailUser { width: 30% !important; }
 .formLengthEmailDomain { width: 30% !important; }
 .formLengthHalf { width: 15% !important; }
