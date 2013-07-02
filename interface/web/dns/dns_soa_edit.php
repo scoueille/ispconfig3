@@ -172,6 +172,9 @@ class page_action extends tform_actions {
 		if(stristr($this->dataRecord["mbox"],'@')) {
 			$this->dataRecord["mbox"] = str_replace('@','.',$this->dataRecord["mbox"]);
 		}
+		
+		$this->dataRecord["xfer"] = preg_replace('/\s+/', '', $this->dataRecord["xfer"]);
+		$this->dataRecord["also_notify"] = preg_replace('/\s+/', '', $this->dataRecord["also_notify"]);
 
 		//* Check if a secondary zone with the same name already exists 	
 		$tmp = $app->db->queryOneRecord("SELECT count(id) as number FROM dns_slave WHERE origin = \"".$this->dataRecord["origin"]."\" AND server_id = \"".$this->dataRecord["server_id"]."\"");
