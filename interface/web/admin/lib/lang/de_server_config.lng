@@ -171,4 +171,6 @@ $wb['web_folder_protection_txt'] = 'Webverzeichnis unveränderlich machen (erwei
 $wb['overtraffic_notify_admin_txt'] = 'Überschreiten des Transfer Limits an den Administrator senden';
 $wb['overtraffic_notify_client_txt'] = 'Überschreiten des Transfer Limits an den Kunden senden';
 $wb['rbl_error_regex'] = 'Bitte geben Sie gültige RBL-Hostnamen an.';
+$wb['overquota_notify_admin_txt'] = 'Quota-Warnungen an den Administrator senden';
+$wb['overquota_notify_client_txt'] = 'Quota-Warnungen an den Kunden senden';
 ?>

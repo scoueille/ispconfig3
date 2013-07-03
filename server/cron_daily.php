@@ -747,6 +747,134 @@ if ($app->dbmaster == $app->db) {
 
 
 #######################################################################################################
+// send website quota warnings by email
+#######################################################################################################
+
+if ($app->dbmaster == $app->db) {
+
+	$global_config = $app->getconf->get_global_config('mail');
+
+	//* Check website disk quota
+	$sql = "SELECT sys_groupid,domain,system_user FROM web_domain WHERE hd_quota > 0 and (type = 'vhost' OR type = 'vhostsubdomain')";
+	$records = $app->db->queryAllRecords($sql);
+	if(is_array($records) && !empty($records)) {
+	
+		$tmp_rec =  $app->db->queryAllRecords("SELECT data from monitor_data WHERE type = 'harddisk_quota' ORDER BY created DESC");
+		$monitor_data = array();
+		if(is_array($tmp_rec)) {
+			foreach ($tmp_rec as $tmp_mon) {
+				$monitor_data = array_merge_recursive($monitor_data,unserialize($app->db->unquote($tmp_mon['data'])));
+			}
+		}
+		
+		foreach($records as $rec) {
+
+			//$web_hd_quota = $rec['hd_quota'];
+			$domain = $rec['domain'];
+			
+			$username = $rec['system_user'];
+			$rec['used'] = $monitor_data['user'][$username]['used'];
+			$rec['soft'] = $monitor_data['user'][$username]['soft'];
+			$rec['hard'] = $monitor_data['user'][$username]['hard'];
+			$rec['files'] = $monitor_data['user'][$username]['files'];
+				
+			if (!is_numeric($rec['used'])){
+				if ($rec['used'][0] > $rec['used'][1]){
+					$rec['used'] = $rec['used'][0];
+				} else {
+					$rec['used'] = $rec['used'][1];
+				}
+			}
+			if (!is_numeric($rec['soft'])) $rec['soft']=$rec['soft'][1];
+			if (!is_numeric($rec['hard'])) $rec['hard']=$rec['hard'][1];
+			if (!is_numeric($rec['files'])) $rec['files']=$rec['files'][1];
+				
+			// used space ratio
+			if($rec['soft'] > 0){
+				$used_ratio = $rec['used']/$rec['soft'];
+			} else {
+				$used_ratio = 0;
+			}
+			
+			// send notifications only if 90% or more of the quota are used
+			if($used_ratio < 0.9) continue;
+			$rec['ratio'] = number_format($used_ratio * 100, 2, '.', '').'%';
+		
+			if($rec['used'] > 1024) {
+				$rec['used'] = round($rec['used'] / 1024,2).' MB';
+			} else {
+				if ($rec['used'] != '') $rec['used'] .= ' KB';
+			}
+		
+			if($rec['soft'] > 1024) {
+				$rec['soft'] = round($rec['soft'] / 1024,2).' MB';
+			} else {
+				$rec['soft'] .= ' KB';
+			}
+		
+			if($rec['hard'] > 1024) {
+				$rec['hard'] = round($rec['hard'] / 1024,2).' MB';
+			} else {
+				$rec['hard'] .= ' KB';
+			}
+				
+			//* Send quota notifications
+			if($web_config['overquota_notify_admin'] == 'y' || $web_config['overquota_notify_client'] == 'y') {
+					
+				if(file_exists($conf['rootpath'].'/conf-custom/mail/web_quota_notification_'.$conf['language'].'.txt')) {
+					$lines = file($conf['rootpath'].'/conf-custom/mail/web_quota_notification_'.$conf['language'].'.txt');
+				} elseif(file_exists($conf['rootpath'].'/conf-custom/mail/web_quota_notification_en.txt')) {
+					$lines = file($conf['rootpath'].'/conf-custom/mail/web_quota_notification_en.txt');
+				} elseif(file_exists($conf['rootpath'].'/conf/mail/web_quota_notification_'.$conf['language'].'.txt')) {
+					$lines = file($conf['rootpath'].'/conf/mail/web_quota_notification_'.$conf['language'].'.txt');
+				} else {
+					$lines = file($conf['rootpath'].'/conf/mail/web_quota_notification_en.txt');
+				}
+					
+				//* Get subject
+				$parts = explode(':',trim($lines[0]));
+				unset($parts[0]);
+				$quota_mail_subject  = implode(':',$parts);
+				unset($lines[0]);
+		
+				//* Get message
+				$quota_mail_message = trim(implode($lines));
+				unset($tmp);
+					
+				//* Replace placeholders
+				$quota_mail_message = str_replace('{domain}',$rec['domain'],$quota_mail_message);
+				$quota_mail_message = str_replace('{used}',$rec['used'],$quota_mail_message);
+				$quota_mail_message = str_replace('{soft}',$rec['soft'],$quota_mail_message);
+				$quota_mail_message = str_replace('{hard}',$rec['hard'],$quota_mail_message);
+				$quota_mail_message = str_replace('{ratio}',$rec['ratio'],$quota_mail_message);
+						
+				$mailHeaders      = "MIME-Version: 1.0" . "\n";
+				$mailHeaders     .= "Content-type: text/plain; charset=utf-8" . "\n";
+				$mailHeaders     .= "Content-Transfer-Encoding: 8bit" . "\n";
+				$mailHeaders     .= "From: ". $global_config['admin_mail'] . "\n";
+				$mailHeaders     .= "Reply-To: ". $global_config['admin_mail'] . "\n";
+				$mailSubject      = "=?utf-8?B?".base64_encode($quota_mail_subject)."?=";
+				
+				//* send email to admin
+				if($global_config['admin_mail'] != '' && $web_config['overquota_notify_admin'] == 'y') {
+					mail($global_config['admin_mail'], $mailSubject, $quota_mail_message, $mailHeaders);
+				}
+					
+				//* Send email to client
+				if($web_config['overquota_notify_client'] == 'y') {
+					$client_group_id = $rec["sys_groupid"];
+					$client = $app->db->queryOneRecord("SELECT client.email FROM sys_group, client WHERE sys_group.client_id = client.client_id and sys_group.groupid = $client_group_id");
+					if($client['email'] != '') {
+						mail($client['email'], $mailSubject, $quota_mail_message, $mailHeaders);
+					}
+				}	
+			}	
+		}
+	}
+}
+
+
+#######################################################################################################
 // deactivate virtual servers (run only on the "master-server")
 #######################################################################################################
 

@@ -171,4 +171,6 @@ $wb["web_folder_protection_txt"] = 'Make web folders immutable (extended attribu
 $wb["overtraffic_notify_admin_txt"] = 'Send overtraffic notification to admin';
 $wb["overtraffic_notify_client_txt"] = 'Send overtraffic notification to client';
 $wb["rbl_error_regex"] = 'Please specify valid RBL hostnames.';
+$wb["overquota_notify_admin_txt"] = 'Send quota warnings to admin';
+$wb["overquota_notify_client_txt"] = 'Send quota warnings to client';
 ?>

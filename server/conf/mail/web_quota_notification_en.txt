@@ -1,0 +1,9 @@
+Subject:Website quota notification
+
+The website {domain} is near or over quota.
+
+Domain: 		{domain}
+Used space:		{used}
+Soft limit:		{soft}
+Hard limit:		{hard}
+Usage ratio:		{ratio}
