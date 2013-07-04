@@ -50,15 +50,18 @@ class list_action extends listform_actions {
 		$rec['used'] = isset($monitor_data[$email]['used']) ? $monitor_data[$email]['used'] : array(1 => 0);
 		
 		if (!is_numeric($rec['used'])) $rec['used']=$rec['used'][1];
-
-        $rec['quota'] = round($rec['quota'] / 1048576,2).' MB';
-		if($rec['quota'] == "0 MB") $rec['quota'] = $app->lng('unlimited');
+		
+		if($rec['quota'] == 0){
+			$rec['quota'] = $app->lng('unlimited');
+		} else {
+			$rec['quota'] = round($rec['quota'] / 1048576,4).' MB';
+		}
 
 
         if($rec['used'] < 1544000) {
-            $rec['used'] = round($rec['used'] / 1024,2).' KB';
+            $rec['used'] = round($rec['used'] / 1024,4).' KB';
         } else {
-            $rec['used'] = round($rec['used'] / 1048576,2).' MB';
+            $rec['used'] = round($rec['used'] / 1048576,4).' MB';
         }   
 
 		//* The variable "id" contains always the index variable
