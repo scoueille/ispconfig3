@@ -695,29 +695,38 @@ if ($app->dbmaster == $app->db) {
 						$lines = file($conf['rootpath'].'/conf/mail/web_traffic_notification_en.txt');
 					}
 					
-					//* Get subject
-					$parts = explode(':',trim($lines[0]));
-					unset($parts[0]);
-					$traffic_mail_subject  = implode(':',$parts);
-					unset($lines[0]);
-		
-					//* Get message
-					$traffic_mail_message = trim(implode($lines));
-					unset($tmp);
-					
+                    //* get mail headers, subject and body
+                    $mailHeaders = '';
+                    $mailBody = '';
+                    $mailSubject = '';
+                    $inHeader = true;
+                    for($l = 0; $l < count($lines); $l++) {
+                        if($lines[$l] == '') {
+                            $inHeader = false;
+                            continue;
+                        }
+                        if($inHeader == true) {
+                            $parts = explode(':', $line[$l], 2);
+                            if(strtolower($parts[0]) == 'subject') $mailSubject = trim($parts[1]);
+                            unset($parts);
+                            $mailHeaders .= $lines[$l] . "\n";
+                        } else {
+                            $mailBody .= $lines[$l] . "\n";
+                        }
+                    }
+                    $mailBody = trim($mailBody);
+                    
+                    $placeholders = array('{domain}' => $rec['domain'],
+                                          '{admin_mail}' => $global_config['admin_mail']);
+                    
 					//* Replace placeholders
-					$traffic_mail_message = str_replace('{domain}',$rec['domain'],$traffic_mail_message);
-						
-					$mailHeaders      = "MIME-Version: 1.0" . "\n";
-					$mailHeaders     .= "Content-type: text/plain; charset=utf-8" . "\n";
-					$mailHeaders     .= "Content-Transfer-Encoding: 8bit" . "\n";
-					$mailHeaders     .= "From: ". $global_config['admin_mail'] . "\n";
-					$mailHeaders     .= "Reply-To: ". $global_config['admin_mail'] . "\n";
-					$mailSubject      = "=?utf-8?B?".base64_encode($traffic_mail_subject)."?=";
+					$mailHeaders = strtr($mailHeaders, $placeholders);
+                    $mailSubject = strtr($mailSubject, $placeholders);
+                    $mailBody = strtr($mailBody, $placeholders);
 					
 					//* send email to admin
 					if($global_config['admin_mail'] != '' && $web_config['overtraffic_notify_admin'] == 'y') {
-						mail($global_config['admin_mail'], $mailSubject, $traffic_mail_message, $mailHeaders);
+						mail($global_config['admin_mail'], $mailSubject, $mailBody, $mailHeaders);
 					}
 					
 					//* Send email to client
@@ -725,10 +734,13 @@ if ($app->dbmaster == $app->db) {
 						$client_group_id = $rec["sys_groupid"];
 						$client = $app->db->queryOneRecord("SELECT client.email FROM sys_group, client WHERE sys_group.client_id = client.client_id and sys_group.groupid = $client_group_id");
 						if($client['email'] != '') {
-							mail($client['email'], $mailSubject, $traffic_mail_message, $mailHeaders);
+							mail($client['email'], $mailSubject, $mailBody, $mailHeaders);
 						}
 					}
-					
+                    unset($mailSubject);
+                    unset($mailHeaders);
+                    unset($mailBody);
+					unset($lines);
 				}
 				
 				
@@ -831,43 +843,58 @@ if ($app->dbmaster == $app->db) {
 					$lines = file($conf['rootpath'].'/conf/mail/web_quota_notification_en.txt');
 				}
 					
-				//* Get subject
-				$parts = explode(':',trim($lines[0]));
-				unset($parts[0]);
-				$quota_mail_subject  = implode(':',$parts);
-				unset($lines[0]);
-		
-				//* Get message
-				$quota_mail_message = trim(implode($lines));
-				unset($tmp);
-					
-				//* Replace placeholders
-				$quota_mail_message = str_replace('{domain}',$rec['domain'],$quota_mail_message);
-				$quota_mail_message = str_replace('{used}',$rec['used'],$quota_mail_message);
-				$quota_mail_message = str_replace('{soft}',$rec['soft'],$quota_mail_message);
-				$quota_mail_message = str_replace('{hard}',$rec['hard'],$quota_mail_message);
-				$quota_mail_message = str_replace('{ratio}',$rec['ratio'],$quota_mail_message);
-						
-				$mailHeaders      = "MIME-Version: 1.0" . "\n";
-				$mailHeaders     .= "Content-type: text/plain; charset=utf-8" . "\n";
-				$mailHeaders     .= "Content-Transfer-Encoding: 8bit" . "\n";
-				$mailHeaders     .= "From: ". $global_config['admin_mail'] . "\n";
-				$mailHeaders     .= "Reply-To: ". $global_config['admin_mail'] . "\n";
-				$mailSubject      = "=?utf-8?B?".base64_encode($quota_mail_subject)."?=";
 				
-				//* send email to admin
-				if($global_config['admin_mail'] != '' && $web_config['overquota_notify_admin'] == 'y') {
-					mail($global_config['admin_mail'], $mailSubject, $quota_mail_message, $mailHeaders);
-				}
-					
-				//* Send email to client
-				if($web_config['overquota_notify_client'] == 'y') {
-					$client_group_id = $rec["sys_groupid"];
-					$client = $app->db->queryOneRecord("SELECT client.email FROM sys_group, client WHERE sys_group.client_id = client.client_id and sys_group.groupid = $client_group_id");
-					if($client['email'] != '') {
-						mail($client['email'], $mailSubject, $quota_mail_message, $mailHeaders);
-					}
-				}	
+                //* get mail headers, subject and body
+                $mailHeaders = '';
+                $mailBody = '';
+                $mailSubject = '';
+                $inHeader = true;
+                for($l = 0; $l < count($lines); $l++) {
+                    if($lines[$l] == '') {
+                        $inHeader = false;
+                        continue;
+                    }
+                    if($inHeader == true) {
+                        $parts = explode(':', $line[$l], 2);
+                        if(strtolower($parts[0]) == 'subject') $mailSubject = trim($parts[1]);
+                        unset($parts);
+                        $mailHeaders .= $lines[$l] . "\n";
+                    } else {
+                        $mailBody .= $lines[$l] . "\n";
+                    }
+                }
+                $mailBody = trim($mailBody);
+                
+                $placeholders = array('{domain}' => $rec['domain'],
+                                      '{admin_mail}' => $global_config['admin_mail'],
+                                      '{used}' => $rec['used'],
+                                      '{soft}' => $rec['soft'],
+                                      '{hard}' => $rec['hard'],
+                                      '{ratio}' => $rec['ratio']);
+                
+                //* Replace placeholders
+                $mailHeaders = strtr($mailHeaders, $placeholders);
+                $mailSubject = strtr($mailSubject, $placeholders);
+                $mailBody = strtr($mailBody, $placeholders);
+                
+                //* send email to admin
+                if($global_config['admin_mail'] != '' && $web_config['overquota_notify_admin'] == 'y') {
+                    mail($global_config['admin_mail'], $mailSubject, $mailBody, $mailHeaders);
+                }
+                
+                //* Send email to client
+                if($web_config['overquota_notify_client'] == 'y') {
+                    $client_group_id = $rec["sys_groupid"];
+                    $client = $app->db->queryOneRecord("SELECT client.email FROM sys_group, client WHERE sys_group.client_id = client.client_id and sys_group.groupid = $client_group_id");
+                    if($client['email'] != '') {
+                        mail($client['email'], $mailSubject, $mailBody, $mailHeaders);
+                    }
+                }
+                
+                unset($mailSubject);
+                unset($mailHeaders);
+                unset($mailBody);
+                unset($lines);
 			}	
 		}
 	}
@@ -938,43 +965,57 @@ if ($app->dbmaster == $app->db) {
 					$lines = file($conf['rootpath'].'/conf/mail/mail_quota_notification_en.txt');
 				}
 					
-				//* Get subject
-				$parts = explode(':',trim($lines[0]));
-				unset($parts[0]);
-				$mailquota_mail_subject  = implode(':',$parts);
-				unset($lines[0]);
-		
-				//* Get message
-				$mailquota_mail_message = trim(implode($lines));
-				unset($tmp);
-					
-				//* Replace placeholders
-				$mailquota_mail_message = str_replace('{email}',$rec['email'],$mailquota_mail_message);
-				$mailquota_mail_message = str_replace('{name}',$rec['name'],$mailquota_mail_message);
-				$mailquota_mail_message = str_replace('{used}',$rec['used'],$mailquota_mail_message);
-				$mailquota_mail_message = str_replace('{quota}',$rec['quota'],$mailquota_mail_message);
-				$mailquota_mail_message = str_replace('{ratio}',$rec['ratio'],$mailquota_mail_message);
-						
-				$mailHeaders      = "MIME-Version: 1.0" . "\n";
-				$mailHeaders     .= "Content-type: text/plain; charset=utf-8" . "\n";
-				$mailHeaders     .= "Content-Transfer-Encoding: 8bit" . "\n";
-				$mailHeaders     .= "From: ". $global_config['admin_mail'] . "\n";
-				$mailHeaders     .= "Reply-To: ". $global_config['admin_mail'] . "\n";
-				$mailSubject      = "=?utf-8?B?".base64_encode($mailquota_mail_subject)."?=";
-				
-				//* send email to admin
-				if($global_config['admin_mail'] != '' && $mail_config['overquota_notify_admin'] == 'y') {
-					mail($global_config['admin_mail'], $mailSubject, $mailquota_mail_message, $mailHeaders);
-				}
-					
-				//* Send email to client
-				if($mail_config['overquota_notify_client'] == 'y') {
-					$client_group_id = $rec["sys_groupid"];
-					$client = $app->db->queryOneRecord("SELECT client.email FROM sys_group, client WHERE sys_group.client_id = client.client_id and sys_group.groupid = $client_group_id");
-					if($client['email'] != '') {
-						mail($client['email'], $mailSubject, $mailquota_mail_message, $mailHeaders);
-					}
-				}	
+                //* get mail headers, subject and body
+                $mailHeaders = '';
+                $mailBody = '';
+                $mailSubject = '';
+                $inHeader = true;
+                for($l = 0; $l < count($lines); $l++) {
+                    if($lines[$l] == '') {
+                        $inHeader = false;
+                        continue;
+                    }
+                    if($inHeader == true) {
+                        $parts = explode(':', $line[$l], 2);
+                        if(strtolower($parts[0]) == 'subject') $mailSubject = trim($parts[1]);
+                        unset($parts);
+                        $mailHeaders .= $lines[$l] . "\n";
+                    } else {
+                        $mailBody .= $lines[$l] . "\n";
+                    }
+                }
+                $mailBody = trim($mailBody);
+                
+                $placeholders = array('{email}' => $rec['email'],
+                                      '{admin_mail}' => $global_config['admin_mail'],
+                                      '{used}' => $rec['used'],
+                                      '{name}' => $rec['name'],
+                                      '{quota}' => $rec['quota'],
+                                      '{ratio}' => $rec['ratio']);
+                
+                //* Replace placeholders
+                $mailHeaders = strtr($mailHeaders, $placeholders);
+                $mailSubject = strtr($mailSubject, $placeholders);
+                $mailBody = strtr($mailBody, $placeholders);
+                
+                //* send email to admin
+                if($global_config['admin_mail'] != '' && $web_config['overquota_notify_admin'] == 'y') {
+                    mail($global_config['admin_mail'], $mailSubject, $mailBody, $mailHeaders);
+                }
+                
+                //* Send email to client
+                if($web_config['overquota_notify_client'] == 'y') {
+                    $client_group_id = $rec["sys_groupid"];
+                    $client = $app->db->queryOneRecord("SELECT client.email FROM sys_group, client WHERE sys_group.client_id = client.client_id and sys_group.groupid = $client_group_id");
+                    if($client['email'] != '') {
+                        mail($client['email'], $mailSubject, $mailBody, $mailHeaders);
+                    }
+                }
+                
+                unset($mailSubject);
+                unset($mailHeaders);
+                unset($mailBody);
+                unset($lines);
 			}	
 		}
 	}
