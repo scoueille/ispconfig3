@@ -709,9 +709,9 @@ if ($app->dbmaster == $app->db) {
                             $parts = explode(':', $lines[$l], 2);
                             if(strtolower($parts[0]) == 'subject') $mailSubject = trim($parts[1]);
                             unset($parts);
-                            $mailHeaders .= $lines[$l] . "\n";
+                            $mailHeaders .= trim($lines[$l]) . "\n";
                         } else {
-                            $mailBody .= $lines[$l] . "\n";
+                            $mailBody .= trim($lines[$l]) . "\n";
                         }
                     }
                     $mailBody = trim($mailBody);
@@ -858,9 +858,9 @@ if ($app->dbmaster == $app->db) {
                         $parts = explode(':', $lines[$l], 2);
                         if(strtolower($parts[0]) == 'subject') $mailSubject = trim($parts[1]);
                         unset($parts);
-                        $mailHeaders .= $lines[$l] . "\n";
+                        $mailHeaders .= trim($lines[$l]) . "\n";
                     } else {
-                        $mailBody .= $lines[$l] . "\n";
+                        $mailBody .= trim($lines[$l]) . "\n";
                     }
                 }
                 $mailBody = trim($mailBody);
@@ -979,9 +979,9 @@ if ($app->dbmaster == $app->db) {
                         $parts = explode(':', $lines[$l], 2);
                         if(strtolower($parts[0]) == 'subject') $mailSubject = trim($parts[1]);
                         unset($parts);
-                        $mailHeaders .= $lines[$l] . "\n";
+                        $mailHeaders .= trim($lines[$l]) . "\n";
                     } else {
-                        $mailBody .= $lines[$l] . "\n";
+                        $mailBody .= trim($lines[$l]) . "\n";
                     }
                 }
                 $mailBody = trim($mailBody);
