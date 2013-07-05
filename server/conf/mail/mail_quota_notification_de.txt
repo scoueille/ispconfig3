@@ -8,7 +8,7 @@ Subject: E-Mail Kontobelegungshinweis
 Ihr E-Mail Konto {email} hat den verfügbaren Speicherplatz (nahezu) ausgeschöpft.
 
 E-Mail Konto: 			{email}
-Name:					{name}
+Name:				{name}
 Belegter Speicher:		{used}
-Verfügbarer Speicher:	{quota}
-Belegt:					{ratio}
+Verfügbarer Speicher:		{quota}
+Belegt:				{ratio}

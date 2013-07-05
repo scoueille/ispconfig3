@@ -7,8 +7,8 @@ Subject: Webseiten-Speicherhinweis
 
 Ihre Webseite {domain} hat den verfügbaren Speicherplatz (nahezu) ausgeschöpft.
 
-Webseite:						 		{domain}
+Webseite:						{domain}
 Belegter Speicherplatz:					{used}
 Verfügbarer Speicherplatz:				{soft}
-Verfügbarer Speicherplatz (hard quota):	{hard}
+Verfügbarer Speicherplatz (hard quota):			{hard}
 Belegter Speicher in %:					{ratio}
