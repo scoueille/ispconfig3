@@ -706,7 +706,7 @@ if ($app->dbmaster == $app->db) {
                             continue;
                         }
                         if($inHeader == true) {
-                            $parts = explode(':', $line[$l], 2);
+                            $parts = explode(':', $lines[$l], 2);
                             if(strtolower($parts[0]) == 'subject') $mailSubject = trim($parts[1]);
                             unset($parts);
                             $mailHeaders .= $lines[$l] . "\n";
@@ -855,7 +855,7 @@ if ($app->dbmaster == $app->db) {
                         continue;
                     }
                     if($inHeader == true) {
-                        $parts = explode(':', $line[$l], 2);
+                        $parts = explode(':', $lines[$l], 2);
                         if(strtolower($parts[0]) == 'subject') $mailSubject = trim($parts[1]);
                         unset($parts);
                         $mailHeaders .= $lines[$l] . "\n";
@@ -976,7 +976,7 @@ if ($app->dbmaster == $app->db) {
                         continue;
                     }
                     if($inHeader == true) {
-                        $parts = explode(':', $line[$l], 2);
+                        $parts = explode(':', $lines[$l], 2);
                         if(strtolower($parts[0]) == 'subject') $mailSubject = trim($parts[1]);
                         unset($parts);
                         $mailHeaders .= $lines[$l] . "\n";
