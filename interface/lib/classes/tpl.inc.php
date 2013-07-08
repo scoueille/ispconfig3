@@ -192,12 +192,12 @@ if (!defined('vlibTemplateClassLoaded')) {
             if (is_array($k)) {
                 foreach($k as $key => $value){
                     $key = ($this->OPTIONS['CASELESS']) ? strtolower(trim($key)) : trim($key);
-                    if (preg_match('/^[A-Za-z_]+[A-Za-z0-9_]*$/', $key) && $value !== null ) {
+                    if (preg_match('/^[A-Za-z]+[A-Za-z0-9_]*$/', $key) && $value !== null ) {
                         $this->_vars[$key] = $value;
                     }
                 }
             } else {
-                if (preg_match('/^[A-Za-z_]+[A-Za-z0-9_]*$/', $k) && $v !== null) {
+                if (preg_match('/^[A-Za-z]+[A-Za-z0-9_]*$/', $k) && $v !== null) {
                     if ($this->OPTIONS['CASELESS']) $k = strtolower($k);
                     $this->_vars[trim($k)] = $v;
                 } else {
@@ -300,12 +300,14 @@ if (!defined('vlibTemplateClassLoaded')) {
          */
         public function setLoop($k, $v)
         {
-            if (is_array($v) && preg_match('/^[A-Za-z_]+[A-Za-z0-9_]*$/', $k)) {
+            if (is_array($v) && preg_match('/^[A-Za-z]+[A-Za-z0-9_]*$/', $k)) {
                 $k = ($this->OPTIONS['CASELESS']) ? strtolower(trim($k)) : trim($k);
                 $this->_arrvars[$k] = array();
                 if ($this->OPTIONS['SET_LOOP_VAR'] && !empty($v)) $this->setvar($k, 1);
                 if (($this->_arrvars[$k] = $this->_arrayBuild($v)) == false) {
                     vlibTemplateError::raiseError('VT_WARNING_INVALID_ARR', WARNING, $k);
+                } else {
+                    $this->vars['_'.$k] = count($v);
                 }
             }
             return true;
