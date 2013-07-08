@@ -641,6 +641,64 @@ if ($app->dbmaster == $app->db) {
 	}
 }
 
+#########
+// function for sending notification emails
+#########
+function send_notification_email($template, $placeholders, $recipients) {
+    global $conf;
+    
+    if(!is_array($recipients) || count($recipients) < 1) return false;
+    if(!is_array($replacements)) $replacements = array();
+    
+    if(file_exists($conf['rootpath'].'/conf-custom/mail/' . $template . '_'.$conf['language'].'.txt')) {
+        $lines = file($conf['rootpath'].'/conf-custom/mail/' . $template . '_'.$conf['language'].'.txt');
+    } elseif(file_exists($conf['rootpath'].'/conf-custom/mail/' . $template . '_en.txt')) {
+        $lines = file($conf['rootpath'].'/conf-custom/mail/' . $template . '_en.txt');
+    } elseif(file_exists($conf['rootpath'].'/conf/mail/' . $template . '_'.$conf['language'].'.txt')) {
+        $lines = file($conf['rootpath'].'/conf/mail/' . $template . '_'.$conf['language'].'.txt');
+    } else {
+        $lines = file($conf['rootpath'].'/conf/mail/' . $template . '_en.txt');
+    }
+    
+    //* get mail headers, subject and body
+    $mailHeaders = '';
+    $mailBody = '';
+    $mailSubject = '';
+    $inHeader = true;
+    for($l = 0; $l < count($lines); $l++) {
+        if($lines[$l] == '') {
+            $inHeader = false;
+            continue;
+        }
+        if($inHeader == true) {
+            $parts = explode(':', $lines[$l], 2);
+            if(strtolower($parts[0]) == 'subject') $mailSubject = trim($parts[1]);
+            unset($parts);
+            $mailHeaders .= trim($lines[$l]) . "\n";
+        } else {
+            $mailBody .= trim($lines[$l]) . "\n";
+        }
+    }
+    $mailBody = trim($mailBody);
+    
+    //* Replace placeholders
+    $mailHeaders = strtr($mailHeaders, $placeholders);
+    $mailSubject = strtr($mailSubject, $placeholders);
+    $mailBody = strtr($mailBody, $placeholders);
+    
+    for($r = 0; $r < count($recipients); $r++) {
+        mail($recipients[$r], $mailSubject, $mailBody, $mailHeaders);
+    }
+
+    unset($mailSubject);
+    unset($mailHeaders);
+    unset($mailBody);
+    unset($lines);
+    
+    return true;
+}
+
+
 #######################################################################################################
 // enforce traffic quota (run only on the "master-server")
 #######################################################################################################
@@ -683,50 +741,15 @@ if ($app->dbmaster == $app->db) {
 				$app->log('Traffic quota for '.$rec['domain'].' exceeded. Disabling website.',LOGLEVEL_DEBUG);
 				
 				//* Send traffic notifications
-				if($web_config['overtraffic_notify_admin'] == 'y' || $web_config['overtraffic_notify_client'] == 'y') {
-					
-					if(file_exists($conf['rootpath'].'/conf-custom/mail/web_traffic_notification_'.$conf['language'].'.txt')) {
-						$lines = file($conf['rootpath'].'/conf-custom/mail/web_traffic_notification_'.$conf['language'].'.txt');
-					} elseif(file_exists($conf['rootpath'].'/conf-custom/mail/web_traffic_notification_en.txt')) {
-						$lines = file($conf['rootpath'].'/conf-custom/mail/web_traffic_notification_en.txt');
-					} elseif(file_exists($conf['rootpath'].'/conf/mail/web_traffic_notification_'.$conf['language'].'.txt')) {
-						$lines = file($conf['rootpath'].'/conf/mail/web_traffic_notification_'.$conf['language'].'.txt');
-					} else {
-						$lines = file($conf['rootpath'].'/conf/mail/web_traffic_notification_en.txt');
-					}
-					
-                    //* get mail headers, subject and body
-                    $mailHeaders = '';
-                    $mailBody = '';
-                    $mailSubject = '';
-                    $inHeader = true;
-                    for($l = 0; $l < count($lines); $l++) {
-                        if($lines[$l] == '') {
-                            $inHeader = false;
-                            continue;
-                        }
-                        if($inHeader == true) {
-                            $parts = explode(':', $lines[$l], 2);
-                            if(strtolower($parts[0]) == 'subject') $mailSubject = trim($parts[1]);
-                            unset($parts);
-                            $mailHeaders .= trim($lines[$l]) . "\n";
-                        } else {
-                            $mailBody .= trim($lines[$l]) . "\n";
-                        }
-                    }
-                    $mailBody = trim($mailBody);
+				if($rec['traffic_quota_lock'] != 'y' && ($web_config['overtraffic_notify_admin'] == 'y' || $web_config['overtraffic_notify_client'] == 'y')) {
                     
                     $placeholders = array('{domain}' => $rec['domain'],
                                           '{admin_mail}' => $global_config['admin_mail']);
                     
-					//* Replace placeholders
-					$mailHeaders = strtr($mailHeaders, $placeholders);
-                    $mailSubject = strtr($mailSubject, $placeholders);
-                    $mailBody = strtr($mailBody, $placeholders);
-					
-					//* send email to admin
+					$recipients = array();
+                    //* send email to admin
 					if($global_config['admin_mail'] != '' && $web_config['overtraffic_notify_admin'] == 'y') {
-						mail($global_config['admin_mail'], $mailSubject, $mailBody, $mailHeaders);
+						$recipients[] = $global_config['admin_mail'];
 					}
 					
 					//* Send email to client
@@ -734,13 +757,11 @@ if ($app->dbmaster == $app->db) {
 						$client_group_id = $rec["sys_groupid"];
 						$client = $app->db->queryOneRecord("SELECT client.email FROM sys_group, client WHERE sys_group.client_id = client.client_id and sys_group.groupid = $client_group_id");
 						if($client['email'] != '') {
-							mail($client['email'], $mailSubject, $mailBody, $mailHeaders);
+							$recipients[] = $client['email'];
 						}
 					}
-                    unset($mailSubject);
-                    unset($mailHeaders);
-                    unset($mailBody);
-					unset($lines);
+                    
+                    send_notification_email('web_traffic_notification', $placeholders, $recipients);
 				}
 				
 				
@@ -767,7 +788,7 @@ if ($app->dbmaster == $app->db) {
 	$global_config = $app->getconf->get_global_config('mail');
 
 	//* Check website disk quota
-	$sql = "SELECT sys_groupid,domain,system_user FROM web_domain WHERE hd_quota > 0 and (type = 'vhost' OR type = 'vhostsubdomain')";
+	$sql = "SELECT domain_id,sys_groupid,domain,system_user,last_quota_notification,DATEDIFF(CURDATE(), last_quota_notification) as `notified_before` FROM web_domain WHERE hd_quota > 0 and (type = 'vhost' OR type = 'vhostsubdomain')";
 	$records = $app->db->queryAllRecords($sql);
 	if(is_array($records) && !empty($records)) {
 	
@@ -809,7 +830,39 @@ if ($app->dbmaster == $app->db) {
 			}
 			
 			// send notifications only if 90% or more of the quota are used
-			if($used_ratio < 0.9) continue;
+			if($used_ratio < 0.9) {
+                // reset notification date
+                if($rec['last_quota_notification']) $app->dbmaster->datalogUpdate('web_domain', "last_quota_notification = NULL", 'domain_id', $rec['domain_id']);
+                
+                // send notification - everything ok again
+                if($rec['last_quota_notification'] && $web_config['overquota_notify_onok'] == 'y' && ($web_config['overquota_notify_admin'] == 'y' || $web_config['overquota_notify_client'] == 'y')) {
+                    $placeholders = array('{domain}' => $rec['domain'],
+                                          '{admin_mail}' => $global_config['admin_mail'],
+                                          '{used}' => $rec['used'],
+                                          '{soft}' => $rec['soft'],
+                                          '{hard}' => $rec['hard'],
+                                          '{ratio}' => $rec['ratio']);
+
+                    $recipients = array();
+                    
+                    //* send email to admin
+                    if($global_config['admin_mail'] != '' && $web_config['overquota_notify_admin'] == 'y') {
+                        $recipients[] = $global_config['admin_mail'];
+                    }
+                    
+                    //* Send email to client
+                    if($web_config['overquota_notify_client'] == 'y') {
+                        $client_group_id = $rec["sys_groupid"];
+                        $client = $app->db->queryOneRecord("SELECT client.email FROM sys_group, client WHERE sys_group.client_id = client.client_id and sys_group.groupid = $client_group_id");
+                        if($client['email'] != '') {
+                            $recipients[] = $client['email'];
+                        }
+                    }
+                    send_notification_email('web_quota_ok_notification', $placeholders, $recipients);
+                }
+                
+                continue;
+            }
 			$rec['ratio'] = number_format($used_ratio * 100, 2, '.', '').'%';
 		
 			if($rec['used'] > 1024) {
@@ -829,41 +882,15 @@ if ($app->dbmaster == $app->db) {
 			} else {
 				$rec['hard'] .= ' KB';
 			}
-				
+            
+            // could a notification be sent?
+            $send_notification = false;
+            if(!$rec['last_quota_notification']) $send_notification = true; // not yet notified
+            elseif($web_config['overquota_notify_freq'] > 0 && $rec['notified_before'] >= $web_config['overquota_notify_freq']) $send_notification = true;
+            
 			//* Send quota notifications
-			if($web_config['overquota_notify_admin'] == 'y' || $web_config['overquota_notify_client'] == 'y') {
-					
-				if(file_exists($conf['rootpath'].'/conf-custom/mail/web_quota_notification_'.$conf['language'].'.txt')) {
-					$lines = file($conf['rootpath'].'/conf-custom/mail/web_quota_notification_'.$conf['language'].'.txt');
-				} elseif(file_exists($conf['rootpath'].'/conf-custom/mail/web_quota_notification_en.txt')) {
-					$lines = file($conf['rootpath'].'/conf-custom/mail/web_quota_notification_en.txt');
-				} elseif(file_exists($conf['rootpath'].'/conf/mail/web_quota_notification_'.$conf['language'].'.txt')) {
-					$lines = file($conf['rootpath'].'/conf/mail/web_quota_notification_'.$conf['language'].'.txt');
-				} else {
-					$lines = file($conf['rootpath'].'/conf/mail/web_quota_notification_en.txt');
-				}
-					
-				
-                //* get mail headers, subject and body
-                $mailHeaders = '';
-                $mailBody = '';
-                $mailSubject = '';
-                $inHeader = true;
-                for($l = 0; $l < count($lines); $l++) {
-                    if($lines[$l] == '') {
-                        $inHeader = false;
-                        continue;
-                    }
-                    if($inHeader == true) {
-                        $parts = explode(':', $lines[$l], 2);
-                        if(strtolower($parts[0]) == 'subject') $mailSubject = trim($parts[1]);
-                        unset($parts);
-                        $mailHeaders .= trim($lines[$l]) . "\n";
-                    } else {
-                        $mailBody .= trim($lines[$l]) . "\n";
-                    }
-                }
-                $mailBody = trim($mailBody);
+			if(($web_config['overquota_notify_admin'] == 'y' || $web_config['overquota_notify_client'] == 'y') && $send_notification == true) {
+				$app->dbmaster->datalogUpdate('web_domain', "last_quota_notification = CURDATE()", 'domain_id', $rec['domain_id']);
                 
                 $placeholders = array('{domain}' => $rec['domain'],
                                       '{admin_mail}' => $global_config['admin_mail'],
@@ -871,15 +898,12 @@ if ($app->dbmaster == $app->db) {
                                       '{soft}' => $rec['soft'],
                                       '{hard}' => $rec['hard'],
                                       '{ratio}' => $rec['ratio']);
-                
-                //* Replace placeholders
-                $mailHeaders = strtr($mailHeaders, $placeholders);
-                $mailSubject = strtr($mailSubject, $placeholders);
-                $mailBody = strtr($mailBody, $placeholders);
+
+                $recipients = array();
                 
                 //* send email to admin
                 if($global_config['admin_mail'] != '' && $web_config['overquota_notify_admin'] == 'y') {
-                    mail($global_config['admin_mail'], $mailSubject, $mailBody, $mailHeaders);
+                    $recipients[] = $global_config['admin_mail'];
                 }
                 
                 //* Send email to client
@@ -887,15 +911,11 @@ if ($app->dbmaster == $app->db) {
                     $client_group_id = $rec["sys_groupid"];
                     $client = $app->db->queryOneRecord("SELECT client.email FROM sys_group, client WHERE sys_group.client_id = client.client_id and sys_group.groupid = $client_group_id");
                     if($client['email'] != '') {
-                        mail($client['email'], $mailSubject, $mailBody, $mailHeaders);
+                        $recipients[] = $client['email'];
                     }
                 }
-                
-                unset($mailSubject);
-                unset($mailHeaders);
-                unset($mailBody);
-                unset($lines);
-			}	
+                send_notification_email('web_quota_notification', $placeholders, $recipients);
+			}
 		}
 	}
 }
@@ -910,7 +930,7 @@ if ($app->dbmaster == $app->db) {
 	$global_config = $app->getconf->get_global_config('mail');
 
 	//* Check email quota
-	$sql = "SELECT sys_groupid,email,name,quota FROM mail_user WHERE quota > 0";
+	$sql = "SELECT mailuser_id,sys_groupid,email,name,quota,last_quota_notification,DATEDIFF(CURDATE(), last_quota_notification) as `notified_before` FROM mail_user WHERE quota > 0";
 	$records = $app->db->queryAllRecords($sql);
 	if(is_array($records) && !empty($records)) {
 	
@@ -940,7 +960,39 @@ if ($app->dbmaster == $app->db) {
 			$used_ratio = $rec['used']/$rec['quota'];
 			
 			// send notifications only if 90% or more of the quota are used
-			if($used_ratio < 0.9) continue;
+			if($used_ratio < 0.9) {
+                // reset notification date
+                if($rec['last_quota_notification']) $app->dbmaster->datalogUpdate('mail_user', "last_quota_notification = NULL", 'mailuser_id', $rec['mailuser_id']);
+
+                // send notification - everything ok again
+                if($rec['last_quota_notification'] && $mail_config['overquota_notify_onok'] == 'y' && ($mail_config['overquota_notify_admin'] == 'y' || $mail_config['overquota_notify_client'] == 'y')) {
+                    $placeholders = array('{email}' => $rec['email'],
+                              '{admin_mail}' => $global_config['admin_mail'],
+                              '{used}' => $rec['used'],
+                              '{name}' => $rec['name'],
+                              '{quota}' => $rec['quota'],
+                              '{ratio}' => $rec['ratio']);
+        
+                    $recipients = array();
+                    //* send email to admin
+                    if($global_config['admin_mail'] != '' && $mail_config['overquota_notify_admin'] == 'y') {
+                        $recipients[] = $global_config['admin_mail'];
+                    }
+                    
+                    //* Send email to client
+                    if($mail_config['overquota_notify_client'] == 'y') {
+                        $client_group_id = $rec["sys_groupid"];
+                        $client = $app->db->queryOneRecord("SELECT client.email FROM sys_group, client WHERE sys_group.client_id = client.client_id and sys_group.groupid = $client_group_id");
+                        if($client['email'] != '') {
+                            $recipients[] = $client['email'];
+                        }
+                    }
+                    
+                    send_notification_email('mail_quota_ok_notification', $placeholders, $recipients);
+                }
+
+                continue;
+            }
 			$rec['ratio'] = number_format($used_ratio * 100, 2, '.', '').'%';
 			
 			$rec['quota'] = round($rec['quota'] / 1048576,4).' MB';
@@ -953,69 +1005,38 @@ if ($app->dbmaster == $app->db) {
 				
 			//* Send quota notifications
 			$mail_config = $app->getconf->get_server_config($conf['server_id'], 'mail');
-			if($mail_config['overquota_notify_admin'] == 'y' || $mail_config['overquota_notify_client'] == 'y') {
-					
-				if(file_exists($conf['rootpath'].'/conf-custom/mail/mail_quota_notification_'.$conf['language'].'.txt')) {
-					$lines = file($conf['rootpath'].'/conf-custom/mail/mail_quota_notification_'.$conf['language'].'.txt');
-				} elseif(file_exists($conf['rootpath'].'/conf-custom/mail/mail_quota_notification_en.txt')) {
-					$lines = file($conf['rootpath'].'/conf-custom/mail/mail_quota_notification_en.txt');
-				} elseif(file_exists($conf['rootpath'].'/conf/mail/mail_quota_notification_'.$conf['language'].'.txt')) {
-					$lines = file($conf['rootpath'].'/conf/mail/mail_quota_notification_'.$conf['language'].'.txt');
-				} else {
-					$lines = file($conf['rootpath'].'/conf/mail/mail_quota_notification_en.txt');
-				}
-					
-                //* get mail headers, subject and body
-                $mailHeaders = '';
-                $mailBody = '';
-                $mailSubject = '';
-                $inHeader = true;
-                for($l = 0; $l < count($lines); $l++) {
-                    if($lines[$l] == '') {
-                        $inHeader = false;
-                        continue;
-                    }
-                    if($inHeader == true) {
-                        $parts = explode(':', $lines[$l], 2);
-                        if(strtolower($parts[0]) == 'subject') $mailSubject = trim($parts[1]);
-                        unset($parts);
-                        $mailHeaders .= trim($lines[$l]) . "\n";
-                    } else {
-                        $mailBody .= trim($lines[$l]) . "\n";
-                    }
-                }
-                $mailBody = trim($mailBody);
+			
+            // could a notification be sent?
+            $send_notification = false;
+            if(!$rec['last_quota_notification']) $send_notification = true; // not yet notified
+            elseif($mail_config['overquota_notify_freq'] > 0 && $rec['notified_before'] >= $mail_config['overquota_notify_freq']) $send_notification = true;
+            
+            if(($mail_config['overquota_notify_admin'] == 'y' || $mail_config['overquota_notify_client'] == 'y') && $send_notification == true) {
+				$app->dbmaster->datalogUpdate('mail_user', "last_quota_notification = CURDATE()", 'mailuser_id', $rec['mailuser_id']);
                 
                 $placeholders = array('{email}' => $rec['email'],
-                                      '{admin_mail}' => $global_config['admin_mail'],
-                                      '{used}' => $rec['used'],
-                                      '{name}' => $rec['name'],
-                                      '{quota}' => $rec['quota'],
-                                      '{ratio}' => $rec['ratio']);
-                
-                //* Replace placeholders
-                $mailHeaders = strtr($mailHeaders, $placeholders);
-                $mailSubject = strtr($mailSubject, $placeholders);
-                $mailBody = strtr($mailBody, $placeholders);
-                
+                          '{admin_mail}' => $global_config['admin_mail'],
+                          '{used}' => $rec['used'],
+                          '{name}' => $rec['name'],
+                          '{quota}' => $rec['quota'],
+                          '{ratio}' => $rec['ratio']);
+    
+                $recipients = array();
                 //* send email to admin
-                if($global_config['admin_mail'] != '' && $web_config['overquota_notify_admin'] == 'y') {
-                    mail($global_config['admin_mail'], $mailSubject, $mailBody, $mailHeaders);
+                if($global_config['admin_mail'] != '' && $mail_config['overquota_notify_admin'] == 'y') {
+                    $recipients[] = $global_config['admin_mail'];
                 }
                 
                 //* Send email to client
-                if($web_config['overquota_notify_client'] == 'y') {
+                if($mail_config['overquota_notify_client'] == 'y') {
                     $client_group_id = $rec["sys_groupid"];
                     $client = $app->db->queryOneRecord("SELECT client.email FROM sys_group, client WHERE sys_group.client_id = client.client_id and sys_group.groupid = $client_group_id");
                     if($client['email'] != '') {
-                        mail($client['email'], $mailSubject, $mailBody, $mailHeaders);
+                        $recipients[] = $client['email'];
                     }
                 }
                 
-                unset($mailSubject);
-                unset($mailHeaders);
-                unset($mailBody);
-                unset($lines);
+                send_notification_email('mail_quota_notification', $placeholders, $recipients);
 			}	
 		}
 	}

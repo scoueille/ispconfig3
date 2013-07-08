@@ -339,6 +339,20 @@ $form["tabs"]['mail'] = array(
 			'default' => 'y',
 			'value' => array(0 => 'n', 1 => 'y')
 		),
+		'overquota_notify_freq' => array(
+			'datatype' => 'INTEGER',
+			'formtype' => 'TEXT',
+			'default' => '7',
+			'value' => '',
+            'width' => '20',
+            'maxlength' => '255'
+		),
+		'overquota_notify_onok' => array(
+			'datatype' => 'VARCHAR',
+			'formtype' => 'CHECKBOX',
+			'default' => 'n',
+			'value' => array(0 => 'n', 1 => 'y')
+		),
 	##################################
 	# ENDE Datatable fields
 	##################################
@@ -563,6 +577,20 @@ $form["tabs"]['web'] = array(
 			'datatype' => 'VARCHAR',
 			'formtype' => 'CHECKBOX',
 			'default' => 'y',
+			'value' => array(0 => 'n', 1 => 'y')
+		),
+		'overquota_notify_freq' => array(
+			'datatype' => 'INTEGER',
+			'formtype' => 'TEXT',
+			'default' => '7',
+			'value' => '',
+            'width' => '20',
+            'maxlength' => '255'
+		),
+		'overquota_notify_onok' => array(
+			'datatype' => 'VARCHAR',
+			'formtype' => 'CHECKBOX',
+			'default' => 'n',
 			'value' => array(0 => 'n', 1 => 'y')
 		),
 		'user' => array(

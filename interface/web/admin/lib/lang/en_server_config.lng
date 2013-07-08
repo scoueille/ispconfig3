@@ -173,4 +173,7 @@ $wb["overtraffic_notify_client_txt"] = 'Send overtraffic notification to client'
 $wb["rbl_error_regex"] = 'Please specify valid RBL hostnames.';
 $wb["overquota_notify_admin_txt"] = 'Send quota warnings to admin';
 $wb["overquota_notify_client_txt"] = 'Send quota warnings to client';
+$wb["overquota_notify_onok_txt"] = 'Send quota ok message to client';
+$wb['overquota_notify_freq_txt'] = 'Send quota warning each X days';
+$wb['overquota_notify_freq_note_txt'] = '0 = send message just once, no repeated messages';
 ?>

@@ -837,6 +837,7 @@ CREATE TABLE `mail_user` (
   `disablesieve` enum('n','y') NOT NULL default 'n',
   `disablelda` enum('n','y') NOT NULL default 'n',
   `disabledoveadm` enum('n','y') NOT NULL default 'n',
+  `last_quota_notification` date NULL default NULL,
   PRIMARY KEY  (`mailuser_id`),
   KEY `server_id` (`server_id`,`email`),
   KEY `email_access` (`email`,`access`)
@@ -1758,6 +1759,7 @@ CREATE TABLE `web_domain` (
   `traffic_quota_lock` enum('n','y') NOT NULL default 'n',
   `fastcgi_php_version` varchar(255) DEFAULT NULL,
   `proxy_directives` mediumtext,
+  `last_quota_notification` date NULL default NULL,
   PRIMARY KEY  (`domain_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 

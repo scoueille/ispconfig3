@@ -35,6 +35,8 @@ mailbox_quota_stats=y
 realtime_blackhole_list=
 overquota_notify_admin=y
 overquota_notify_client=y
+overquota_notify_freq=7
+overquota_notify_onok=n
 
 [getmail]
 getmail_config_dir=/etc/getmail
@@ -83,6 +85,8 @@ connect_userid_to_webid_start=10000
 web_folder_protection=y
 overquota_notify_admin=y
 overquota_notify_client=y
+overquota_notify_freq=7
+overquota_notify_onok=n
 
 [dns]
 bind_user=root

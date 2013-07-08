@@ -173,4 +173,7 @@ $wb['overtraffic_notify_client_txt'] = 'Überschreiten des Transfer Limits an de
 $wb['rbl_error_regex'] = 'Bitte geben Sie gültige RBL-Hostnamen an.';
 $wb['overquota_notify_admin_txt'] = 'Quota-Warnungen an den Administrator senden';
 $wb['overquota_notify_client_txt'] = 'Quota-Warnungen an den Kunden senden';
+$wb['overquota_notify_onok_txt'] = 'Meldung an den Kunden senden, wenn Belegung wieder ok';
+$wb['overquota_notify_freq_txt'] = 'Quota-Warnung alle X Tage versenden';
+$wb['overquota_notify_freq_note_txt'] = '0 = Meldung nur einmalig versenden, keine Wiederholung';
 ?>
