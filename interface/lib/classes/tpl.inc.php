@@ -243,7 +243,7 @@ if (!defined('vlibTemplateClassLoaded')) {
             for ($i = 0; $i < $num_args; $i++) {
                 $var = func_get_arg($i);
                 if ($this->OPTIONS['CASELESS']) $var = strtolower($var);
-                if (!preg_match('/^[A-Za-z_]+[A-Za-z0-9_]*$/', $var)) continue;
+                if (!preg_match('/^[A-Za-z]+[A-Za-z0-9_]*$/', $var)) continue;
                 unset($this->_vars[$var]);
             }
             return true;
@@ -307,7 +307,7 @@ if (!defined('vlibTemplateClassLoaded')) {
                 if (($this->_arrvars[$k] = $this->_arrayBuild($v)) == false) {
                     vlibTemplateError::raiseError('VT_WARNING_INVALID_ARR', WARNING, $k);
                 } else {
-                    $this->vars['_'.$k] = count($v);
+                    $this->vars['_'.$k.'_num'] = count($v);
                 }
             }
             return true;
