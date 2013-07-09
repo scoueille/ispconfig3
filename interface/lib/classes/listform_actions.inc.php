@@ -36,7 +36,27 @@ class listform_actions {
 	public $SQLExtWhere = '';
 	public $SQLOrderBy = '';
 	public $SQLExtSelect = '';
-	
+	private $sortKeys;
+    
+    private function _sort($aOne, $aTwo) {
+        if(!is_array($aOne) || !is_array($aTwo)) return 0;
+        
+        if(!is_array($this->sortKeys)) $this->sortKeys = array($this->sortKeys);
+        foreach($this->sortKeys as $sKey => $sDir) {
+            if(is_numeric($sKey)) {
+                $sKey = $sDir;
+                $sDir = 'ASC';
+            }
+            $a = $aOne[$sKey];
+            $b = $aTwo[$sKey];
+            if(is_string($a)) $a = strtolower($a);
+            if(is_string($b)) $b = strtolower($b);
+            if($a < $b) return ($sDir == 'DESC' ? 1 : -1);
+            elseif($a > $b) return ($sDir == 'DESC' ? -1 : 1);
+        }
+        return 0;
+    }
+    
 	public function onLoad()
     {
 		global $app, $conf, $list_def_file;
@@ -62,36 +82,43 @@ class listform_actions {
 		if(!isset($_SESSION['search'][$_SESSION['s']['module']['name'].$app->listform->listDef["name"].$app->listform->listDef['table']]['order'])){
 		  $_SESSION['search'][$_SESSION['s']['module']['name'].$app->listform->listDef["name"].$app->listform->listDef['table']]['order'] = '';
 		}
-
+        
+        $php_sort = false;
+        
 		if(!empty($_GET['orderby'])){
 		  $order = str_replace('tbl_col_','',$_GET['orderby']);
 		  
 		  //* Check the css class submited value
 		  if (preg_match("/^[a-z\_]{1,}$/",$order)) {
-		  
-		    // prepend correct table
-			$prepend_table = $app->listform->listDef['table'];
-			if(trim($app->listform->listDef['additional_tables']) != '' && is_array($app->listform->listDef['item']) && count($app->listform->listDef['item']) > 0) {
-				foreach($app->listform->listDef['item'] as $field) {
-					if($field['field'] == $order && $field['table'] != ''){
-						$prepend_table = $field['table'];
-						break;
-					}
-				}
-		    }
-			$order = $prepend_table.'.'.$order;
+            
+            if(isset($app->listform->listDef['phpsort']) && is_array($app->listform->listDef['phpsort']) && in_array($order, $app->listform->listDef['phpsort'])) {
+                $php_sort = true;
+            } else {
+                // prepend correct table
+                $prepend_table = $app->listform->listDef['table'];
+                if(trim($app->listform->listDef['additional_tables']) != '' && is_array($app->listform->listDef['item']) && count($app->listform->listDef['item']) > 0) {
+                    foreach($app->listform->listDef['item'] as $field) {
+                        if($field['field'] == $order && $field['table'] != ''){
+                            $prepend_table = $field['table'];
+                            break;
+                        }
+                    }
+                }
+                $order = $prepend_table.'.'.$order;
+            }
 			
 		    if($_SESSION['search'][$_SESSION['s']['module']['name'].$app->listform->listDef["name"].$app->listform->listDef['table']]['order'] == $order){
 				$_SESSION['search'][$_SESSION['s']['module']['name'].$app->listform->listDef["name"].$app->listform->listDef['table']]['order'] = $order.' DESC';
 		    } else {
 				$_SESSION['search'][$_SESSION['s']['module']['name'].$app->listform->listDef["name"].$app->listform->listDef['table']]['order'] = $order;
 		    }
+            $_SESSION['search'][$_SESSION['s']['module']['name'].$app->listform->listDef["name"].$app->listform->listDef['table']]['order_in_php'] = $php_sort;
 		  }
 		}
 
 		// If a manuel oder by like customers isset the sorting will be infront
-		if(!empty($_SESSION['search'][$_SESSION['s']['module']['name'].$app->listform->listDef["name"].$app->listform->listDef['table']]['order'])){
-		  if(empty($this->SQLOrderBy)){
+		if(!empty($_SESSION['search'][$_SESSION['s']['module']['name'].$app->listform->listDef["name"].$app->listform->listDef['table']]['order']) && !$_SESSION['search'][$_SESSION['s']['module']['name'].$app->listform->listDef["name"].$app->listform->listDef['table']]['order_in_php']){
+          if(empty($this->SQLOrderBy)){
 		    $this->SQLOrderBy = "ORDER BY ".$_SESSION['search'][$_SESSION['s']['module']['name'].$app->listform->listDef["name"].$app->listform->listDef['table']]['order'];
 		  } else {
 		    $this->SQLOrderBy = str_replace("ORDER BY ","ORDER BY ".$_SESSION['search'][$_SESSION['s']['module']['name'].$app->listform->listDef["name"].$app->listform->listDef['table']]['order'].', ',$this->SQLOrderBy);
@@ -109,7 +136,18 @@ class listform_actions {
 				$records_new[] = $this->prepareDataRow($rec);
 			}
 		}
-
+        
+        if(!empty($_SESSION['search'][$_SESSION['s']['module']['name'].$app->listform->listDef["name"].$app->listform->listDef['table']]['order']) && $_SESSION['search'][$_SESSION['s']['module']['name'].$app->listform->listDef["name"].$app->listform->listDef['table']]['order_in_php']) {
+            $order_by = $_SESSION['search'][$_SESSION['s']['module']['name'].$app->listform->listDef["name"].$app->listform->listDef['table']]['order'];
+            $order_dir = 'ASC';
+            if(substr($order_by, -5) === ' DESC') {
+                $order_by = substr($order_by, 0, -5);
+                $order_dir = 'DESC';
+            }
+            $this->sortKeys = array($order_by => $order_dir);
+            uasort($records_new, array($this, '_sort'));
+        }
+        
 		$app->tpl->setLoop('records',$records_new);
 
 		$this->onShow();
