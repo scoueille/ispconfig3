@@ -496,6 +496,10 @@ class ispcmail {
         $this->_is_signed = true;
     }
     
+    private function _char_to_hex($matches) {
+        return '=' . strtoupper(dechex(ord($matches[1])));
+    }
+    
     /**
     * Function to encode a header if necessary
     * according to RFC2047
@@ -504,7 +508,7 @@ class ispcmail {
     private function _encodeHeader($input, $charset = 'ISO-8859-1') {
 		preg_match_all('/(\s?\w*[\x80-\xFF]+\w*\s?)/', $input, $matches);
 		foreach ($matches[1] as $value) {
-			$replacement = preg_replace('/([\x20\x80-\xFF])/e', '"=" . strtoupper(dechex(ord("\1")))', $value);
+			$replacement = preg_replace_callback('/([\x20\x80-\xFF])/', array($this, '_char_to_hex'), $value);
 			$input = str_replace($value, '=?' . $charset . '?Q?' . $replacement . '?=', $input);
 		}
         

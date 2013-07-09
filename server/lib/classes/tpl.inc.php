@@ -930,7 +930,7 @@ if (!defined('vlibTemplateClassLoaded')) {
                 $regex.= '(?:>|\/>|}|-->){1}';
 				$regex.= '/ie';
                 //$regex.= '([\r\n|\n|\r])?/ie';
-                $data = preg_replace($regex,"\$this->_parseTag(array('\\0','\\1','\\2','\\3','\\4','\\5','\\6','\\7','\\8','\\9'));",$data);
+                $data = preg_replace_callback($regex, array($this, '_parseTag'), $data);
 
                 if ($this->_cache) { // add cache if need be
                     $this->_createCache($data);
