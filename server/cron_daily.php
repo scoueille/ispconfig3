@@ -648,7 +648,7 @@ function send_notification_email($template, $placeholders, $recipients) {
     global $conf;
     
     if(!is_array($recipients) || count($recipients) < 1) return false;
-    if(!is_array($replacements)) $replacements = array();
+    if(!is_array($placeholders)) $placeholders = array();
     
     if(file_exists($conf['rootpath'].'/conf-custom/mail/' . $template . '_'.$conf['language'].'.txt')) {
         $lines = file($conf['rootpath'].'/conf-custom/mail/' . $template . '_'.$conf['language'].'.txt');
@@ -788,7 +788,7 @@ if ($app->dbmaster == $app->db) {
 	$global_config = $app->getconf->get_global_config('mail');
 
 	//* Check website disk quota
-	$sql = "SELECT domain_id,sys_groupid,domain,system_user,last_quota_notification,DATEDIFF(CURDATE(), last_quota_notification) as `notified_before` FROM web_domain WHERE hd_quota > 0 and (type = 'vhost' OR type = 'vhostsubdomain')";
+	$sql = "SELECT domain_id,sys_groupid,domain,system_user,last_quota_notification,DATEDIFF(CURDATE(), last_quota_notification) as `notified_before` FROM web_domain WHERE (type = 'vhost' OR type = 'vhostsubdomain')";
 	$records = $app->db->queryAllRecords($sql);
 	if(is_array($records) && !empty($records)) {
 	
@@ -829,6 +829,30 @@ if ($app->dbmaster == $app->db) {
 				$used_ratio = 0;
 			}
 			
+			$rec['ratio'] = number_format($used_ratio * 100, 2, '.', '').'%';
+		
+			if($rec['used'] > 1024) {
+				$rec['used'] = round($rec['used'] / 1024,2).' MB';
+			} else {
+				if ($rec['used'] != '') $rec['used'] .= ' KB';
+			}
+		
+			if($rec['soft'] > 1024) {
+				$rec['soft'] = round($rec['soft'] / 1024,2).' MB';
+			} elseif($rec['soft'] == 0){
+				$rec['soft'] = '----';
+			} else {
+				$rec['soft'] .= ' KB';
+			}
+		
+			if($rec['hard'] > 1024) {
+				$rec['hard'] = round($rec['hard'] / 1024,2).' MB';
+			} elseif($rec['hard'] == 0){
+				$rec['hard'] = '----';
+			} else {
+				$rec['hard'] .= ' KB';
+			}
+			
 			// send notifications only if 90% or more of the quota are used
 			if($used_ratio < 0.9) {
                 // reset notification date
@@ -863,25 +887,6 @@ if ($app->dbmaster == $app->db) {
                 
                 continue;
             }
-			$rec['ratio'] = number_format($used_ratio * 100, 2, '.', '').'%';
-		
-			if($rec['used'] > 1024) {
-				$rec['used'] = round($rec['used'] / 1024,2).' MB';
-			} else {
-				if ($rec['used'] != '') $rec['used'] .= ' KB';
-			}
-		
-			if($rec['soft'] > 1024) {
-				$rec['soft'] = round($rec['soft'] / 1024,2).' MB';
-			} else {
-				$rec['soft'] .= ' KB';
-			}
-		
-			if($rec['hard'] > 1024) {
-				$rec['hard'] = round($rec['hard'] / 1024,2).' MB';
-			} else {
-				$rec['hard'] .= ' KB';
-			}
             
             // could a notification be sent?
             $send_notification = false;
@@ -928,9 +933,10 @@ if ($app->dbmaster == $app->db) {
 if ($app->dbmaster == $app->db) {
 
 	$global_config = $app->getconf->get_global_config('mail');
+	$mail_config = $app->getconf->get_server_config($conf['server_id'], 'mail');
 
 	//* Check email quota
-	$sql = "SELECT mailuser_id,sys_groupid,email,name,quota,last_quota_notification,DATEDIFF(CURDATE(), last_quota_notification) as `notified_before` FROM mail_user WHERE quota > 0";
+	$sql = "SELECT mailuser_id,sys_groupid,email,name,quota,last_quota_notification,DATEDIFF(CURDATE(), last_quota_notification) as `notified_before` FROM mail_user";
 	$records = $app->db->queryAllRecords($sql);
 	if(is_array($records) && !empty($records)) {
 	
@@ -957,7 +963,25 @@ if ($app->dbmaster == $app->db) {
 			if (!is_numeric($rec['used'])) $rec['used']=$rec['used'][1];
 				
 			// used space ratio
-			$used_ratio = $rec['used']/$rec['quota'];
+			if($rec['quota'] > 0){
+				$used_ratio = $rec['used']/$rec['quota'];
+			} else {
+				$used_ratio = 0;
+			}
+			
+			$rec['ratio'] = number_format($used_ratio * 100, 2, '.', '').'%';
+			
+			if($rec['quota'] > 0){
+				$rec['quota'] = round($rec['quota'] / 1048576,4).' MB';
+			} else {
+				$rec['quota'] = '----';
+			}
+
+			if($rec['used'] < 1544000) {
+				$rec['used'] = round($rec['used'] / 1024,4).' KB';
+			} else {
+				$rec['used'] = round($rec['used'] / 1048576,4).' MB';
+			} 
 			
 			// send notifications only if 90% or more of the quota are used
 			if($used_ratio < 0.9) {
@@ -993,19 +1017,8 @@ if ($app->dbmaster == $app->db) {
 
                 continue;
             }
-			$rec['ratio'] = number_format($used_ratio * 100, 2, '.', '').'%';
-			
-			$rec['quota'] = round($rec['quota'] / 1048576,4).' MB';
-
-			if($rec['used'] < 1544000) {
-				$rec['used'] = round($rec['used'] / 1024,4).' KB';
-			} else {
-				$rec['used'] = round($rec['used'] / 1048576,4).' MB';
-			} 
 				
 			//* Send quota notifications
-			$mail_config = $app->getconf->get_server_config($conf['server_id'], 'mail');
-			
             // could a notification be sent?
             $send_notification = false;
             if(!$rec['last_quota_notification']) $send_notification = true; // not yet notified
