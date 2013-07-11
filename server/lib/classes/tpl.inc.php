@@ -928,7 +928,7 @@ if (!defined('vlibTemplateClassLoaded')) {
                 $regex.=    '[\"\']?';
                 $regex.= ')?\s*';
                 $regex.= '(?:>|\/>|}|-->){1}';
-				$regex.= '/ie';
+				$regex.= '/i';
                 //$regex.= '([\r\n|\n|\r])?/ie';
                 $data = preg_replace_callback($regex, array($this, '_parseTag'), $data);
 
