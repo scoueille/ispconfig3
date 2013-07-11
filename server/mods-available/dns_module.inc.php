@@ -129,11 +129,11 @@ class dns_module {
 		}
 		
 		if($action == 'restart') {
-			exec($conf['init_scripts'] . '/' . $daemon . ' restart');
+			exec($conf['init_scripts'] . '/' . $daemon . ' restart', $output, $retval);
 		} else {
-			exec($conf['init_scripts'] . '/' . $daemon . ' reload');
+			exec($conf['init_scripts'] . '/' . $daemon . ' reload', $output, $retval);
 		}
-		
+		return $retval;
 	}
 
 	function restartPowerDNS($action = 'restart') {
@@ -177,9 +177,10 @@ class dns_module {
 			$daemon = 'pdns';
 		}
 
-		exec($conf['init_scripts'] . '/' . $daemon . ' restart');
+		exec($conf['init_scripts'] . '/' . $daemon . ' restart', $output, $retval);
 
 //     unset $tmps;
+		return $retval;
 
 	}
 	

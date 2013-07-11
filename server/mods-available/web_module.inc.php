@@ -211,11 +211,11 @@ class web_module {
 		}
 
 		if($action == 'restart') {
-			exec($conf['init_scripts'] . '/' . $daemon . ' restart');
+			exec($conf['init_scripts'] . '/' . $daemon . ' restart', $output, $retval);
 		} else {
-			exec($conf['init_scripts'] . '/' . $daemon . ' reload');
+			exec($conf['init_scripts'] . '/' . $daemon . ' reload', $output, $retval);
 		}
-		
+		return $retval;
 	}
 	
 	function restartPHP_FPM($action = 'restart') {
@@ -229,7 +229,8 @@ class web_module {
 		
 		if(!$init_script) $init_script = $conf['init_scripts'].'/'.$web_config['php_fpm_init_script'];
 		
-		exec($init_script.' '.$action);
+		exec($init_script.' '.$action, $output, $retval);
+		return $retval;
 	}
 
 } // end class
