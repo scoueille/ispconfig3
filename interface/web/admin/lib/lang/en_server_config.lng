@@ -176,4 +176,6 @@ $wb["overquota_notify_client_txt"] = 'Send quota warnings to client';
 $wb["overquota_notify_onok_txt"] = 'Send quota ok message to client';
 $wb['overquota_notify_freq_txt'] = 'Send quota warning each X days';
 $wb['overquota_notify_freq_note_txt'] = '0 = send message just once, no repeated messages';
+$wb['admin_notify_events_txt'] = 'Send email to admin starting with the following level';
+$wb['no_notifications_txt'] = 'No Notifications';
 ?>

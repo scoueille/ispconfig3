@@ -152,6 +152,14 @@ $form["tabs"]['server'] = array(
 			'width' => '40',
 			'maxlength' => '255'
 		),
+		'admin_notify_events' => array(
+			'datatype' => 'INTEGER',
+			'formtype' => 'SELECT',
+			'default' => '1',
+			'value' => array('3' => 'no_notifications_txt', '0' => 'Debug', '1' => 'Warnings', '2' => 'Errors'),
+			'width' => '40',
+			'maxlength' => '255'
+		),
 		'backup_dir' => array(
 			'datatype' => 'VARCHAR',
 			'formtype' => 'TEXT',

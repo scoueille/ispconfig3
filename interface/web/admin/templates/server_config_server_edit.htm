@@ -49,6 +49,12 @@
                     {tmpl_var name='loglevel'}
                 </select>
             </div>
+			<div class="ctrlHolder">
+                <label for="admin_notify_events">{tmpl_var name='admin_notify_events_txt'}</label>
+                <select name="admin_notify_events" id="admin_notify_events" class="selectInput">
+                    {tmpl_var name='admin_notify_events'}
+                </select>
+            </div>
             <div class="ctrlHolder">
                 <label for="backup_dir">{tmpl_var name='backup_dir_txt'}</label>
                 <input name="backup_dir" id="backup_dir" value="{tmpl_var name='backup_dir'}" size="40" maxlength="255" type="text" class="textInput" />

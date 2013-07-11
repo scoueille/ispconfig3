@@ -1583,12 +1583,7 @@ class nginx_plugin {
 			}
 		} else {
 			//* We do not check the nginx config after changes (is faster)
-			if($nginx_chrooted) {
-				$app->services->restartServiceDelayed('httpd','reload');
-			} else {
-				// request a httpd reload when all records have been processed
-				$app->services->restartServiceDelayed('httpd','reload');
-			}
+			$app->services->restartServiceDelayed('httpd','reload');
 		}
 		
 		//* The vhost is written and apache has been restarted, so we 
