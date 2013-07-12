@@ -41,7 +41,7 @@ class installer_dist extends installer_base {
 		}
 
 		// load files
-		$content = rf('tpl/mm_cfg.py.master');
+		$content = rfsel($conf['ispconfig_install_dir'].'/server/conf-custom/install/mm_cfg.py.master', 'tpl/mm_cfg.py.master');
 		$old_file = rf($full_file_name);
 
 		$old_options = array();
@@ -98,7 +98,11 @@ class installer_dist extends installer_base {
 		}
 		
 		if(is_dir('/etc/mailman')) {
-			copy('tpl/mailman-virtual_to_transport.sh',$full_file_name);
+			if(is_file($conf['ispconfig_install_dir'].'/server/conf-custom/install/mailman-virtual_to_transport.sh')) {
+                copy($conf['ispconfig_install_dir'].'/server/conf-custom/install/mailman-virtual_to_transport.sh', $full_file_name);
+            } else {
+                copy('tpl/mailman-virtual_to_transport.sh',$full_file_name);
+            }
 			chgrp($full_file_name,'mailman');
 			chmod($full_file_name,0750);
 		}
@@ -282,7 +286,7 @@ class installer_dist extends installer_base {
 		if(is_file($cf['vmail_mailbox_base'].'/.'.$configfile)){
             copy($cf['vmail_mailbox_base'].'/.'.$configfile, $cf['vmail_mailbox_base'].'/.'.$configfile.'~');
         }
-		$content = rf("tpl/$configfile.master");
+		$content = rfsel($conf['ispconfig_install_dir'].'/server/conf-custom/install/'.$configfile.'.master', "tpl/$configfile.master");
 		$content = str_replace('{dist_postfix_vmail_mailbox_base}', $cf['vmail_mailbox_base'], $content);
 		wf($cf['vmail_mailbox_base'].'/.'.$configfile, $content);
 		
@@ -353,7 +357,7 @@ class installer_dist extends installer_base {
 		if(is_file("$pam/smtp"))    copy("$pam/smtp", "$pam/smtp~");
 		if(is_file("$pam/smtp~"))   exec("chmod 400 $pam/smtp~");
 
-		$content = rf("tpl/$configfile.master");
+		$content = rfsel($conf['ispconfig_install_dir'].'/server/conf-custom/install/'.$configfile.'.master', "tpl/$configfile.master");
 		$content = str_replace('{mysql_server_ispconfig_user}', $conf['mysql']['ispconfig_user'], $content);
 		$content = str_replace('{mysql_server_ispconfig_password}', $conf['mysql']['ispconfig_password'], $content);
 		$content = str_replace('{mysql_server_database}', $conf['mysql']['database'], $content);
@@ -376,7 +380,7 @@ class installer_dist extends installer_base {
             copy("$config_dir/$configfile", "$config_dir/$configfile~");
         }
 		exec("chmod 400 $config_dir/$configfile~");
-		$content = rf("tpl/$configfile.master");
+		$content = rfsel($conf['ispconfig_install_dir'].'/server/conf-custom/install/'.$configfile.'.master', "tpl/$configfile.master");
 		$content = str_replace('{mysql_server_ispconfig_user}',$conf['mysql']['ispconfig_user'],$content);
 		$content = str_replace('{mysql_server_ispconfig_password}',$conf['mysql']['ispconfig_password'], $content);
 		$content = str_replace('{mysql_server_database}',$conf['mysql']['database'],$content);
@@ -456,9 +460,17 @@ class installer_dist extends installer_base {
 		
 		//* Copy dovecot configuration file
 		if($dovecot_version == 2) {
-			copy('tpl/opensuse_dovecot2.conf.master',$config_dir.'/'.$configfile);
+            if(is_file($conf['ispconfig_install_dir'].'/server/conf-custom/install/opensuse_dovecot2.conf.master')) {
+                copy($conf['ispconfig_install_dir'].'/server/conf-custom/install/opensuse_dovecot2.conf.master', $config_dir.'/'.$configfile);
+            } else {
+                copy('tpl/opensuse_dovecot2.conf.master',$config_dir.'/'.$configfile);
+            }
 		} else {
-			copy('tpl/opensuse_dovecot.conf.master',$config_dir.'/'.$configfile);
+            if(is_file($conf['ispconfig_install_dir'].'/server/conf-custom/install/opensuse_dovecot.conf.master')) {
+                copy($conf['ispconfig_install_dir'].'/server/conf-custom/install/opensuse_dovecot.conf.master', $config_dir.'/'.$configfile);
+            } else {
+                copy('tpl/opensuse_dovecot.conf.master',$config_dir.'/'.$configfile);
+            }
 		}
 		
 		//* dovecot-sql.conf
@@ -468,7 +480,7 @@ class installer_dist extends installer_base {
 			exec("chmod 400 $config_dir/$configfile~");
         }
 		
-		$content = rf("tpl/opensuse_dovecot-sql.conf.master");
+		$content = rfsel($conf['ispconfig_install_dir'].'/server/conf-custom/install/opensuse_dovecot-sql.conf.master', "tpl/opensuse_dovecot-sql.conf.master");
 		$content = str_replace('{mysql_server_ispconfig_user}',$conf['mysql']['ispconfig_user'],$content);
 		$content = str_replace('{mysql_server_ispconfig_password}',$conf['mysql']['ispconfig_password'], $content);
 		$content = str_replace('{mysql_server_database}',$conf['mysql']['database'],$content);
@@ -487,7 +499,7 @@ class installer_dist extends installer_base {
 		$configfile = 'opensuse_amavisd_conf';
 		if(is_file($conf["amavis"]["config_dir"].'/amavisd.conf')) @copy($conf["amavis"]["config_dir"].'/amavisd.conf',$conf["amavis"]["config_dir"].'/amavisd.conf~');
 		if(is_file($conf["amavis"]["config_dir"].'/amavisd.conf~')) exec('chmod 400 '.$conf["amavis"]["config_dir"].'/amavisd.conf~');
-		$content = rf("tpl/".$configfile.".master");
+		$content = rfsel($conf['ispconfig_install_dir'].'/server/conf-custom/install/'.$configfile.'.master', "tpl/".$configfile.".master");
 		$content = str_replace('{mysql_server_ispconfig_user}',$conf['mysql']['ispconfig_user'],$content);
 		$content = str_replace('{mysql_server_ispconfig_password}',$conf['mysql']['ispconfig_password'], $content);
 		$content = str_replace('{mysql_server_database}',$conf['mysql']['database'],$content);
@@ -517,7 +529,7 @@ class installer_dist extends installer_base {
 		// Only add the content if we had not addded it before
 		if(!stristr($content,"127.0.0.1:10025")) {
 			unset($content);
-			$content = rf("tpl/master_cf_amavis.master");
+			$content = rfsel($conf['ispconfig_install_dir'].'/server/conf-custom/install/master_cf_amavis.master', "tpl/master_cf_amavis.master");
 			af($conf["postfix"]["config_dir"].'/master.cf',$content);
 		}
 		unset($content);
@@ -577,7 +589,7 @@ class installer_dist extends installer_base {
 		if(is_file("$config_dir/$configfile~")){
             exec("chmod 400 $config_dir/$configfile~");
         }
-		$content = rf('tpl/pureftpd_mysql.conf.master');
+		$content = rfsel($conf['ispconfig_install_dir'].'/server/conf-custom/install/pureftpd_mysql.conf.master', 'tpl/pureftpd_mysql.conf.master');
 		$content = str_replace('{mysql_server_ispconfig_user}', $conf["mysql"]["ispconfig_user"], $content);
 		$content = str_replace('{mysql_server_ispconfig_password}', $conf["mysql"]["ispconfig_password"], $content);
 		$content = str_replace('{mysql_server_database}', $conf["mysql"]["database"], $content);
@@ -588,7 +600,11 @@ class installer_dist extends installer_base {
 		exec("chown root:root $config_dir/$configfile");
 		
 		// copy our customized copy of pureftpd.conf to the pure-ftpd config directory
-		exec("cp tpl/opensuse_pureftpd_conf.master $config_dir/pure-ftpd.conf");
+		if(is_file($conf['ispconfig_install_dir'].'/server/conf-custom/install/opensuse_pureftpd_conf.master')) {
+            exec("cp " . $conf['ispconfig_install_dir']."/server/conf-custom/install/opensuse_pureftpd_conf.master $config_dir/pure-ftpd.conf");
+        } else {
+            exec("cp tpl/opensuse_pureftpd_conf.master $config_dir/pure-ftpd.conf");
+        }
 		
 	}
 	
@@ -600,7 +616,7 @@ class installer_dist extends installer_base {
 		$configfile = 'mydns.conf';
 		if(is_file($conf["mydns"]["config_dir"].'/'.$configfile)) copy($conf["mydns"]["config_dir"].'/'.$configfile,$conf["mydns"]["config_dir"].'/'.$configfile.'~');
 		if(is_file($conf["mydns"]["config_dir"].'/'.$configfile.'~')) exec('chmod 400 '.$conf["mydns"]["config_dir"].'/'.$configfile.'~');
-		$content = rf("tpl/".$configfile.".master");
+		$content = rfsel($conf['ispconfig_install_dir'].'/server/conf-custom/install/'.$configfile.'.master', "tpl/".$configfile.".master");
 		$content = str_replace('{mysql_server_ispconfig_user}',$conf['mysql']['ispconfig_user'],$content);
 		$content = str_replace('{mysql_server_ispconfig_password}',$conf['mysql']['ispconfig_password'], $content);
 		$content = str_replace('{mysql_server_database}',$conf['mysql']['database'],$content);
@@ -646,7 +662,7 @@ class installer_dist extends installer_base {
         $vhost_conf_enabled_dir = $conf['apache']['vhost_conf_enabled_dir'];
         
 		//copy('tpl/apache_ispconfig.conf.master',$vhost_conf_dir.'/ispconfig.conf');
-		$content = rf('tpl/apache_ispconfig.conf.master');
+		$content = rfsel($conf['ispconfig_install_dir'].'/server/conf-custom/install/apache_ispconfig.conf.master', 'tpl/apache_ispconfig.conf.master');
 		$records = $this->db->queryAllRecords('SELECT * FROM '.$conf['mysql']['master_database'].'.server_ip WHERE server_id = '.$conf['server_id']." AND virtualhost = 'y'");
 
 		if(is_array($records) && count($records) > 0) {
@@ -782,7 +798,11 @@ class installer_dist extends installer_base {
 		if(is_dir("/etc/Bastille")) caselog("mv -f /etc/Bastille /etc/Bastille.backup", __FILE__, __LINE__);
   		@mkdir("/etc/Bastille", octdec($directory_mode));
   		if(is_dir("/etc/Bastille.backup/firewall.d")) caselog("cp -pfr /etc/Bastille.backup/firewall.d /etc/Bastille/", __FILE__, __LINE__);
-  		caselog("cp -f tpl/bastille-firewall.cfg.master /etc/Bastille/bastille-firewall.cfg", __FILE__, __LINE__);
+  		if(is_file($conf['ispconfig_install_dir'].'/server/conf-custom/install/bastille-firewall.cfg.master')) {
+            caselog("cp -f " . $conf['ispconfig_install_dir']."/server/conf-custom/install/bastille-firewall.cfg.master /etc/Bastille/bastille-firewall.cfg", __FILE__, __LINE__);
+        } else {
+            caselog("cp -f tpl/bastille-firewall.cfg.master /etc/Bastille/bastille-firewall.cfg", __FILE__, __LINE__);
+        }
   		caselog("chmod 644 /etc/Bastille/bastille-firewall.cfg", __FILE__, __LINE__);
   		$content = rf("/etc/Bastille/bastille-firewall.cfg");
   		$content = str_replace("{DNS_SERVERS}", "", $content);
@@ -870,7 +890,7 @@ class installer_dist extends installer_base {
 		if(is_file($install_dir.'/interface/lib/'.$configfile)){
             copy("$install_dir/interface/lib/$configfile", "$install_dir/interface/lib/$configfile~");
         }
-		$content = rf("tpl/$configfile.master");
+		$content = rfsel($conf['ispconfig_install_dir'].'/server/conf-custom/install/'.$configfile.'.master', "tpl/$configfile.master");
 		$content = str_replace('{mysql_server_ispconfig_user}', $conf['mysql']['ispconfig_user'], $content);
 		$content = str_replace('{mysql_server_ispconfig_password}',$conf['mysql']['ispconfig_password'], $content);
 		$content = str_replace('{mysql_server_database}', $conf['mysql']['database'], $content);
@@ -894,7 +914,7 @@ class installer_dist extends installer_base {
 		if(is_file($install_dir.'/server/lib/'.$configfile)){
             copy("$install_dir/server/lib/$configfile", "$install_dir/interface/lib/$configfile~");
         }
-		$content = rf("tpl/$configfile.master");
+		$content = rfsel($conf['ispconfig_install_dir'].'/server/conf-custom/install/'.$configfile.'.master', "tpl/$configfile.master");
 		$content = str_replace('{mysql_server_ispconfig_user}', $conf['mysql']['ispconfig_user'], $content);
 		$content = str_replace('{mysql_server_ispconfig_password}', $conf['mysql']['ispconfig_password'], $content);
 		$content = str_replace('{mysql_server_database}', $conf['mysql']['database'], $content);
@@ -1065,7 +1085,7 @@ class installer_dist extends installer_base {
         
 			// Dont just copy over the virtualhost template but add some custom settings
          
-			$content = rf("tpl/apache_ispconfig.vhost.master");
+			$content = rfsel($conf['ispconfig_install_dir'].'/server/conf-custom/install/apache_ispconfig.vhost.master', "tpl/apache_ispconfig.vhost.master");
 			$content = str_replace('{vhost_port}', $conf['apache']['vhost_port'], $content);
 		
 			// comment out the listen directive if port is 80 or 443
@@ -1091,7 +1111,7 @@ class installer_dist extends installer_base {
 			wf("$vhost_conf_dir/ispconfig.vhost", $content);
 		
 			//if(!is_file('/srv/www/php-fcgi-scripts/ispconfig/.php-fcgi-starter')) {
-				$content = rf('tpl/apache_ispconfig_fcgi_starter.master');
+				$content = rfsel($conf['ispconfig_install_dir'].'/server/conf-custom/install/apache_ispconfig_fcgi_starter.master', 'tpl/apache_ispconfig_fcgi_starter.master');
 				$content = str_replace('{fastcgi_bin}', $conf['fastcgi']['fastcgi_bin'], $content);
 				$content = str_replace('{fastcgi_phpini_path}', $conf['fastcgi']['fastcgi_phpini_path'], $content);
 				exec('mkdir -p /srv/www/php-fcgi-scripts/ispconfig');
@@ -1122,7 +1142,7 @@ class installer_dist extends installer_base {
 			$vhost_conf_enabled_dir = $conf['nginx']['vhost_conf_enabled_dir'];
 
 			// Dont just copy over the virtualhost template but add some custom settings
-			$content = rf('tpl/nginx_ispconfig.vhost.master');
+			$content = rfsel($conf['ispconfig_install_dir'].'/server/conf-custom/install/nginx_ispconfig.vhost.master', 'tpl/nginx_ispconfig.vhost.master');
 			$content = str_replace('{vhost_port}', $conf['nginx']['vhost_port'], $content);
 		
 			if(is_file($install_dir.'/interface/ssl/ispserver.crt') && is_file($install_dir.'/interface/ssl/ispserver.key')) {
@@ -1149,7 +1169,7 @@ class installer_dist extends installer_base {
 			
 			// PHP-FPM
 			// Dont just copy over the php-fpm pool template but add some custom settings
-			$content = rf('tpl/php_fpm_pool.conf.master');
+			$content = rfsel($conf['ispconfig_install_dir'].'/server/conf-custom/install/php_fpm_pool.conf.master', 'tpl/php_fpm_pool.conf.master');
 			$content = str_replace('{fpm_pool}', 'ispconfig', $content);
 			//$content = str_replace('{fpm_port}', $conf['nginx']['php_fpm_start_port'], $content);
 			$content = str_replace('{fpm_socket}', $fpm_socket, $content);
@@ -1244,7 +1264,7 @@ class installer_dist extends installer_base {
 			caselog($command.' &> /dev/null', __FILE__, __LINE__, "EXECUTED: $command", "Failed to execute the command $command");
 		}
 		
-		$content = rf("tpl/mysql_clientdb.conf.master");
+		$content = rfsel($conf['ispconfig_install_dir'].'/server/conf-custom/install/mysql_clientdb.conf.master', "tpl/mysql_clientdb.conf.master");
 		$content = str_replace('{hostname}',$conf['mysql']['host'],$content);
 		$content = str_replace('{username}',$conf['mysql']['admin_user'],$content);
 		$content = str_replace('{password}',$conf['mysql']['admin_password'], $content);

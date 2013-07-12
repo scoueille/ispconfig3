@@ -345,6 +345,12 @@ function mkdirs($strPath, $mode = '0755'){
 	return false;
 }
 
+function rfsel($file, $file2) {
+    clearstatcache();
+    if(is_file($file)) return rf($file);
+    else return rf($file2);
+}
+
 function rf($file){
 	clearstatcache();
 	if(is_file($file)) {
