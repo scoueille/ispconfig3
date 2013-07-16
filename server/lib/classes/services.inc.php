@@ -58,7 +58,7 @@ class services {
 			return call_user_func(array($app->loaded_modules[$module_name],$function_name),$action);
 		} else {
 			$app->log("Unable to restart $service_name. Service not registered.",LOGLEVEL_WARNING);
-			return 0;
+			return array('output' => '', 'retval' => 0);
 		}
 		
 	}

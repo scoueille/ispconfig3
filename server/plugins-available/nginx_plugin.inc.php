@@ -1526,8 +1526,8 @@ class nginx_plugin {
 			$nginx_online_status_before_restart = $this->_checkTcp('localhost',80);
 			$app->log('nginx status is: '.$nginx_online_status_before_restart,LOGLEVEL_DEBUG);
 
-			$retval = $app->services->restartService('httpd','restart'); // $retval is 0 on success and > 0 on failure
-			$app->log('nginx restart return value is: '.$retval,LOGLEVEL_DEBUG);
+			$retval = $app->services->restartService('httpd','restart'); // $retval['retval'] is 0 on success and > 0 on failure
+			$app->log('nginx restart return value is: '.$retval['retval'],LOGLEVEL_DEBUG);
 			
 			// wait a few seconds, before we test the apache status again
 			sleep(2);
@@ -1535,9 +1535,10 @@ class nginx_plugin {
 			//* Check if nginx restarted successfully if it was online before
 			$nginx_online_status_after_restart = $this->_checkTcp('localhost',80);
 			$app->log('nginx online status after restart is: '.$nginx_online_status_after_restart,LOGLEVEL_DEBUG);
-			if($nginx_online_status_before_restart && !$nginx_online_status_after_restart || $retval > 0) {
+			if($nginx_online_status_before_restart && !$nginx_online_status_after_restart || $retval['retval'] > 0) {
 				$app->log('nginx did not restart after the configuration change for website '.$data['new']['domain'].'. Reverting the configuration. Saved non-working config as '.$vhost_file.'.err',LOGLEVEL_WARN);
 				$app->system->copy($vhost_file,$vhost_file.'.err');
+				if(is_array($retval['output']) && !empty($retval['output'])) $app->log('Reason for nginx restart failure: '.implode("\n", $retval['output']),LOGLEVEL_WARN);
 				if(is_file($vhost_file.'~')) {
 					//* Copy back the last backup file
 					$app->system->copy($vhost_file.'~',$vhost_file);

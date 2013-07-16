@@ -128,10 +128,11 @@ class dns_module {
 			$daemon = 'named';
 		}
 		
+		$retval = array('output' => '', 'retval' => 0);
 		if($action == 'restart') {
-			exec($conf['init_scripts'] . '/' . $daemon . ' restart', $output, $retval);
+			exec($conf['init_scripts'] . '/' . $daemon . ' restart', $retval['output'], $retval['retval']);
 		} else {
-			exec($conf['init_scripts'] . '/' . $daemon . ' reload', $output, $retval);
+			exec($conf['init_scripts'] . '/' . $daemon . ' reload', $retval['output'], $retval['retval']);
 		}
 		return $retval;
 	}
@@ -177,7 +178,8 @@ class dns_module {
 			$daemon = 'pdns';
 		}
 
-		exec($conf['init_scripts'] . '/' . $daemon . ' restart', $output, $retval);
+		$retval = array('output' => '', 'retval' => 0);
+		exec($conf['init_scripts'] . '/' . $daemon . ' restart', $retval['output'], $retval['retval']);
 
 //     unset $tmps;
 		return $retval;
