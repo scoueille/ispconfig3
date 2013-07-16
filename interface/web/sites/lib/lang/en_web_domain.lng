@@ -116,4 +116,6 @@ $wb['no_backup_txt'] = 'No backup';
 $wb['daily_backup_txt'] = 'Daily';
 $wb['weekly_backup_txt'] = 'Weekly';
 $wb['monthly_backup_txt'] = 'Monthly';
+$wb['rewrite_rules_txt'] = 'Rewrite Rules';
+$wb['invalid_rewrite_rules_txt'] = 'Invalid Rewrite Rules';
 ?>

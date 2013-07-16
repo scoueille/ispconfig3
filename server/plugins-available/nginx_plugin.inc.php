@@ -939,6 +939,20 @@ class nginx_plugin {
 		// backwards compatibility; since ISPConfig 3.0.5, the PHP mode for nginx is called 'php-fpm' instead of 'fast-cgi'. The following line makes sure that old web sites that have 'fast-cgi' in the database still get PHP-FPM support.
 		if($vhost_data['php'] == 'fast-cgi') $vhost_data['php'] = 'php-fpm';
 		
+		// Custom rewrite rules
+		$final_rewrite_rules = array();
+		$custom_rewrite_rules = $data['new']['rewrite_rules'];
+		// Make sure we only have Unix linebreaks
+		$custom_rewrite_rules = str_replace("\r\n", "\n", $custom_rewrite_rules);
+		$custom_rewrite_rules = str_replace("\r", "\n", $custom_rewrite_rules);
+		$custom_rewrite_rule_lines = explode("\n", $custom_rewrite_rules);
+		if(is_array($custom_rewrite_rule_lines) && !empty($custom_rewrite_rule_lines)){
+			foreach($custom_rewrite_rule_lines as $custom_rewrite_rule_line){
+				$final_rewrite_rules[] = array('rewrite_rule' => $custom_rewrite_rule_line);
+			}
+		}
+		$tpl->setLoop('rewrite_rules', $final_rewrite_rules);
+		
 		// Custom nginx directives
 		$final_nginx_directives = array();
 		$nginx_directives = $data['new']['nginx_directives'];

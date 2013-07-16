@@ -614,7 +614,15 @@ class page_action extends tform_actions {
 		
 		//* get the server config for this server
 		$app->uses("getconf");
-		$web_config = $app->getconf->get_server_config($app->functions->intval(isset($this->dataRecord["server_id"]) ? $this->dataRecord["server_id"] : 0),'web');
+		if($this->id > 0){
+			$web_rec = $app->tform->getDataRecord($this->id);
+			$server_id = $web_rec["server_id"];
+		} else {
+			// Get the first server ID
+			$tmp = $app->db->queryOneRecord("SELECT server_id FROM server WHERE web_server = 1 ORDER BY server_name LIMIT 0,1");
+			$server_id = intval($tmp['server_id']);
+		}
+		$web_config = $app->getconf->get_server_config($app->functions->intval(isset($this->dataRecord["server_id"]) ? $this->dataRecord["server_id"] : $server_id),'web');
 		//* Check for duplicate ssl certs per IP if SNI is disabled
 		if(isset($this->dataRecord['ssl']) && $this->dataRecord['ssl'] == 'y' && $web_config['enable_sni'] != 'y') {
 			$sql = "SELECT count(domain_id) as number FROM web_domain WHERE `ssl` = 'y' AND ip_address = '".$app->db->quote($this->dataRecord['ip_address'])."' and domain_id != ".$this->id;
@@ -628,6 +636,59 @@ class page_action extends tform_actions {
 		
 			} else {
 				$app->tform->errorMessage .= $app->tform->lng("error_php_fpm_pm_settings_txt").'<br>';
+			}
+		}
+		
+		// Check rewrite rules
+		$server_type = $web_config['server_type'];
+		
+		if($server_type == 'nginx' && isset($this->dataRecord['rewrite_rules']) && trim($this->dataRecord['rewrite_rules']) != '') {
+			$rewrite_rules = trim($this->dataRecord['rewrite_rules']);
+			$rewrites_are_valid = true;
+			// use this counter to make sure all curly brackets are properly closed
+			$if_level = 0;
+			// Make sure we only have Unix linebreaks
+			$rewrite_rules = str_replace("\r\n", "\n", $rewrite_rules);
+			$rewrite_rules = str_replace("\r", "\n", $rewrite_rules);
+			$rewrite_rule_lines = explode("\n", $rewrite_rules);
+			if(is_array($rewrite_rule_lines) && !empty($rewrite_rule_lines)){
+				foreach($rewrite_rule_lines as $rewrite_rule_line){
+					// rewrite
+					if(preg_match('@^\s*rewrite\s+(^/)?\S+(\$)?\s+\S+(\s+(last|break|redirect|permanent|))?\s*;\s*$@', $rewrite_rule_line)) continue;
+					// if
+					if(preg_match('@^\s*if\s+\(\s*\$\S+(\s+(\!?(=|~|~\*))\s+(\S+|\".+\"))?\s*\)\s*\{\s*$@', $rewrite_rule_line)){
+						$if_level += 1;
+						continue;
+					}
+					// if - check for files, directories, etc.
+					if(preg_match('@^\s*if\s+\(\s*\!?-(f|d|e|x)\s+\S+\s*\)\s*\{\s*$@', $rewrite_rule_line)){
+						$if_level += 1;
+						continue;
+					}
+					// break
+					if(preg_match('@^\s*break\s*;\s*$@', $rewrite_rule_line)){
+						$if_level += 1;
+						continue;
+					}
+					// return code [ text ]
+					if(preg_match('@^\s*return\s+\d\d\d.*;\s*$@', $rewrite_rule_line)) continue;
+					// return code URL
+					// return URL
+					if(preg_match('@^\s*return(\s+\d\d\d)?\s+(http|https|ftp)\://([a-zA-Z0-9\.\-]+(\:[a-zA-Z0-9\.&%\$\-]+)*\@)*((25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9])\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[0-9])|localhost|([a-zA-Z0-9\-]+\.)*[a-zA-Z0-9\-]+\.(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))(\:[0-9]+)*(/($|[a-zA-Z0-9\.\,\?\'\\\+&%\$#\=~_\-]+))*\s*;\s*$@', $rewrite_rule_line)) continue;
+					// set
+					if(preg_match('@^\s*set\s+\$\S+\s+\S+\s*;\s*$@', $rewrite_rule_line)) continue;
+					// closing curly bracket
+					if(trim($rewrite_rule_line) == '}'){
+						$if_level -= 1;
+						continue;
+					}
+					$rewrites_are_valid = false;
+					break;
+				}
+			}
+			
+			if(!$rewrites_are_valid || $if_level != 0){
+				$app->tform->errorMessage .= $app->tform->lng("invalid_rewrite_rules_txt").'<br>';
 			}
 		}
 

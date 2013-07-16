@@ -1760,6 +1760,7 @@ CREATE TABLE `web_domain` (
   `fastcgi_php_version` varchar(255) DEFAULT NULL,
   `proxy_directives` mediumtext,
   `last_quota_notification` date NULL default NULL,
+  `rewrite_rules` mediumtext,
   PRIMARY KEY  (`domain_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
