@@ -247,7 +247,7 @@ if($parse_mail_log == true) {
 // Create webalizer statistics
 #######################################################################################################
 
-function setConfigVar( $filename, $varName, $varValue ) {
+function setConfigVar( $filename, $varName, $varValue, $append = 0 ) {
 	if($lines = @file($filename)) {
 		$out = '';
 		$found = 0;
