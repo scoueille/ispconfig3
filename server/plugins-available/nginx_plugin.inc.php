@@ -1549,10 +1549,18 @@ class nginx_plugin {
 			//* Check if nginx restarted successfully if it was online before
 			$nginx_online_status_after_restart = $this->_checkTcp('localhost',80);
 			$app->log('nginx online status after restart is: '.$nginx_online_status_after_restart,LOGLEVEL_DEBUG);
-			if($nginx_online_status_before_restart && !$nginx_online_status_after_restart || $retval['retval'] > 0) {
+			if($nginx_online_status_before_restart && !$nginx_online_status_after_restart || $retval['retval'] > 0) { 
 				$app->log('nginx did not restart after the configuration change for website '.$data['new']['domain'].'. Reverting the configuration. Saved non-working config as '.$vhost_file.'.err',LOGLEVEL_WARN);
+				if(is_array($retval['output']) && !empty($retval['output'])){
+					$app->log('Reason for nginx restart failure: '.implode("\n", $retval['output']),LOGLEVEL_WARN);
+				} else {
+					// if no output is given, check again
+					exec('nginx -t 2>&1', $tmp_output, $tmp_retval);
+					if($tmp_retval > 0 && is_array($tmp_output) && !empty($tmp_output)) $app->log('Reason for nginx restart failure: '.implode("\n", $tmp_output),LOGLEVEL_WARN);
+					unset($tmp_output, $tmp_retval);
+				}
 				$app->system->copy($vhost_file,$vhost_file.'.err');
-				if(is_array($retval['output']) && !empty($retval['output'])) $app->log('Reason for nginx restart failure: '.implode("\n", $retval['output']),LOGLEVEL_WARN);
+				
 				if(is_file($vhost_file.'~')) {
 					//* Copy back the last backup file
 					$app->system->copy($vhost_file.'~',$vhost_file);

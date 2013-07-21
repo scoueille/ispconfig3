@@ -1491,8 +1491,40 @@ class apache2_plugin {
 			$app->log('Apache online status after restart is: '.$apache_online_status_after_restart,LOGLEVEL_DEBUG);
 			if($apache_online_status_before_restart && !$apache_online_status_after_restart || $retval['retval'] > 0) {
 				$app->log('Apache did not restart after the configuration change for website '.$data['new']['domain'].'. Reverting the configuration. Saved non-working config as '.$vhost_file.'.err',LOGLEVEL_WARN);
+				if(is_array($retval['output']) && !empty($retval['output'])){
+					$app->log('Reason for Apache restart failure: '.implode("\n", $retval['output']),LOGLEVEL_WARN);
+				} else {
+					// if no output is given, check again
+					$webserver_binary = '';
+					exec('which apache2', $webserver_check_output, $webserver_check_retval);
+					if($webserver_check_retval == 0){
+						$webserver_binary = 'apache2';
+					} else {
+						unset($webserver_check_output, $webserver_check_retval);
+						exec('which httpd2', $webserver_check_output, $webserver_check_retval);
+						if($webserver_check_retval == 0){
+							$webserver_binary = 'httpd2';
+						} else {
+							unset($webserver_check_output, $webserver_check_retval);
+							exec('which httpd', $webserver_check_output, $webserver_check_retval);
+							if($webserver_check_retval == 0){
+								$webserver_binary = 'httpd';
+							} else {
+								unset($webserver_check_output, $webserver_check_retval);
+								exec('which apache', $webserver_check_output, $webserver_check_retval);
+								if($webserver_check_retval == 0){
+									$webserver_binary = 'apache';
+								}
+							}
+						}
+					}
+					if($webserver_binary != ''){
+						exec($webserver_binary.' -t 2>&1', $tmp_output, $tmp_retval);
+						if($tmp_retval > 0 && is_array($tmp_output) && !empty($tmp_output)) $app->log('Reason for Apache restart failure: '.implode("\n", $tmp_output),LOGLEVEL_WARN);
+						unset($tmp_output, $tmp_retval);
+					}
+				}
 				$app->system->copy($vhost_file,$vhost_file.'.err');
-				if(is_array($retval['output']) && !empty($retval['output'])) $app->log('Reason for Apache restart failure: '.implode("\n", $retval['output']),LOGLEVEL_WARN);
 				if(is_file($vhost_file.'~')) {
 					//* Copy back the last backup file
 					$app->system->copy($vhost_file.'~',$vhost_file);
