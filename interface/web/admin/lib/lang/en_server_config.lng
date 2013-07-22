@@ -178,4 +178,9 @@ $wb['overquota_notify_freq_txt'] = 'Send quota warning each X days';
 $wb['overquota_notify_freq_note_txt'] = '0 = send message just once, no repeated messages';
 $wb['admin_notify_events_txt'] = 'Send email to admin starting with the following level';
 $wb['no_notifications_txt'] = 'No Notifications';
+$wb['monit_url_txt'] = 'Monit URL';
+$wb['monit_user_txt'] = 'Monit User';
+$wb['monit_password_txt'] = 'Monit Password';
+$wb['monit_url_error_regex'] = 'Invalid Monit URL';
+$wb['monit_url_note_txt'] = 'Placeholder:';
 ?>

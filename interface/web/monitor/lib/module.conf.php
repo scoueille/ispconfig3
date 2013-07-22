@@ -115,6 +115,11 @@ $items[] = array( 'title' 	=> "Show Services",
                   'target' 	=> 'content',
                   'link'	=> 'monitor/show_data.php?type=services',
                   'html_id' => 'services');
+				  
+$items[] = array( 'title' 	=> "Show Monit",
+                  'target' 	=> 'content',
+                  'link'	=> 'monitor/show_monit.php',
+                  'html_id' => 'monit');
 
 $items[] = array( 'title' 	=> "Show OpenVz VE BeanCounter",
                   'target' 	=> 'content',

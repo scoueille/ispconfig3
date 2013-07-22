@@ -178,4 +178,9 @@ $wb['overquota_notify_freq_txt'] = 'Quota-Warnung alle X Tage versenden';
 $wb['overquota_notify_freq_note_txt'] = '0 = Meldung nur einmalig versenden, keine Wiederholung';
 $wb['admin_notify_events_txt'] = 'Sende E-Mail an Administrator ab folgendem Level';
 $wb['no_notifications_txt'] = 'Keine Benachrichtigungen';
+$wb['monit_url_txt'] = 'Monit-URL';
+$wb['monit_user_txt'] = 'Monit-Benutzer';
+$wb['monit_password_txt'] = 'Monit-Passwort';
+$wb['monit_url_error_regex'] = 'Ungültige Monit-URL';
+$wb['monit_url_note_txt'] = 'Platzhalter:';
 ?>
