@@ -183,4 +183,9 @@ $wb['monit_user_txt'] = 'Monit User';
 $wb['monit_password_txt'] = 'Monit Password';
 $wb['monit_url_error_regex'] = 'Invalid Monit URL';
 $wb['monit_url_note_txt'] = 'Placeholder:';
+$wb['munin_url_txt'] = 'Munin URL';
+$wb['munin_user_txt'] = 'Munin User';
+$wb['munin_password_txt'] = 'Munin Password';
+$wb['munin_url_error_regex'] = 'Invalid Munin URL';
+$wb['munin_url_note_txt'] = 'Placeholder:';
 ?>

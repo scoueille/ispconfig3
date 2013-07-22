@@ -77,6 +77,18 @@
                 <label for="monit_password">{tmpl_var name='monit_password_txt'}</label>
                 <input name="monit_password" id="monit_password" value="{tmpl_var name='monit_password'}" size="40" maxlength="255" type="text" class="textInput" />
             </div>
+			<div class="ctrlHolder">
+                <label for="munin_url">{tmpl_var name='munin_url_txt'}</label>
+                <input name="munin_url" id="munin_url" value="{tmpl_var name='munin_url'}" size="40" maxlength="255" type="text" class="textInput" />&nbsp;{tmpl_var name='munin_url_note_txt'} <a href="javascript:void(0);" class="addPlaceholder">[SERVERNAME]</a>
+            </div>
+			<div class="ctrlHolder">
+                <label for="munin_user">{tmpl_var name='munin_user_txt'}</label>
+                <input name="munin_user" id="munin_user" value="{tmpl_var name='munin_user'}" size="40" maxlength="255" type="text" class="textInput" />
+            </div>
+			<div class="ctrlHolder">
+                <label for="munin_password">{tmpl_var name='munin_password_txt'}</label>
+                <input name="munin_password" id="munin_password" value="{tmpl_var name='munin_password'}" size="40" maxlength="255" type="text" class="textInput" />
+            </div>
         </fieldset>
             
         <input type="hidden" name="id" value="{tmpl_var name='id'}">

@@ -125,6 +125,11 @@ $items[] = array( 'title' 	=> "Show OpenVz VE BeanCounter",
                   'target' 	=> 'content',
                   'link'	=> 'monitor/show_data.php?type=openvz_beancounter',
                   'html_id' => 'openvz_beancounter');
+				  
+$items[] = array( 'title' 	=> "Show Munin",
+                  'target' 	=> 'content',
+                  'link'	=> 'monitor/show_munin.php',
+                  'html_id' => 'monit');
 
 $module["nav"][] = array(	'title'	=> 'Server State',
                             'open' 	=> 1,

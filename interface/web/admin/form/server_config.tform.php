@@ -207,6 +207,34 @@ $form["tabs"]['server'] = array(
 			'width' => '40',
 			'maxlength' => '255'
 		),
+		'munin_url' => array(
+			'datatype' => 'VARCHAR',
+			'formtype' => 'TEXT',
+			'default' => '',
+			'validators'	=> array ( 0 => array (	'type'	=> 'REGEX',
+                                                                'regex' => '/^[0-9a-zA-Z\:\/\-\.\[\]]{0,255}$/',
+                                                                'errmsg'=> 'munin_url_error_regex'),
+                                                ),
+			'value' => '',
+			'width' => '40',
+			'maxlength' => '255'
+		),
+		'munin_user' => array(
+			'datatype' => 'VARCHAR',
+			'formtype' => 'TEXT',
+			'default' => '',
+			'value' => '',
+			'width' => '40',
+			'maxlength' => '255'
+		),
+		'munin_password' => array(
+			'datatype' => 'VARCHAR',
+			'formtype' => 'TEXT',
+			'default' => '',
+			'value' => '',
+			'width' => '40',
+			'maxlength' => '255'
+		),
 	##################################
 	# ENDE Datatable fields
 	##################################

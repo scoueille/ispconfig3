@@ -19,6 +19,9 @@ backup_mode=rootgz
 monit_url=
 monit_user=
 monit_password=
+munin_url=
+munin_user=
+munin_password=
 
 [mail]
 module=postfix_mysql
