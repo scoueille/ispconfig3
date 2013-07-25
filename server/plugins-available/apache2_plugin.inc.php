@@ -1264,9 +1264,9 @@ class apache2_plugin {
 
 			if (!is_dir($cgi_starter_path)) {
 				$app->system->mkdirpath($cgi_starter_path);
-				$app->system->chmod($cgi_starter_script,0755);
-				$app->system->chown($cgi_starter_script,$data['new']['system_user']);
-				$app->system->chgrp($cgi_starter_script,$data['new']['system_group']);
+				$app->system->chown($cgi_starter_path,$data['new']['system_user']);
+				$app->system->chgrp($cgi_starter_path,$data['new']['system_group']);
+				$app->system->chmod($cgi_starter_path,0755);
 
 				$app->log('Creating cgi starter script directory: '.$cgi_starter_path,LOGLEVEL_DEBUG);
 			}
