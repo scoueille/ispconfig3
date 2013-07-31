@@ -553,7 +553,8 @@ class tform {
                                         break;
 
                                 case 'PASSWORD':
-                                        $new_record[$key] = '';
+                                        //$new_record[$key] = '';
+										$new_record[$key] = htmlspecialchars($field['default']);
                                 break;
 
                                 case 'CHECKBOX':
