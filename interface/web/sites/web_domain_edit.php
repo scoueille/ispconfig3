@@ -653,6 +653,10 @@ class page_action extends tform_actions {
 			$rewrite_rule_lines = explode("\n", $rewrite_rules);
 			if(is_array($rewrite_rule_lines) && !empty($rewrite_rule_lines)){
 				foreach($rewrite_rule_lines as $rewrite_rule_line){
+					// ignore comments
+					if(substr(ltrim($rewrite_rule_line),0,1) == '#') continue;
+					// empty lines
+					if(trim($rewrite_rule_line) == '') continue;
 					// rewrite
 					if(preg_match('@^\s*rewrite\s+(^/)?\S+(\$)?\s+\S+(\s+(last|break|redirect|permanent|))?\s*;\s*$@', $rewrite_rule_line)) continue;
 					// if
@@ -667,7 +671,6 @@ class page_action extends tform_actions {
 					}
 					// break
 					if(preg_match('@^\s*break\s*;\s*$@', $rewrite_rule_line)){
-						$if_level += 1;
 						continue;
 					}
 					// return code [ text ]
