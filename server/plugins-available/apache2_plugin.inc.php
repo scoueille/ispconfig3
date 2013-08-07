@@ -1474,7 +1474,7 @@ class apache2_plugin {
 		if($web_config['check_apache_config'] == 'y') {
 			//* Test if apache starts with the new configuration file
 			$apache_online_status_before_restart = $this->_checkTcp('localhost',80);
-			$app->log('Apache status is: '.$apache_online_status_before_restart,LOGLEVEL_DEBUG);
+			$app->log('Apache status is: '.($apache_online_status_before_restart === true? 'running' : 'down'),LOGLEVEL_DEBUG);
 
 			$retval = $app->services->restartService('httpd','restart'); // $retval['retval'] is 0 on success and > 0 on failure
 			$app->log('Apache restart return value is: '.$retval['retval'],LOGLEVEL_DEBUG);
@@ -1488,7 +1488,7 @@ class apache2_plugin {
 				sleep(1);
 			}
 			//* Check if apache restarted successfully if it was online before
-			$app->log('Apache online status after restart is: '.$apache_online_status_after_restart,LOGLEVEL_DEBUG);
+			$app->log('Apache online status after restart is: '.($apache_online_status_after_restart === true? 'running' : 'down'),LOGLEVEL_DEBUG);
 			if($apache_online_status_before_restart && !$apache_online_status_after_restart || $retval['retval'] > 0) {
 				$app->log('Apache did not restart after the configuration change for website '.$data['new']['domain'].'. Reverting the configuration. Saved non-working config as '.$vhost_file.'.err',LOGLEVEL_WARN);
 				if(is_array($retval['output']) && !empty($retval['output'])){

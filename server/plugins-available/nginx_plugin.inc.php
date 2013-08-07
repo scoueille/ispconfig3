@@ -1538,7 +1538,7 @@ class nginx_plugin {
 		if($web_config['check_apache_config'] == 'y') {
 			//* Test if nginx starts with the new configuration file
 			$nginx_online_status_before_restart = $this->_checkTcp('localhost',80);
-			$app->log('nginx status is: '.$nginx_online_status_before_restart,LOGLEVEL_DEBUG);
+			$app->log('nginx status is: '.($nginx_online_status_before_restart === true? 'running' : 'down'),LOGLEVEL_DEBUG);
 
 			$retval = $app->services->restartService('httpd','restart'); // $retval['retval'] is 0 on success and > 0 on failure
 			$app->log('nginx restart return value is: '.$retval['retval'],LOGLEVEL_DEBUG);
@@ -1548,7 +1548,7 @@ class nginx_plugin {
 		
 			//* Check if nginx restarted successfully if it was online before
 			$nginx_online_status_after_restart = $this->_checkTcp('localhost',80);
-			$app->log('nginx online status after restart is: '.$nginx_online_status_after_restart,LOGLEVEL_DEBUG);
+			$app->log('nginx online status after restart is: '.($nginx_online_status_after_restart === true? 'running' : 'down'),LOGLEVEL_DEBUG);
 			if($nginx_online_status_before_restart && !$nginx_online_status_after_restart || $retval['retval'] > 0) { 
 				$app->log('nginx did not restart after the configuration change for website '.$data['new']['domain'].'. Reverting the configuration. Saved non-working config as '.$vhost_file.'.err',LOGLEVEL_WARN);
 				if(is_array($retval['output']) && !empty($retval['output'])){
