@@ -34,7 +34,7 @@ require_once('../../lib/app.inc.php');
 //* Check permissions for module
 $app->auth->check_module_permissions('sites');
 
-$app->uses('getconf');
+$app->uses('getconf,tform');
 
 $server_id = $app->functions->intval($_GET["server_id"]);
 $web_id = $app->functions->intval($_GET["web_id"]);
@@ -55,7 +55,7 @@ $type = $_GET["type"];
 	
 	if($type == 'getserverid'){
 		$json = '{"serverid":"';
-		$sql = "SELECT server_id FROM web_domain WHERE domain_id = $web_id";
+		$sql = "SELECT server_id FROM web_domain WHERE domain_id = $web_id AND ".$app->tform->getAuthSQL('r');
 		$server = $app->db->queryOneRecord($sql);
 		$json .= $server['server_id'];
 		unset($server);
@@ -99,7 +99,7 @@ $type = $_GET["type"];
 	
 	if($type == 'getphptype'){
 		$json = '{"phptype":"';
-		$sql = "SELECT php FROM web_domain WHERE domain_id = $web_id";
+		$sql = "SELECT php FROM web_domain WHERE domain_id = $web_id AND ".$app->tform->getAuthSQL('r');
 		$php = $app->db->queryOneRecord($sql);
 		$json .= $php['php'];
 		unset($php);
@@ -108,7 +108,7 @@ $type = $_GET["type"];
 	
 	if($type == 'getredirecttype'){
 		$json = '{"redirecttype":"';
-		$sql = "SELECT redirect_type FROM web_domain WHERE domain_id = $web_id";
+		$sql = "SELECT redirect_type FROM web_domain WHERE domain_id = $web_id AND ".$app->tform->getAuthSQL('r');
 		$redirect = $app->db->queryOneRecord($sql);
 		$json .= $redirect['redirect_type'];
 		unset($redirect);
@@ -138,7 +138,7 @@ $type = $_GET["type"];
     if($type == 'getdatabaseusers') {
         $json = '{}';
 		
-		$sql = "SELECT sys_groupid FROM web_domain WHERE domain_id = $web_id";
+		$sql = "SELECT sys_groupid FROM web_domain WHERE domain_id = $web_id AND ".$app->tform->getAuthSQL('r');
         $group = $app->db->queryOneRecord($sql);
         if($group) {
             $sql = "SELECT database_user_id, database_user FROM web_database_user WHERE sys_groupid = '" . $group['sys_groupid'] . "'";
