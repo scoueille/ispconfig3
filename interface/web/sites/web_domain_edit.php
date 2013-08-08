@@ -450,7 +450,7 @@ class page_action extends tform_actions {
 		
 		// check for configuration errors in sys_datalog
 		if($this->id > 0) {
-			$datalog = $app->db->queryOneRecord("SELECT * FROM sys_datalog WHERE dbtable = 'web_domain' AND dbidx = 'domain_id:".$this->id."' ORDER BY tstamp DESC");
+			$datalog = $app->db->queryOneRecord("SELECT sys_datalog.error, sys_log.tstamp FROM sys_datalog, sys_log WHERE sys_datalog.dbtable = 'web_domain' AND sys_datalog.dbidx = 'domain_id:".$this->id."' AND sys_datalog.datalog_id = sys_log.datalog_id AND sys_log.message = CONCAT('Processed datalog_id ',sys_log.datalog_id) ORDER BY sys_datalog.tstamp DESC");
 			if(is_array($datalog) && !empty($datalog)){
 				if(trim($datalog['error']) != ''){
 					$app->tpl->setVar("config_error_msg",nl2br(htmlentities($datalog['error'])));
