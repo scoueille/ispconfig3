@@ -1425,6 +1425,7 @@ CREATE TABLE `sys_datalog` (
   `user` varchar(255) NOT NULL default '',
   `data` longtext NOT NULL,
   `status` set('pending','ok','warning','error') NOT NULL default 'ok',
+  `error` mediumtext,
   PRIMARY KEY  (`datalog_id`),
   KEY `server_id` (`server_id`,`status`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;

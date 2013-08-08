@@ -400,7 +400,7 @@ class installer_base {
 				$this->warning('Unable to set rights of user in master database: '.$value['db']."\n Query: ".$query."\n Error: ".$this->dbmaster->errorMessage);
 			}
 
-			$query = "GRANT SELECT, UPDATE(`status`) ON ".$value['db'].".`sys_datalog` TO '".$value['user']."'@'".$host."' ";
+			$query = "GRANT SELECT, UPDATE(`status`, `error`) ON ".$value['db'].".`sys_datalog` TO '".$value['user']."'@'".$host."' ";
 			if ($verbose){
 				echo $query ."\n";
 			}

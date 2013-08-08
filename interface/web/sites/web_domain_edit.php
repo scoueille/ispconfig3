@@ -447,6 +447,17 @@ class page_action extends tform_actions {
 			}
 			$app->tpl->setVar("domain_option",$domain_select);
 		}
+		
+		// check for configuration errors in sys_datalog
+		if($this->id > 0) {
+			$datalog = $app->db->queryOneRecord("SELECT * FROM sys_datalog WHERE dbtable = 'web_domain' AND dbidx = 'domain_id:".$this->id."' ORDER BY tstamp DESC");
+			if(is_array($datalog) && !empty($datalog)){
+				if(trim($datalog['error']) != ''){
+					$app->tpl->setVar("config_error_msg",nl2br(htmlentities($datalog['error'])));
+					$app->tpl->setVar("config_error_tstamp",date($app->lng('conf_format_datetime'), $datalog['tstamp']));
+				}
+			}
+		}
 
 		parent::onShowEnd();
 	}

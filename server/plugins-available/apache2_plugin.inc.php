@@ -1493,6 +1493,7 @@ class apache2_plugin {
 				$app->log('Apache did not restart after the configuration change for website '.$data['new']['domain'].'. Reverting the configuration. Saved non-working config as '.$vhost_file.'.err',LOGLEVEL_WARN);
 				if(is_array($retval['output']) && !empty($retval['output'])){
 					$app->log('Reason for Apache restart failure: '.implode("\n", $retval['output']),LOGLEVEL_WARN);
+					$app->dbmaster->datalogError(implode("\n", $retval['output']));
 				} else {
 					// if no output is given, check again
 					$webserver_binary = '';
@@ -1526,7 +1527,10 @@ class apache2_plugin {
 					}
 					if($webserver_binary != ''){
 						exec($webserver_binary.' -t 2>&1', $tmp_output, $tmp_retval);
-						if($tmp_retval > 0 && is_array($tmp_output) && !empty($tmp_output)) $app->log('Reason for Apache restart failure: '.implode("\n", $tmp_output),LOGLEVEL_WARN);
+						if($tmp_retval > 0 && is_array($tmp_output) && !empty($tmp_output)){
+							$app->log('Reason for Apache restart failure: '.implode("\n", $tmp_output),LOGLEVEL_WARN);
+							$app->dbmaster->datalogError(implode("\n", $tmp_output));
+						}
 						unset($tmp_output, $tmp_retval);
 					}
 				}
