@@ -744,7 +744,7 @@ if ($app->dbmaster == $app->db) {
 				if($rec['traffic_quota_lock'] != 'y' && ($web_config['overtraffic_notify_admin'] == 'y' || $web_config['overtraffic_notify_client'] == 'y')) {
                     
                     $placeholders = array('{domain}' => $rec['domain'],
-                                          '{admin_mail}' => $global_config['admin_mail']);
+                                          '{admin_mail}' => ($global_config['admin_mail'] != ''? $global_config['admin_mail'] : 'root'));
                     
 					$recipients = array();
                     //* send email to admin
@@ -861,7 +861,7 @@ if ($app->dbmaster == $app->db) {
                 // send notification - everything ok again
                 if($rec['last_quota_notification'] && $web_config['overquota_notify_onok'] == 'y' && ($web_config['overquota_notify_admin'] == 'y' || $web_config['overquota_notify_client'] == 'y')) {
                     $placeholders = array('{domain}' => $rec['domain'],
-                                          '{admin_mail}' => $global_config['admin_mail'],
+                                          '{admin_mail}' => ($global_config['admin_mail'] != ''? $global_config['admin_mail'] : 'root'),
                                           '{used}' => $rec['used'],
                                           '{soft}' => $rec['soft'],
                                           '{hard}' => $rec['hard'],
@@ -898,7 +898,7 @@ if ($app->dbmaster == $app->db) {
 				$app->dbmaster->datalogUpdate('web_domain', "last_quota_notification = CURDATE()", 'domain_id', $rec['domain_id']);
                 
                 $placeholders = array('{domain}' => $rec['domain'],
-                                      '{admin_mail}' => $global_config['admin_mail'],
+                                      '{admin_mail}' => ($global_config['admin_mail'] != ''? $global_config['admin_mail'] : 'root'),
                                       '{used}' => $rec['used'],
                                       '{soft}' => $rec['soft'],
                                       '{hard}' => $rec['hard'],
@@ -991,7 +991,7 @@ if ($app->dbmaster == $app->db) {
                 // send notification - everything ok again
                 if($rec['last_quota_notification'] && $mail_config['overquota_notify_onok'] == 'y' && ($mail_config['overquota_notify_admin'] == 'y' || $mail_config['overquota_notify_client'] == 'y')) {
                     $placeholders = array('{email}' => $rec['email'],
-                              '{admin_mail}' => $global_config['admin_mail'],
+                              '{admin_mail}' => ($global_config['admin_mail'] != ''? $global_config['admin_mail'] : 'root'),
                               '{used}' => $rec['used'],
                               '{name}' => $rec['name'],
                               '{quota}' => $rec['quota'],
@@ -1028,7 +1028,7 @@ if ($app->dbmaster == $app->db) {
 				$app->dbmaster->datalogUpdate('mail_user', "last_quota_notification = CURDATE()", 'mailuser_id', $rec['mailuser_id']);
                 
                 $placeholders = array('{email}' => $rec['email'],
-                          '{admin_mail}' => $global_config['admin_mail'],
+                          '{admin_mail}' => ($global_config['admin_mail'] != ''? $global_config['admin_mail'] : 'root'),
                           '{used}' => $rec['used'],
                           '{name}' => $rec['name'],
                           '{quota}' => $rec['quota'],
