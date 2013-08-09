@@ -378,7 +378,7 @@ public function toLower($record) {
     public function datalogError($errormsg) {
       global $app;
 	  
-	  $this->query("UPDATE sys_datalog set error = '".$this->quote($errormsg)."' WHERE datalog_id = ".$app->modules->current_datalog_id);
+	  if(isset($app->modules->current_datalog_id) && $app->modules->current_datalog_id > 0) $this->query("UPDATE sys_datalog set error = '".$this->quote($errormsg)."' WHERE datalog_id = ".$app->modules->current_datalog_id);
 
       return true;
     }
