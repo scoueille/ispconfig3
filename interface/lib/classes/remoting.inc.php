@@ -1176,7 +1176,93 @@ class remoting {
 			
 			return $affected_rows;
 	}
+    
+    public function client_template_additional_get($session_id, $client_id) {
+        global $app;
 
+		if(!$this->checkPerm($session_id, 'client_get')) {
+			$this->server->fault('permission_denied', 'You do not have the permissions to access this function.');
+			return false;
+		}
+        
+        if(@is_numeric($client_id)) {
+            $sql = "SELECT * FROM `client_template_assigned` WHERE `client_id` = ".$client_id;
+            return $app->db->queryOneRecord($sql);
+        } else {
+            $this->server->fault('The ID must be an integer.');
+            return array();
+        }
+    }
+    
+    public function client_template_additional_add($session_id, $client_id, $template_id) {
+        global $app;
+        
+		if(!$this->checkPerm($session_id, 'client_update')) {
+			$this->server->fault('permission_denied', 'You do not have the permissions to access this function.');
+			return false;
+		}
+        
+        if(@is_numeric($client_id) && @is_numeric($template_id)) {
+            // check if client exists
+            $check = $app->db->queryOneRecord('SELECT `client_id` FROM `client` WHERE `client_id` = ' . $client_id);
+            if(!$check) {
+                $this->server->fault('Invalid client');
+                return false;
+            }
+            // check if template exists
+            $check = $app->db->queryOneRecord('SELECT `template_id` FROM `client_template` WHERE `template_id` = ' . $template_id);
+            if(!$check) {
+                $this->server->fault('Invalid template');
+                return false;
+            }
+            
+            $sql = "INSERT INTO `client_template_assigned` (`client_id`, `client_template_id`) VALUES (" . $client_id . ", " . $template_id . ")";
+            $app->db->query($sql);
+            $insert_id = $app->db->insertID();
+            
+            $app->plugin->raiseEvent('client:client:on_after_update',$this);
+            
+            return $insert_id;
+        } else {
+            $this->server->fault('The IDs must be of type integer.');
+            return false;
+        }
+    }
+
+    public function client_template_additional_delete($session_id, $client_id, $assigned_template_id) {
+        global $app;
+        
+		if(!$this->checkPerm($session_id, 'client_update')) {
+			$this->server->fault('permission_denied', 'You do not have the permissions to access this function.');
+			return false;
+		}
+        
+        if(@is_numeric($client_id) && @is_numeric($template_id)) {
+            // check if client exists
+            $check = $app->db->queryOneRecord('SELECT `client_id` FROM `client` WHERE `client_id` = ' . $client_id);
+            if(!$check) {
+                $this->server->fault('Invalid client');
+                return false;
+            }
+            // check if template exists
+            $check = $app->db->queryOneRecord('SELECT `assigned_template_id` FROM `client_template_assigned` WHERE `assigned_template_id` = ' . $assigned_template_id);
+            if(!$check) {
+                $this->server->fault('Invalid template');
+                return false;
+            }
+            
+            $sql = "DELETE FROM `client_template_assigned` WHERE `assigned_template_id` = " . $template_id . " AND `client_id` = " . $client_id;
+            $app->db->query($sql);
+            $affected_rows = $app->db->affectedRows();
+            
+            $app->plugin->raiseEvent('client:client:on_after_update',$this);
+            
+            return $affected_rows;
+        } else {
+            $this->server->fault('The IDs must be of type integer.');
+            return false;
+        }
+    }
 
 	public function client_delete($session_id,$client_id)
 	{

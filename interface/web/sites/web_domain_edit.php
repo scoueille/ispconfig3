@@ -968,7 +968,16 @@ class page_action extends tform_actions {
 			unset($backup_copies);
 			unset($backup_interval);
 		}
-
+        
+        //* Change vhost subdomain ip/ipv6 if domain ip/ipv6 has changed
+        if(isset($this->dataRecord['ip_address']) && ($this->dataRecord['ip_address'] != $this->oldDataRecord['ip_address'] || $this->dataRecord['ipv6_address'] != $this->oldDataRecord['ipv6_address'])) {
+			$records = $app->db->queryAllRecords("SELECT domain_id FROM web_domain WHERE type = 'vhostsubdomain' AND parent_domain_id = ".$this->id);
+			foreach($records as $rec) {
+				$app->db->datalogUpdate('web_domain', "ip_address = '".$web_rec['ip_address']."', ipv6_address = '".$web_rec['ipv6_address']."'", 'domain_id', $rec['domain_id']);
+			}
+			unset($records);
+			unset($rec);
+        }
 	}
 
 	function onAfterDelete() {
