@@ -1286,7 +1286,8 @@ if($backup_dir != '') {
                 }
 
 				unset($files);
-				unset($dir_handle			}
+				unset($dir_handle);
+			}
 		}
 
 		unset($clientdb_host);
