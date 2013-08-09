@@ -1231,7 +1231,8 @@ if($backup_dir != '') {
 				$db_id = $rec['database_id'];
 				$db_name = $rec['database_name'];
 				$db_backup_file = 'db_'.$db_name.'_'.date('Y-m-d_H-i').'.sql';
-				$command = "mysqldump -h '".escapeshellcmd($clientdb_host)."' -u '".escapeshellcmd($clientdb_user)."' -p'".escapeshellcmd($clientdb_password)."' -c --add-drop-table --create-options --quick --result-file='".$db_backup_dir.'/'.$db_backup_file."' '".$db_name."'";
+				//$command = "mysqldump -h '".escapeshellcmd($clientdb_host)."' -u '".escapeshellcmd($clientdb_user)."' -p'".escapeshellcmd($clientdb_password)."' -c --add-drop-table --create-options --quick --result-file='".$db_backup_dir.'/'.$db_backup_file."' '".$db_name."'";
+				$command = "mysqldump -h ".escapeshellarg($clientdb_host)." -u ".escapeshellarg($clientdb_user)." -p".escapeshellarg($clientdb_password)." -c --add-drop-table --create-options --quick --result-file='".$db_backup_dir.'/'.$db_backup_file."' '".$db_name."'";
 				exec($command, $tmp_output, $retval);
 
 				//* Compress the backup with gzip
@@ -1285,8 +1286,7 @@ if($backup_dir != '') {
                 }
 
 				unset($files);
-				unset($dir_handle);
-			}
+				unset($dir_handle			}
 		}
 
 		unset($clientdb_host);
