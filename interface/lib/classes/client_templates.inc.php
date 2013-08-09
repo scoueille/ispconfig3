@@ -80,6 +80,7 @@ class client_templates {
             // we have to call the update_client_templates function
             $templates = explode('/', $record['template_additional']);
             $this->update_client_templates($clientId, $templates);
+            $app->db->query('UPDATE `client` SET `template_additional` = '' WHERE `client_id` = ' . $app->functions->intval($clientId));
         }
         
         /*
