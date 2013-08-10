@@ -135,8 +135,9 @@ class page_action extends tform_actions {
         $server_config_array[$section] = $new_config;
 		$server_config_str = $app->ini_parser->get_ini_string($server_config_array);
 		
-		$sql = "UPDATE sys_ini SET config = '".$app->db->quote($server_config_str)."' WHERE sysini_id = 1";
-		if($conf['demo_mode'] != true) $app->db->query($sql);
+		//$sql = "UPDATE sys_ini SET config = '".$app->db->quote($server_config_str)."' WHERE sysini_id = 1";
+		//if($conf['demo_mode'] != true) $app->db->query($sql);
+		if($conf['demo_mode'] != true) $app->db->datalogUpdate('sys_ini', "config = '".$app->db->quote($server_config_str)."'", 'sysini_id', 1);
 
 		/*
 		 * If we should use the domain-module, we have to insert all existing domains into the table
