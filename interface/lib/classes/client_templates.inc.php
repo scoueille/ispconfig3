@@ -20,6 +20,8 @@ class client_templates {
         
         $new_tpl = array();
         $used_assigned = array();
+        $needed_types = array();
+        $old_style = true;
         foreach($templates as $item) {
             $item = trim($item);
             if($item == '') continue;
@@ -29,9 +31,12 @@ class client_templates {
             if(strpos($item, ':') === false) {
                 $tpl_id = $item;
             } else {
+                $old_style = false; // has new-style assigns
                 list($assigned_id, $tpl_id) = explode(':', $item, 2);
                 if(substr($assigned_id, 0, 1) === 'n') $assigned_id = 0; // newly inserted items
             }
+            if(array_key_exists($tpl_id, $needed_types) == false) $needed_types[$tpl_id] = 0;
+            $needed_types[$tpl_id]++;
             
             if($assigned_id > 0) {
                 $used_assigned[] = $assigned_id; // for comparison with database
@@ -40,23 +45,50 @@ class client_templates {
             }
         }
         
-        $in_db = $app->db->queryAllRecords('SELECT `assigned_template_id`, `client_template_id` FROM `client_template_assigned` WHERE `client_id` = ' . $clientId);
-        if(is_array($in_db) && count($in_db) > 0) {
-            // check which templates were removed from this client
-            foreach($in_db as $item) {
-                if(in_array($item['assigned_template_id'], $used_assigned) == false) {
-                    // delete this one
-                    $app->db->query('DELETE FROM `client_template_assigned` WHERE `assigned_template_id` = ' . $item['assigned_template_id']);
+        if($old_style == true) {
+            // we have to take care of this in an other way
+            $in_db = $app->db->queryAllRecords('SELECT `assigned_template_id`, `client_template_id` FROM `client_template_assigned` WHERE `client_id` = ' . $clientId);
+            if(is_array($in_db) && count($in_db) > 0) {
+                foreach($in_db as $item) {
+                    if(array_key_exists($item['client_template_id'], $needed_types) == false) $needed_types[$item['client_template_id']] = 0;
+                    $needed_types[$item['client_template_id']]--;
+                }
+            }
+            
+            foreach($needed_types as $tpl_id => $count) {
+                if($count > 0) {
+                    // add new template to client (includes those from old-style without assigned_template_id)
+                    for($i = $count; $i > 0; $i--) {
+                        $app->db->query('INSERT INTO `client_template_assigned` (`client_id`, `client_template_id`) VALUES (' . $clientId . ', ' . $tpl_id . ')');
+                    }
+                } elseif($count < 0) {
+                    // remove old ones
+                    for($i = $count; $i < 0; $i++) {
+                        $app->db->query('DELETE FROM `client_template_assigned` WHERE client_id = ' . $clientId . ' AND client_template_id = ' . $tpl_id . ' LIMIT 1');
+                    }
+                }
+            }
+        } else {
+            // we have to take care of this in an other way
+            $in_db = $app->db->queryAllRecords('SELECT `assigned_template_id`, `client_template_id` FROM `client_template_assigned` WHERE `client_id` = ' . $clientId);
+            if(is_array($in_db) && count($in_db) > 0) {
+                // check which templates were removed from this client
+                foreach($in_db as $item) {
+                    if(in_array($item['assigned_template_id'], $used_assigned) == false) {
+                        // delete this one
+                        $app->db->query('DELETE FROM `client_template_assigned` WHERE `assigned_template_id` = ' . $item['assigned_template_id']);
+                    }
+                }
+            }
+            
+            if(count($new_tpl) > 0) {
+                foreach($new_tpl as $item) {
+                    // add new template to client (includes those from old-style without assigned_template_id)
+                    $app->db->query('INSERT INTO `client_template_assigned` (`client_id`, `client_template_id`) VALUES (' . $clientId . ', ' . $item . ')');
                 }
             }
         }
         
-        if(count($new_tpl) > 0) {
-            foreach($new_tpl as $item) {
-                // add new template to client (includes those from old-style without assigned_template_id)
-                $app->db->query('INSERT INTO `client_template_assigned` (`client_id`, `client_template_id`) VALUES (' . $clientId . ', ' . $item . ')');
-            }
-        }
         unset($new_tpl);
         unset($in_db);
         unset($templates);
@@ -80,7 +112,7 @@ class client_templates {
             // we have to call the update_client_templates function
             $templates = explode('/', $record['template_additional']);
             $this->update_client_templates($clientId, $templates);
-            $app->db->query('UPDATE `client` SET `template_additional` = '' WHERE `client_id` = ' . $app->functions->intval($clientId));
+            $app->db->query('UPDATE `client` SET `template_additional` = \'\' WHERE `client_id` = ' . $app->functions->intval($clientId));
         }
         
         /*
