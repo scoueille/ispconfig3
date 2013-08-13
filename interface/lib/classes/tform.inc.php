@@ -1260,7 +1260,7 @@ class tform {
 		function getDataRecord($primary_id) {
 			global $app;
 			$escape = '`';
-			$sql = "SELECT * FROM ".$escape.$this->formDef['db_table'].$escape." WHERE ".$this->formDef['db_table_idx']." = ".$primary_id;
+			$sql = "SELECT * FROM ".$escape.$this->formDef['db_table'].$escape." WHERE ".$this->formDef['db_table_idx']." = ".$primary_id." AND ".$this->getAuthSQL('r',$this->formDef['db_table']);
             return $app->db->queryOneRecord($sql);
 		}
 		
@@ -1270,70 +1270,6 @@ class tform {
 				
 				$app->db->datalogSave($this->formDef['db_table'], $action, $this->formDef['db_table_idx'], $primary_id, $record_old, $record_new);
 				return true;
-				
-				/*
-                // Add backticks for incomplete table names.
-                if(stristr($this->formDef['db_table'],'.')) {
-                        $escape = '';
-                } else {
-                        $escape = '`';
-                }
-
-                $this->diffrec = array();
-				
-				// Full diff records for ISPConfig, they have a different format then the simple diffrec
-				$diffrec_full = array();
-
-                if(is_array($record_old) && count($record_old) > 0) {
-                        foreach($record_old as $key => $val) {
-                                //if(isset($record_new[$key]) && $record_new[$key] != $val) {
-								if(!isset($record_new[$key]) || $record_new[$key] != $val) {
-                                    // Record has changed
-									$diffrec_full['old'][$key] = $val;
-									$diffrec_full['new'][$key] = $record_new[$key];
-									$this->diffrec[$key] = array(	'new' => $record_new[$key],
-                                                               		'old' => $val);
-                                } else {
-									$diffrec_full['old'][$key] = $val;
-									$diffrec_full['new'][$key] = $val;
-								}
-                        }
-                } elseif(is_array($record_new)) {
-                        foreach($record_new as $key => $val) {
-                                if(isset($record_new[$key]) && $record_old[$key] != $val) {
-                                    // Record has changed
-									$diffrec_full['new'][$key] = $val;
-									$diffrec_full['old'][$key] = $record_old[$key];
-									$this->diffrec[$key] = array(	'old' => @$record_old[$key],
-                                                               		'new' => $val);
-                                } else {
-									$diffrec_full['new'][$key] = $val;
-									$diffrec_full['old'][$key] = $val;
-								}
-                        }
-                }
-				
-				//$this->diffrec = $diffrec;
-				// Insert the server_id, if the record has a server_id
-				$server_id = (isset($record_old["server_id"]) && $record_old["server_id"] > 0)?$record_old["server_id"]:0;
-				if(isset($record_new["server_id"])) $server_id = $record_new["server_id"];
-
-                if(count($this->diffrec) > 0) {
-						$diffstr = addslashes(serialize($diffrec_full));
-                        $username = $app->db->quote($_SESSION["s"]["user"]["username"]);
-                        $dbidx = $this->formDef['db_table_idx'].":".$primary_id;
-                        // $action = ($action == 'INSERT')?'i':'u';
-						
-						if($action == 'INSERT') $action = 'i';
-						if($action == 'UPDATE') $action = 'u';
-						if($action == 'DELETE') $action = 'd';
-                        $sql = "INSERT INTO sys_datalog (dbtable,dbidx,server_id,action,tstamp,user,data) VALUES ('".$this->formDef['db_table']."','$dbidx','$server_id','$action','".time()."','$username','$diffstr')";
-						$app->db->query($sql);
-                }
-
-                return true;
-				*/
-
         }
 
         function getAuthSQL($perm, $table = '') {
