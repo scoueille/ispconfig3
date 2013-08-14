@@ -1204,6 +1204,7 @@ class remoting {
 			}
             
             $app->uses('remoting_lib');
+            $app->remoting_lib->loadFormDef('../client/form/' . (isset($params['limit_client']) && $params['limit_client'] > 0 ? 'reseller' : 'client') . '.tform.php');
             $old_rec = $app->remoting_lib->getDataRecord($client_id);
             
             // we need the previuos templates assigned here
@@ -1215,7 +1216,7 @@ class remoting {
                 foreach($tpls as $item) {
                     $item = trim($item);
                     if(!$item) continue;
-                    $this->oldTemplatesAssigned[] = array('assigned_templated_id' => 0, 'client_template_id' => $item, 'client_id' => $client_id);
+                    $this->oldTemplatesAssigned[] = array('assigned_template_id' => 0, 'client_template_id' => $item, 'client_id' => $client_id);
                 }
                 unset($tpls);
             }

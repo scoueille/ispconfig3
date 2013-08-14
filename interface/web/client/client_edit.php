@@ -102,7 +102,7 @@ class page_action extends tform_actions {
                 foreach($tpls as $item) {
                     $item = trim($item);
                     if(!$item) continue;
-                    $this->oldTemplatesAssigned[] = array('assigned_templated_id' => 0, 'client_template_id' => $item, 'client_id' => $this->id);
+                    $this->oldTemplatesAssigned[] = array('assigned_template_id' => 0, 'client_template_id' => $item, 'client_id' => $this->id);
                 }
                 unset($tpls);
             }
