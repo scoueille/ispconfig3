@@ -228,8 +228,10 @@ class page_action extends tform_actions {
 		$sql = "UPDATE client SET default_mailserver = $default_mailserver, default_webserver = $default_webserver, default_dnsserver = $default_dnsserver, default_slave_dnsserver = $default_dnsserver, default_dbserver = $default_dbserver WHERE client_id = ".$this->id;
 		$app->db->query($sql);
 		
-        $app->uses('client_templates');
-        $app->client_templates->update_client_templates($this->id, $this->_template_additional);
+        if(isset($this->dataRecord['template_master'])) {
+            $app->uses('client_templates');
+            $app->client_templates->update_client_templates($this->id, $this->_template_additional);
+        }
 
 		parent::onAfterInsert();
 	}
@@ -351,12 +353,12 @@ class page_action extends tform_actions {
         }
         
         if(!isset($this->dataRecord['canceled'])) $this->dataRecord['canceled'] = 'n';
-        if(isset($conf['demo_mode']) && $conf['demo_mode'] != true && isset($this->dataRecord["canceled"]) && $this->dataRecord["canceled"] != $this->oldDataRecord['canceled']) {
+        if(isset($conf['demo_mode']) && $conf['demo_mode'] != true && $this->dataRecord["canceled"] != $this->oldDataRecord['canceled']) {
             if($this->dataRecord['canceled'] == 'y') {
-                $sql = "UPDATE sys_user SET active = 'n' WHERE client_id = " . $this->id;
+                $sql = "UPDATE sys_user SET active = '0' WHERE client_id = " . $this->id;
                 $app->db->query($sql);
             } elseif($this->dataRecord['canceled'] == 'n') {
-                $sql = "UPDATE sys_user SET active = 'y' WHERE client_id = " . $this->id;
+                $sql = "UPDATE sys_user SET active = '1' WHERE client_id = " . $this->id;
                 $app->db->query($sql);
             }
         }
@@ -379,8 +381,10 @@ class page_action extends tform_actions {
 			$app->db->query($sql);
 		}
 		
-        $app->uses('client_templates');
-        $app->client_templates->update_client_templates($this->id, $this->_template_additional);
+        if(isset($this->dataRecord['template_master'])) {
+            $app->uses('client_templates');
+            $app->client_templates->update_client_templates($this->id, $this->_template_additional);
+        }
         
 		parent::onAfterUpdate();
 	}
