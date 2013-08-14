@@ -78,6 +78,24 @@ class page_action extends tform_actions {
 		$app->tpl->setVar($record);
 	}
 	
+	function onShowEnd() {
+		global $app, $conf;
+		
+		// available dashlets
+		$available_dashlets_txt = '';
+		$handle = @opendir(ISPC_WEB_PATH.'/dashboard/dashlets'); 
+		while ($file = @readdir ($handle)) { 
+			if ($file != '.' && $file != '..' && !is_dir($file)) {
+				$available_dashlets_txt .= '<a href="javascript:void(0);" class="addPlaceholderContent">['.substr($file,0,-4).']<pre class="addPlaceholderContent" style="display:none;">['.substr($file,0,-4).'],</pre></a> ';
+			}
+		}
+		
+		if($available_dashlets_txt == '') $available_dashlets_txt = '------';
+		$app->tpl->setVar("available_dashlets_txt",$available_dashlets_txt);
+		
+		parent::onShowEnd();
+	}
+	
     function onSubmit() {
         global $app;
         
