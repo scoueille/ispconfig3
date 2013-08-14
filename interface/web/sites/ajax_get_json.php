@@ -72,7 +72,7 @@ $type = $_GET["type"];
 		// get client id
 		$sql_where = '';
 		if($_SESSION["s"]["user"]["typ"] != 'admin'){
-			$sql_where = " AND client_id = ".$_SESSION["s"]["user"]["client_id"];
+			$sql_where = " AND (client_id = 0 OR client_id = ".$_SESSION["s"]["user"]["client_id"] . ")";
 		}
 		
 		if($php_type == 'php-fpm'){
