@@ -78,12 +78,18 @@ $type = $_GET["type"];
 		//* Reseller: If the logged in user is not admin and has sub clients (is a reseller)
 		} elseif ($_SESSION["s"]["user"]["typ"] != 'admin' && $app->auth->has_clients($_SESSION['s']['user']['userid'])) {
 			$client = $app->db->queryOneRecord("SELECT client_id FROM sys_group WHERE groupid = $client_group_id");
-			$sql_where = " AND (client_id = 0 OR client_id = ".$_SESSION["s"]["user"]["client_id"];
+			//$sql_where = " AND (client_id = 0 OR client_id = ".$_SESSION["s"]["user"]["client_id"];
+			$sql_where = " AND (client_id = 0";
 			if($app->functions->intval($client['client_id']) > 0) $sql_where .= " OR client_id = ".$app->functions->intval($client['client_id']);
 			$sql_where .= ")";
 		//* Admin: If the logged in user is admin
 		} else {
-			$sql_where = '';
+			//$sql_where = '';
+			$client = $app->db->queryOneRecord("SELECT client_id FROM sys_group WHERE groupid = $client_group_id");
+			//$sql_where = " AND (client_id = 0 OR client_id = ".$_SESSION["s"]["user"]["client_id"];
+			$sql_where = " AND (client_id = 0";
+			if($app->functions->intval($client['client_id']) > 0) $sql_where .= " OR client_id = ".$app->functions->intval($client['client_id']);
+			$sql_where .= ")";
 		}
 		
 		if($php_type == 'php-fpm'){

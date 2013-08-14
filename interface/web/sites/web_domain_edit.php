@@ -233,11 +233,13 @@ class page_action extends tform_actions {
 			if(!empty($web_config['server_type'])) $server_type = $web_config['server_type'];
 			if($server_type == 'nginx' && $this->dataRecord['php'] == 'fast-cgi') $this->dataRecord['php'] = 'php-fpm';
 			$selected_client = $app->db->queryOneRecord("SELECT client_id FROM sys_group WHERE groupid = $selected_client_group_id");
+			//$sql_where = " AND (client_id = 0 OR client_id=".$_SESSION['s']['user']['client_id']." OR client_id = ".intval($selected_client['client_id']).")";
+			$sql_where = " AND (client_id = 0 OR client_id = ".intval($selected_client['client_id']).")";
 			if($this->dataRecord['php'] == 'php-fpm'){
-				$php_records = $app->db->queryAllRecords("SELECT * FROM server_php WHERE php_fpm_init_script != '' AND php_fpm_ini_dir != '' AND php_fpm_pool_dir != '' AND server_id = ".($this->id > 0 ? $this->dataRecord['server_id'] : intval($client['default_webserver']))." AND (client_id = 0 OR client_id=".$_SESSION['s']['user']['client_id']." OR client_id = ".intval($selected_client['client_id']).")");
+				$php_records = $app->db->queryAllRecords("SELECT * FROM server_php WHERE php_fpm_init_script != '' AND php_fpm_ini_dir != '' AND php_fpm_pool_dir != '' AND server_id = ".($this->id > 0 ? $this->dataRecord['server_id'] : intval($client['default_webserver'])).$sql_where);
 			}
 			if($this->dataRecord['php'] == 'fast-cgi') {
-				$php_records = $app->db->queryAllRecords("SELECT * FROM server_php WHERE php_fastcgi_binary != '' AND php_fastcgi_ini_dir != '' AND server_id = ".($this->id > 0 ? $this->dataRecord['server_id'] : intval($client['default_webserver']))." AND (client_id = 0 OR client_id=".$_SESSION['s']['user']['client_id']." OR client_id = ".intval($selected_client['client_id']).")");
+				$php_records = $app->db->queryAllRecords("SELECT * FROM server_php WHERE php_fastcgi_binary != '' AND php_fastcgi_ini_dir != '' AND server_id = ".($this->id > 0 ? $this->dataRecord['server_id'] : intval($client['default_webserver'])).$sql_where);
 			}
 			$php_select = "<option value=''>Default</option>";
 			if(is_array($php_records) && !empty($php_records)) {
@@ -307,16 +309,36 @@ class page_action extends tform_actions {
 			$app->tpl->setVar("ipv6_address",$ip_select);
 			unset($tmp);
 			unset($ips);
+
+			// Fill the client select field
+			$sql = "SELECT sys_group.groupid, sys_group.name, CONCAT(IF(client.company_name != '', CONCAT(client.company_name, ' :: '), ''), client.contact_name, ' (', client.username, IF(client.customer_no != '', CONCAT(', ', client.customer_no), ''), ')') as contactname FROM sys_group, client WHERE sys_group.client_id = client.client_id AND sys_group.client_id > 0 ORDER BY sys_group.name";
+			$clients = $app->db->queryAllRecords($sql);
+			$client_select = "<option value='0'></option>";
+			//$tmp_data_record = $app->tform->getDataRecord($this->id);
+			if(is_array($clients)) {
+				$selected_client_group_id = 0; // needed to get list of PHP versions
+				foreach($clients as $client) {
+					if(is_array($this->dataRecord) && ($client["groupid"] == $this->dataRecord['client_group_id'] || $client["groupid"] == $this->dataRecord['sys_groupid']) && !$selected_client_group_id) $selected_client_group_id = $client["groupid"];
+					//$selected = @($client["groupid"] == $tmp_data_record["sys_groupid"])?'SELECTED':'';
+					$selected = @(is_array($this->dataRecord) && ($client["groupid"] == $this->dataRecord['client_group_id'] || $client["groupid"] == $this->dataRecord['sys_groupid']))?'SELECTED':'';
+					if($selected == 'SELECTED') $selected_client_group_id = $client["groupid"];
+					$client_select .= "<option value='$client[groupid]' $selected>$client[contactname]</option>\r\n";
+				}
+			}
+			$app->tpl->setVar("client_group_id",$client_select);
 			
 			//PHP Version Selection (FastCGI)
 			$server_type = 'apache';
 			if(!empty($web_config['server_type'])) $server_type = $web_config['server_type'];
 			if($server_type == 'nginx' && $this->dataRecord['php'] == 'fast-cgi') $this->dataRecord['php'] = 'php-fpm';
+			$selected_client = $app->db->queryOneRecord("SELECT client_id FROM sys_group WHERE groupid = $selected_client_group_id");
+			//$sql_where = " AND (client_id = 0 OR client_id=".$_SESSION['s']['user']['client_id']." OR client_id = ".intval($selected_client['client_id']).")";
+			$sql_where = " AND (client_id = 0 OR client_id = ".intval($selected_client['client_id']).")";
 			if($this->dataRecord['php'] == 'php-fpm'){
-				$php_records = $app->db->queryAllRecords("SELECT * FROM server_php WHERE php_fpm_init_script != '' AND php_fpm_ini_dir != '' AND php_fpm_pool_dir != '' AND server_id = $server_id");
+				$php_records = $app->db->queryAllRecords("SELECT * FROM server_php WHERE php_fpm_init_script != '' AND php_fpm_ini_dir != '' AND php_fpm_pool_dir != '' AND server_id = $server_id".$sql_where);
 			}
 			if($this->dataRecord['php'] == 'fast-cgi') {
-				$php_records = $app->db->queryAllRecords("SELECT * FROM server_php WHERE php_fastcgi_binary != '' AND php_fastcgi_ini_dir != '' AND server_id = $server_id");
+				$php_records = $app->db->queryAllRecords("SELECT * FROM server_php WHERE php_fastcgi_binary != '' AND php_fastcgi_ini_dir != '' AND server_id = $server_id".$sql_where);
 			}
 			$php_select = "<option value=''>Default</option>";
 			if(is_array($php_records) && !empty($php_records)) {
@@ -332,20 +354,6 @@ class page_action extends tform_actions {
 			}
 			$app->tpl->setVar("fastcgi_php_version",$php_select);
 			unset($php_records);
-
-			// Fill the client select field
-			$sql = "SELECT sys_group.groupid, sys_group.name, CONCAT(IF(client.company_name != '', CONCAT(client.company_name, ' :: '), ''), client.contact_name, ' (', client.username, IF(client.customer_no != '', CONCAT(', ', client.customer_no), ''), ')') as contactname FROM sys_group, client WHERE sys_group.client_id = client.client_id AND sys_group.client_id > 0 ORDER BY sys_group.name";
-			$clients = $app->db->queryAllRecords($sql);
-			$client_select = "<option value='0'></option>";
-			//$tmp_data_record = $app->tform->getDataRecord($this->id);
-			if(is_array($clients)) {
-				foreach( $clients as $client) {
-					//$selected = @($client["groupid"] == $tmp_data_record["sys_groupid"])?'SELECTED':'';
-					$selected = @(is_array($this->dataRecord) && ($client["groupid"] == $this->dataRecord['client_group_id'] || $client["groupid"] == $this->dataRecord['sys_groupid']))?'SELECTED':'';
-					$client_select .= "<option value='$client[groupid]' $selected>$client[contactname]</option>\r\n";
-				}
-			}
-			$app->tpl->setVar("client_group_id",$client_select);
             
             foreach($read_limits as $limit) $app->tpl->setVar($limit, ($limit == 'force_suexec' ? 'n' : 'y'));
 			
