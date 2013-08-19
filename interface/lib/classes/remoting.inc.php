@@ -1254,6 +1254,27 @@ class remoting {
         }
     }
     
+    private function _set_client_formdata($client_id) {
+        global $app;
+        
+        $this->id = $client_id;
+        $this->dataRecord = $app->db->queryOneRecord('SELECT * FROM `client` WHERE `client_id` = ' . $client_id);
+        $this->oldDataRecord = $this->dataRecord;
+        
+        $this->oldTemplatesAssigned = $app->db->queryAllRecords('SELECT * FROM `client_template_assigned` WHERE `client_id` = ' . $client_id);
+        if(!is_array($this->oldTemplatesAssigned) || count($this->oldTemplatesAssigned) < 1) {
+            // check previous type of storing templates
+            $tpls = explode('/', $this->oldDataRecord['template_additional']);
+            $this->oldTemplatesAssigned = array();
+            foreach($tpls as $item) {
+                $item = trim($item);
+                if(!$item) continue;
+                $this->oldTemplatesAssigned[] = array('assigned_template_id' => 0, 'client_template_id' => $item, 'client_id' => $client_id);
+            }
+            unset($tpls);
+        }
+    }
+    
     public function client_template_additional_add($session_id, $client_id, $template_id) {
         global $app;
         
@@ -1275,6 +1296,9 @@ class remoting {
                 $this->server->fault('Invalid template');
                 return false;
             }
+            
+            // for the update event we have to cheat a bit
+            $this->_set_client_formdata($client_id);
             
             $sql = "INSERT INTO `client_template_assigned` (`client_id`, `client_template_id`) VALUES (" . $client_id . ", " . $template_id . ")";
             $app->db->query($sql);
@@ -1310,6 +1334,9 @@ class remoting {
                 $this->server->fault('Invalid template');
                 return false;
             }
+            
+            // for the update event we have to cheat a bit
+            $this->_set_client_formdata($client_id);
             
             $sql = "DELETE FROM `client_template_assigned` WHERE `assigned_template_id` = " . $template_id . " AND `client_id` = " . $client_id;
             $app->db->query($sql);
