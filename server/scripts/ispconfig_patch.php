@@ -107,7 +107,7 @@ if(!$patch_data) {
 
 $patch_text = @file_get_contents('http://ispconfig.org/downloads/patches/' . $patch_id . '.txt');
 if($patch_text) {
-    $ok = simple_query("Patch description:\n".$patch_text."\n".str_repeat("-", 80)."Do you really want to apply this patch now?", array('y','n'), 'y');
+    $ok = simple_query("Patch description:\n".str_repeat("-", 80)."\n".$patch_text."\n".str_repeat("-", 80)."\nDo you really want to apply this patch now?", array('y','n'), 'y');
     if($ok != 'y') {
         swriteln("Patch terminated by user.\n");
         die();
@@ -120,6 +120,8 @@ file_put_contents($temp_file, $patch_data);
 chdir('/usr/local/ispconfig');
 
 passthru('patch -p0 < ' . escapeshellarg($temp_file));
+
+unlink($temp_file);
 
 exit;
 
