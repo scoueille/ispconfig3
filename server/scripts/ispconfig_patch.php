@@ -105,6 +105,15 @@ if(!$patch_data) {
     die();
 }
 
+$patch_text = @file_get_contents('http://ispconfig.org/downloads/patches/' . $patch_id . '.txt');
+if($patch_text) {
+    $ok = simple_query("Patch description:\n".$patch_text."\n".str_repeat("-", 80)."Do you really want to apply this patch now?", array('y','n'), 'y');
+    if($ok != 'y') {
+        swriteln("Patch terminated by user.\n");
+        die();
+    }
+}
+
 $temp_file = tempnam(sys_get_temp_dir(), 'ispc');
 
 file_put_contents($temp_file, $patch_data);
