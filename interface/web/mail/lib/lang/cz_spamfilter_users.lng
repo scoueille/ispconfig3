@@ -8,3 +8,5 @@ $wb['local_txt'] = 'Lokální';
 $wb['email_error_notempty'] = 'The email address must not be empty.';
 $wb['fullname_error_notempty'] = 'The name must not be empty.';
 ?>
+
+

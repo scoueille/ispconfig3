@@ -11,3 +11,5 @@ $wb['no_packages_txt'] = 'Žádné balíčky nejsou k dispozici';
 $wb['edit_txt'] = 'Edit';
 $wb['delete_txt'] = 'Delete';
 ?>
+
+

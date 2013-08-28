@@ -9,7 +9,7 @@ $wb['limit_mailcatchall_txt'] = 'Max. počet e-mailových košů';
 $wb['limit_mailrouting_txt'] = 'Max. počet e-mailových směrování';
 $wb['limit_mailfilter_txt'] = 'Max. počet e-mailových filtrů';
 $wb['limit_fetchmail_txt'] = 'Max. počet účtů externího získávání e-mailů';
-$wb['limit_mailquota_txt'] = 'Mailbox kvóta';
+$wb['limit_mailquota_txt'] = 'Kvóta e-mailové schránky';
 $wb['limit_spamfilter_wblist_txt'] = 'Max. počet spamfiltrových bílých / černých listinových filtrů';
 $wb['limit_spamfilter_user_txt'] = 'Max. počet spamflitrových uživatelů';
 $wb['limit_spamfilter_policy_txt'] = 'Max. počet spamfiltrových politik';
@@ -88,3 +88,5 @@ $wb['aps_limits_txt'] = 'APS Installer Limits';
 $wb['limit_aps_txt'] = 'Max. number of APS instances';
 $wb['limit_aps_error_notint'] = 'The APS instances limit must be a number.';
 ?>
+
+
