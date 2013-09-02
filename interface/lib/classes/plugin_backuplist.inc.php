@@ -58,7 +58,10 @@ class plugin_backuplist extends plugin_base {
 					//* check if the user is  owner of the parent domain
 					$domain_backup = $app->db->queryOneRecord("SELECT parent_domain_id FROM web_backup WHERE backup_id = ".$backup_id);
 					
-					$get_domain = $app->db->queryOneRecord("SELECT domain_id FROM web_domain WHERE domain_id = ".$app->functions->intval($domain_backup["parent_domain_id"])." AND ".$this->getAuthSQL('u'));
+                    $check_perm = 'u';
+                    if($_GET['backup_action'] == 'download') $check_perm = 'r'; // only check read permissions on download, not update permissions
+                    
+					$get_domain = $app->db->queryOneRecord("SELECT domain_id FROM web_domain WHERE domain_id = ".$app->functions->intval($domain_backup["parent_domain_id"])." AND ".$this->getAuthSQL($check_perm));
 					if(empty($get_domain) || !$get_domain) {
 						$app->error($app->tform->lng('no_domain_perm'));
 					}
