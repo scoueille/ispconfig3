@@ -101,6 +101,7 @@ $conf['theme'] = $conf_old['theme'];
 if($conf['language'] == '{language}') $conf['language'] = 'en';
 $conf['timezone'] = (isset($conf_old['timezone']))?$conf_old['timezone']:'UTC';
 if($conf['timezone'] == '{timezone}' or trim($conf['timezone']) == '') $conf['timezone'] = 'UTC';
+$conf['language_file_import_enabled'] = (isset($conf_old['language_file_import_enabled']))?$conf_old['language_file_import_enabled']:true;
 
 if(isset($conf_old["dbmaster_host"])) $conf["mysql"]["master_host"] = $conf_old["dbmaster_host"];
 if(isset($conf_old["dbmaster_database"])) $conf["mysql"]["master_database"] = $conf_old["dbmaster_database"];
