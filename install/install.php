@@ -108,8 +108,9 @@ $inst->find_installed_apps();
 $conf['language'] = $inst->simple_query('Select language', array('en','de'), 'en');
 $conf['timezone'] = get_system_timezone();
 
-//* Set defaukt theme
+//* Set default theme
 $conf['theme'] = 'default';
+$conf['language_file_import_enabled'] = true;
 
 //** Select installation mode
 $install_mode = $inst->simple_query('Installation mode', array('standard','expert'), 'standard');

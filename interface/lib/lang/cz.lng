@@ -134,5 +134,3 @@ $wb['login_as_txt'] = 'Přihlaste se jako';
 $wb['no_domain_perm'] = 'You have no permission for this domain.';
 $wb['no_destination_perm'] = 'You have no permission for this destination.';
 ?>
-
-

@@ -189,5 +189,3 @@ $wb['munin_password_txt'] = 'Munin Password';
 $wb['munin_url_error_regex'] = 'Invalid Munin URL';
 $wb['munin_url_note_txt'] = 'Placeholder:';
 ?>
-
-

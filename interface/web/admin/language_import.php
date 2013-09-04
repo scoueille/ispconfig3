@@ -117,6 +117,8 @@ $app->auth->check_module_permissions('admin');
 if(!$app->auth->is_admin()) die('only allowed for administrators.');
 if($conf['demo_mode'] == true) $app->error('This function is disabled in demo mode.');
 
+if(!$conf['language_file_import_enabled']) $app->error('Languge import function is disabled in the interface config.inc.php file.');
+
 $app->uses('tpl');
 
 $app->tpl->newTemplate('form.tpl.htm');

@@ -121,5 +121,3 @@ $wb['invalid_rewrite_rules_txt'] = 'Invalid Rewrite Rules';
 $wb['allowed_rewrite_rule_directives_txt'] = 'Allowed Directives:';
 $wb['configuration_error_txt'] = 'CONFIGURATION ERROR';
 ?>
-
-
