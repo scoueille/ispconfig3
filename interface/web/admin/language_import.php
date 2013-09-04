@@ -165,7 +165,9 @@ if(isset($_FILES['file']['name']) && is_uploaded_file($_FILES['file']['tmp_name'
 					} else {
 						$langfile_path = trim(ISPC_WEB_PATH.'/'.$module_name.'/lib/lang/'.$file_name);
 					}
-				} else {
+				} elseif(is_array($parts) && count($parts) > 1 && $parts[0] == '---' && $parts[1] == 'EOF') {
+                    // EOF line, ignore it.
+                } else {
                     $line = validate_line($line);
                     if($line === false) $error .= "Language file contains invalid language entry on line $ln.<br />";
 					else $buffer .= $line."\n";
