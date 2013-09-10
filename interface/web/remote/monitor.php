@@ -30,7 +30,7 @@ if($token == '' or $secret == '' or $token != $secret) {
 		$sql = 'SELECT server_id, server_name FROM server WHERE 1 ORDER BY server_id';
 		$records = $app->db->queryAllRecords($sql);
         foreach($records as $index => $rec) {
-            $rec = $app->db->queryOneRecord("SELECT * FROM monitor_data WHERE server_id = " . $rec['server_id'] . " AND state NOT IN ('ok', 'no_state')");
+            $rec = $app->db->queryOneRecord("SELECT * FROM monitor_data WHERE server_id = " . $rec['server_id'] . " AND state NOT IN ('ok', 'no_state', 'info')");
             if($rec) $records[$index]['state'] = 'warn';
             else $records[$index]['state'] = 'ok';
         }
