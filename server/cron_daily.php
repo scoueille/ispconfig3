@@ -1135,7 +1135,7 @@ if($backup_dir != '') {
 					$web_backup_file = 'web'.$web_id.'_'.date('Y-m-d_H-i').'.tar.gz';
 					exec('tar pczf '.escapeshellarg($web_backup_dir.'/'.$web_backup_file).' --exclude=backup\* --directory '.escapeshellarg($web_path).' .', $tmp_output, $retval);
 				}
-				if($retval == 0){
+				if($retval == 0 || $backup_mode != 'userzip'){ // tar can return 1 (due to harmless warings) and still create valid backups
 					chown($web_backup_dir.'/'.$web_backup_file, 'root');
 					chgrp($web_backup_dir.'/'.$web_backup_file, 'root');
 					chmod($web_backup_dir.'/'.$web_backup_file, 0750);
