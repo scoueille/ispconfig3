@@ -1194,7 +1194,6 @@ if($backup_dir != '') {
 				}
 				
 				$app->system->web_folder_protection($web_path,true);
-
 			}
 
 			/* If backup_interval is set to none and we have a
@@ -1295,6 +1294,19 @@ if($backup_dir != '') {
 		unset($clientdb_user);
 		unset($clientdb_password);
 
+	}
+	
+	// remove non-existing backups from database
+	$backups = $app->db->queryAllRecords("SELECT * FROM web_backup WHERE server_id = ".$conf['server_id']);
+	if(is_array($backups) && !empty($backups)){
+		foreach($backups as $backup){
+			$backup_file = $backup_dir.'/web'.$backup['parent_domain_id'].'/'.$backup['filename'];
+			if(!is_file($backup_file)){
+				$sql = "DELETE FROM web_backup WHERE server_id = ".$conf['server_id']." AND parent_domain_id = ".$backup['parent_domain_id']." AND filename = '".$backup['filename']."'";
+				$app->db->query($sql);
+				if($app->db->dbHost != $app->dbmaster->dbHost) $app->dbmaster->query($sql);
+			}
+		}
 	}
 }
 
