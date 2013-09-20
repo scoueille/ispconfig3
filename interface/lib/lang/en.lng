@@ -136,4 +136,6 @@ $wb['login_as_txt'] = 'Log in as';
 $wb["no_domain_perm"] = 'You have no permission for this domain.';
 $wb["no_destination_perm"] = 'You have no permission for this destination.';
 $wb['client_you_are_locked'] = 'You have no permission to change any settings.';
+$wb['gender_m_txt'] = 'Mr.';
+$wb['gender_f_txt'] = 'Ms.';
 ?>
