@@ -130,7 +130,8 @@ $wb['datalog_status_d_web_folder'] = 'Odstranění chráněného adresáře hesl
 $wb['datalog_status_i_web_folder_user'] = 'Vytvoření uživatele pro adresáře chráněné heslem';
 $wb['datalog_status_u_web_folder_user'] = 'Aktualizace nastavení uživatele pro adresáře chráněné heslem';
 $wb['datalog_status_d_web_folder_user'] = 'Odstranění uživatele pro adresáře chráněné heslem';
-$wb['login_as_txt'] = 'Přihlaste se jako';
-$wb['no_domain_perm'] = 'You have no permission for this domain.';
-$wb['no_destination_perm'] = 'You have no permission for this destination.';
+$wb['login_as_txt'] = 'Přihlašte se jako';
+$wb['no_domain_perm'] = 'Nemáte oprávnění pro tuto doménu. ';
+$wb['no_destination_perm'] = 'Nemáte oprávnění pro tuto destinaci.';
 ?>
+
