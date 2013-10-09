@@ -132,6 +132,25 @@ if($_POST['create'] == 1) {
 	
 	$error = '';
 	
+	// apply filters
+	if(isset($_POST['domain']) && $_POST['domain'] != ''){
+		$_POST['domain'] = $app->functions->idn_encode($_POST['domain']);
+		$_POST['domain'] = strtolower($_POST['domain']);
+	}
+	if(isset($_POST['ns1']) && $_POST['ns1'] != ''){
+		$_POST['ns1'] = $app->functions->idn_encode($_POST['ns1']);
+		$_POST['ns1'] = strtolower($_POST['ns1']);
+	}
+	if(isset($_POST['ns2']) && $_POST['ns2'] != ''){
+		$_POST['ns2'] = $app->functions->idn_encode($_POST['ns2']);
+		$_POST['ns2'] = strtolower($_POST['ns2']);
+	}
+	if(isset($_POST['email']) && $_POST['email'] != ''){
+		$_POST['email'] = $app->functions->idn_encode($_POST['email']);
+		$_POST['email'] = strtolower($_POST['email']);
+	}
+	
+	
 	if(isset($_POST['domain']) && $_POST['domain'] == '') $error .= $app->lng('error_domain_empty').'<br />';
 	elseif(isset($_POST['domain']) && !preg_match('/^[\w\.\-]{2,64}\.[a-zA-Z0-9\-]{2,30}$/',$_POST['domain'])) $error .= $app->lng('error_domain_regex').'<br />';
 
