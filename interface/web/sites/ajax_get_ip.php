@@ -44,7 +44,7 @@ if($_SESSION["s"]["user"]["typ"] == 'admin' or $app->auth->has_clients($_SESSION
 	//* Get global web config
 	$web_config = $app->getconf->get_server_config($server_id, 'web');
 	
-	$sql = "SELECT ip_address FROM server_ip WHERE ip_type = '$ip_type' AND virtualhost = 'y' AND server_id = $server_id";
+	$sql = "SELECT ip_address FROM server_ip WHERE ip_type = '$ip_type' AND server_id = $server_id";
 	$ips = $app->db->queryAllRecords($sql);
 	// $ip_select = "<option value=''></option>";
 	if($ip_type == 'IPv4'){
