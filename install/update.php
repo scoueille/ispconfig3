@@ -107,6 +107,11 @@ unset($conf);
 
 if($dist['id'] == '') die('Linux distribution or version not recognized.');
 
+//** Check the PHP Version
+if (version_compare(PHP_VERSION, '7.0.0') >= 0) {
+	die('PHP 7 is not supported by ISPConfig 3.0.5. Plesae use ISPConfig version 3.1 instead.');
+}
+
 //** Include the autoinstaller configuration (for non-interactive setups)
 error_reporting(E_ALL ^ E_NOTICE);
 
