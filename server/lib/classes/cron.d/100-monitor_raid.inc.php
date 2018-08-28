@@ -179,50 +179,52 @@ class cronjob_monitor_raid extends cronjob {
 
 			// TYPOWORX FIX | Determine Controler-ID
 			$availableControlers = shell_exec('tw_cli info | grep -Eo "c[0-9]+"');
-			$data['output'] = shell_exec('tw_cli info ' . $availableControlers);
+			if(strlen($availableControlers) > 0) {
+				$data['output'] = shell_exec('tw_cli info ' . $availableControlers);
 
-			$state = 'ok';
-			if(is_array($data['output'])) {
-				foreach ($data['output'] as $item) {
-					if (strpos($item, 'RAID') !== false) {
-						if (strpos($item, ' VERIFYING ') !== false) {
-							$this->_tools->_setState($state, 'info');
-						}
-						else if (strpos($item, ' MIGRATE-PAUSED ') !== false) {
+				$state = 'ok';
+				if(is_array($data['output'])) {
+					foreach ($data['output'] as $item) {
+						if (strpos($item, 'RAID') !== false) {
+							if (strpos($item, ' VERIFYING ') !== false) {
 								$this->_tools->_setState($state, 'info');
 							}
-						else if (strpos($item, ' MIGRATING ') !== false) {
-								$this->_tools->_setState($state, 'ok');
-							}
-						else if (strpos($item, ' INITIALIZING ') !== false) {
-								$this->_tools->_setState($state, 'info');
-							}
-						else if (strpos($item, ' INIT-PAUSED ') !== false) {
-								$this->_tools->_setState($state, 'info');
-							}
-						else if (strpos($item, ' REBUILDING ') !== false) {
-								$this->_tools->_setState($state, 'info');
-							}
-						else if (strpos($item, ' REBUILD-PAUSED ') !== false) {
-								$this->_tools->_setState($state, 'warning');
-							}
-						else if (strpos($item, ' RECOVERY ') !== false) {
-								$this->_tools->_setState($state, 'warning');
-							}
-						else if (strpos($item, ' DEGRADED ') !== false) {
+							else if (strpos($item, ' MIGRATE-PAUSED ') !== false) {
+									$this->_tools->_setState($state, 'info');
+								}
+							else if (strpos($item, ' MIGRATING ') !== false) {
+									$this->_tools->_setState($state, 'ok');
+								}
+							else if (strpos($item, ' INITIALIZING ') !== false) {
+									$this->_tools->_setState($state, 'info');
+								}
+							else if (strpos($item, ' INIT-PAUSED ') !== false) {
+									$this->_tools->_setState($state, 'info');
+								}
+							else if (strpos($item, ' REBUILDING ') !== false) {
+									$this->_tools->_setState($state, 'info');
+								}
+							else if (strpos($item, ' REBUILD-PAUSED ') !== false) {
+									$this->_tools->_setState($state, 'warning');
+								}
+							else if (strpos($item, ' RECOVERY ') !== false) {
+									$this->_tools->_setState($state, 'warning');
+								}
+							else if (strpos($item, ' DEGRADED ') !== false) {
+									$this->_tools->_setState($state, 'critical');
+								}
+							else if (strpos($item, ' UNKNOWN ') !== false) {
+									$this->_tools->_setState($state, 'critical');
+								}
+							else if (strpos($item, ' OK ') !== false) {
+									$this->_tools->_setState($state, 'ok');
+								}
+							else if (strpos($item, ' OPTIMAL ') !== false) {
+									$this->_tools->_setState($state, 'ok');
+								}
+							else {
 								$this->_tools->_setState($state, 'critical');
 							}
-						else if (strpos($item, ' UNKNOWN ') !== false) {
-								$this->_tools->_setState($state, 'critical');
-							}
-						else if (strpos($item, ' OK ') !== false) {
-								$this->_tools->_setState($state, 'ok');
-							}
-						else if (strpos($item, ' OPTIMAL ') !== false) {
-								$this->_tools->_setState($state, 'ok');
-							}
-						else {
-							$this->_tools->_setState($state, 'critical');
 						}
 					}
 				}
