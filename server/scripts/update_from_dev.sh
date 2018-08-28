@@ -10,7 +10,7 @@
     exit 1
 }
 
-wget -O ispconfig3-dev.tar.gz "https://git.ispconfig.org/ispconfig/ispconfig3/repository/archive.tar.gz?ref=master"
+wget -O ispconfig3-dev.tar.gz "https://github.com/scoueille/ispconfig3/archive/master.tar.gz"
 tar xzf ispconfig3-dev.tar.gz
 
 echo -n "Latest git version:  "
