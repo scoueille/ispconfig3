@@ -131,13 +131,15 @@ class cronjob_monitor_raid extends cronjob {
 				/*
 				 * Fetch the output
 				 */
-				$data['output'] = shell_exec('mpt-status --autoload');
+				$mptstatus = shell_exec('mpt-status --autoload');
 
-				/*
-				 * Then calc the state.
-				 */
-				$state = 'ok';
-				if(is_array($data['output'])) {
+				if(is_array($mptstatus)) {
+  
+  				/*
+  				 * Then calc the state.
+  				 */
+  				$state = 'ok';
+          $data['output'] = $mptstatus;
 					foreach ($data['output'] as $item) {
 						/*
 						* The output contains information for every RAID and every HDD.
