@@ -1,10 +1,3 @@
-<div class='page-header'>
-	<h1><tmpl_var name="list_head_txt"></h1>
-</div>
-<p><tmpl_var name="list_desc_txt"></p>
-
-
-        
             <div class="form-group">
                 <label for="name" class="col-sm-3 control-label">{tmpl_var name='name_txt'}</label>
                 <div class="col-sm-6"><input type="text" name="name" id="name" value="{tmpl_var name='name'}" class="form-control" /></div><div class="col-sm-3 input-sm"> &nbsp; {tmpl_var name='name_optional_txt'}
@@ -62,6 +55,12 @@
                 <div class="col-sm-6"><input type="text" name="cc" id="cc" value="{tmpl_var name='cc'}" class="form-control" /></div><div class="col-sm-3 input-sm"> &nbsp; {tmpl_var name='name_optional_txt'} {tmpl_var name='cc_note_txt'}
             </div></div>
             <div class="form-group">
+                <label class="col-sm-3 control-label">{tmpl_var name='forward_in_lda_txt'}</label>
+                <div class="col-sm-9">
+                    <a data-toggle="tooltip" title="{tmpl_var name='tooltip_forward_in_lda_txt'}">{tmpl_var name='forward_in_lda'}</a>
+                </div>
+            </div>
+            <div class="form-group">
                 <label for="sender_name" class="col-sm-3 control-label">{tmpl_var name='sender_cc_txt'}</label>
                 <div class="col-sm-6"><input type="text" name="sender_cc" id="sender_cc" value="{tmpl_var name='sender_cc'}" class="form-control" /></div><div class="col-sm-3 input-sm"> &nbsp; {tmpl_var name='name_optional_txt'} {tmpl_var name='sender_cc_note_txt'}
             </div></div>
@@ -74,13 +73,19 @@
             <div class="form-group">
                 <label class="col-sm-3 control-label">{tmpl_var name='postfix_txt'}</label>
                 <div class="col-sm-9">
-                    {tmpl_var name='postfix'}
+                    <a data-toggle="tooltip" title="{tmpl_var name='tooltip_postfix_txt'}">{tmpl_var name='postfix'}</a>
                 </div>
             </div>
             <div class="form-group">
                 <label class="col-sm-3 control-label">{tmpl_var name='disablesmtp_txt'}</label>
                 <div class="col-sm-9">
-                    {tmpl_var name='disablesmtp'}
+                    <a data-toggle="tooltip" title="{tmpl_var name='tooltip_disablesmtp_txt'}">{tmpl_var name='disablesmtp'}</a>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label">{tmpl_var name='disabledeliver_txt'}</label>
+                <div class="col-sm-9">
+                    <a data-toggle="tooltip" title="{tmpl_var name='tooltip_disabledeliver_txt'}">{tmpl_var name='disabledeliver'}</a>
                 </div>
             </div>
             <div class="form-group">

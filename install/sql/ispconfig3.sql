@@ -26,24 +26,24 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
--- Includes 
--- 
+-- Includes
+--
 -- iso_country_list.sql
--- 
+--
 -- This will create and then populate a MySQL table with a list of the names and
 -- ISO 3166 codes for countries in existence as of the date below.
--- 
+--
 -- For updates to this file, see http://27.org/isocountrylist/
 -- For more about ISO 3166, see http://www.iso.ch/iso/en/prods-services/iso3166ma/02iso-3166-code-lists/list-en1.html
--- 
+--
 -- Created by getisocountrylist.pl on Sun Nov  2 14:59:20 2003.
 -- Wm. Rhodes <iso_country_list@27.org>
--- 
+--
 
--- 
+--
 -- ISPConfig 3
 -- DB-Version: 3.0.0.9
--- 
+--
 
 SET FOREIGN_KEY_CHECKS = 0;
 
@@ -69,7 +69,7 @@ CREATE TABLE IF NOT EXISTS `aps_instances` (
   `package_id` int(4) NOT NULL DEFAULT '0',
   `instance_status` int(4) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ;
+) DEFAULT CHARSET=utf8 ;
 
 -- --------------------------------------------------------
 
@@ -84,7 +84,7 @@ CREATE TABLE IF NOT EXISTS `aps_instances_settings` (
   `name` varchar(255) NOT NULL DEFAULT '',
   `value` text,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ;
+) DEFAULT CHARSET=utf8 ;
 
 -- --------------------------------------------------------
 
@@ -102,7 +102,7 @@ CREATE TABLE IF NOT EXISTS `aps_packages` (
   `package_url` TEXT,
   `package_status` int(1) NOT NULL DEFAULT '2',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ;
+) DEFAULT CHARSET=utf8 ;
 
 -- --------------------------------------------------------
 
@@ -116,7 +116,7 @@ CREATE TABLE IF NOT EXISTS `aps_settings` (
   `value` text,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ;
+) DEFAULT CHARSET=utf8 ;
 
 -- --------------------------------------------------------
 
@@ -128,7 +128,7 @@ CREATE TABLE `attempts_login` (
   `ip` varchar(39) NOT NULL DEFAULT '',
   `times` int(11) DEFAULT NULL,
   `login_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ;
+) DEFAULT CHARSET=utf8 ;
 
 -- --------------------------------------------------------
 
@@ -243,7 +243,7 @@ CREATE TABLE `client` (
   `limit_openvz_vm_template_id` int(11) NOT NULL DEFAULT '0',
   `parent_client_id` int(11) unsigned NOT NULL DEFAULT '0',
   `username` varchar(64) DEFAULT NULL,
-  `password` varchar(64) DEFAULT NULL,
+  `password` varchar(200) DEFAULT NULL,
   `language` char(2) NOT NULL DEFAULT 'en',
   `usertheme` varchar(32) NOT NULL DEFAULT 'default',
   `template_master` int(11) unsigned NOT NULL DEFAULT '0',
@@ -253,7 +253,7 @@ CREATE TABLE `client` (
   `canceled` enum('n','y') NOT NULL DEFAULT 'n',
   `can_use_api` enum('n','y') NOT NULL DEFAULT 'n',
   `tmp_data` mediumblob,
-  `id_rsa` varchar(2000) NOT NULL DEFAULT '',
+  `id_rsa` text,
   `ssh_rsa` varchar(600) NOT NULL DEFAULT '',
   `customer_no_template` varchar(255) DEFAULT 'R[CLIENTID]C[CUSTOMER_NO]',
   `customer_no_start` int(11) NOT NULL DEFAULT '1',
@@ -264,7 +264,7 @@ CREATE TABLE `client` (
   `risk_score` int(10) unsigned NOT NULL DEFAULT '0',
   `activation_code` varchar(10) NOT NULL DEFAULT '',
   PRIMARY KEY (`client_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -284,13 +284,13 @@ CREATE TABLE `client_circle` (
   `description` text,
   `active` enum('n','y') NOT NULL default 'y',
   PRIMARY KEY (`circle_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table  `client_template`
--- 
+--
 
 CREATE TABLE `client_template` (
   `template_id` int(11) unsigned NOT NULL auto_increment,
@@ -330,7 +330,7 @@ CREATE TABLE `client_template` (
   `limit_web_ip` text,
   `limit_web_domain` int(11) NOT NULL default '-1',
   `limit_web_quota` int(11) NOT NULL default '-1',
-  `web_php_options` varchar(255) NOT NULL DEFAULT 'no',
+  `web_php_options` varchar(255) NOT NULL DEFAULT '',
   `limit_cgi` enum('n','y') NOT NULL DEFAULT 'n',
   `limit_ssi` enum('n','y') NOT NULL DEFAULT 'n',
   `limit_perl` enum('n','y') NOT NULL DEFAULT 'n',
@@ -345,7 +345,7 @@ CREATE TABLE `client_template` (
   `limit_web_aliasdomain` int(11) NOT NULL default '-1',
   `limit_ftp_user` int(11) NOT NULL default '-1',
   `limit_shell_user` int(11) NOT NULL default '0',
-  `ssh_chroot` varchar(255) NOT NULL DEFAULT 'no',
+  `ssh_chroot` varchar(255) NOT NULL DEFAULT '',
   `limit_webdav_user` int(11) NOT NULL default '0',
   `limit_backup` ENUM( 'n', 'y' ) NOT NULL DEFAULT 'y',
   `limit_directive_snippets` ENUM( 'n', 'y' ) NOT NULL DEFAULT 'n',
@@ -369,13 +369,13 @@ CREATE TABLE `client_template` (
   `limit_openvz_vm` int(11) NOT NULL DEFAULT '0',
   `limit_openvz_vm_template_id` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY  (`template_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table  `client_template_assigned`
--- 
+--
 
 CREATE TABLE `client_template_assigned` (
   `assigned_template_id` bigint(20) NOT NULL auto_increment,
@@ -383,7 +383,7 @@ CREATE TABLE `client_template_assigned` (
   `client_template_id` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`assigned_template_id`),
   KEY `client_id` (`client_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 -- --------------------------------------------------------
 
 --
@@ -402,7 +402,7 @@ CREATE TABLE `client_message_template` (
   `subject` varchar(255) DEFAULT NULL,
   `message` text,
   PRIMARY KEY (`client_message_template_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `invoice_message_template`
@@ -422,13 +422,13 @@ CREATE TABLE `country` (
   `numcode` smallint(6) DEFAULT NULL,
   `eu` enum('n','y') NOT NULL DEFAULT 'n',
   PRIMARY KEY (`iso`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ;
+) DEFAULT CHARSET=utf8 ;
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table  `cron`
--- 
+--
 CREATE TABLE `cron` (
   `id` int(11) unsigned NOT NULL auto_increment,
   `sys_userid` int(11) unsigned NOT NULL default '0',
@@ -448,13 +448,13 @@ CREATE TABLE `cron` (
   `log` enum('n','y') NOT NULL default 'n',
   `active` enum('n','y') NOT NULL default 'y',
   PRIMARY KEY  (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table  `directive_snippets`
--- 
+--
 
 CREATE TABLE IF NOT EXISTS `directive_snippets` (
   `directive_snippets_id` int(11) unsigned NOT NULL AUTO_INCREMENT,
@@ -470,15 +470,15 @@ CREATE TABLE IF NOT EXISTS `directive_snippets` (
   `required_php_snippets` varchar(255) NOT NULL DEFAULT '',
   `active` enum('n','y') NOT NULL DEFAULT 'y',
   `master_directive_snippets_id` int(11) unsigned NOT NULL DEFAULT '0',
+  `update_sites` ENUM('y','n') NOT NULL DEFAULT 'n',
   PRIMARY KEY (`directive_snippets_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table  `dns_rr`
--- 
-
+--
 CREATE TABLE `dns_rr` (
   `id` int(11) unsigned NOT NULL auto_increment,
   `sys_userid` int(11) unsigned NOT NULL DEFAULT '0',
@@ -489,7 +489,7 @@ CREATE TABLE `dns_rr` (
   `server_id` int(11) NOT NULL default '1',
   `zone` int(11) unsigned NOT NULL DEFAULT '0',
   `name` varchar(255) NOT NULL DEFAULT '',
-  `type` enum('A','AAAA','ALIAS','CNAME','DS','HINFO','LOC','MX','NAPTR','NS','PTR','RP','SRV','TXT','TLSA','DNSKEY') default NULL,
+  `type` enum('A','AAAA','ALIAS','CNAME','DNAME','CAA','DS','HINFO','LOC','MX','NAPTR','NS','PTR','RP','SRV','SSHFP','TXT','TLSA','DNSKEY') default NULL,
   `data` TEXT NOT NULL,
   `aux` int(11) unsigned NOT NULL default '0',
   `ttl` int(11) unsigned NOT NULL default '3600',
@@ -498,7 +498,7 @@ CREATE TABLE `dns_rr` (
   `serial` int(10) unsigned default NULL,
   PRIMARY KEY  (`id`),
   KEY `rr` (`zone`,`type`,`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -517,17 +517,91 @@ CREATE TABLE `dns_slave` (
   `origin` varchar(255) NOT NULL DEFAULT '',
   `ns` varchar(255) NOT NULL DEFAULT '',
   `active` enum('N','Y') NOT NULL DEFAULT 'N',
-  `xfer` varchar(255) NOT NULL DEFAULT '',
+  `xfer` TEXT NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `slave` (`origin`,`server_id`),
   KEY `active` (`active`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
--- 
+--
+-- Table structure for table  `dns_ssl_ca`
+--
+
+CREATE TABLE IF NOT EXISTS `dns_ssl_ca` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `sys_userid` int(11) unsigned NOT NULL DEFAULT '0',
+  `sys_groupid` int(11) unsigned NOT NULL DEFAULT '0',
+  `sys_perm_user` varchar(5) NOT NULL DEFAULT '',
+  `sys_perm_group` varchar(5) NOT NULL DEFAULT '',
+  `sys_perm_other` varchar(5) NOT NULL DEFAULT '',
+  `active` enum('N','Y') NOT NULL DEFAULT 'N',
+  `ca_name` varchar(255) NOT NULL DEFAULT '',
+  `ca_issue` varchar(255) NOT NULL DEFAULT '',
+  `ca_wildcard` enum('Y','N') NOT NULL DEFAULT 'N',
+  `ca_iodef` text NOT NULL,
+  `ca_critical` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY (`ca_issue`)
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+
+ALTER TABLE `dns_ssl_ca` ADD UNIQUE(`ca_issue`);
+
+INSERT INTO `dns_ssl_ca` (`id`, `sys_userid`, `sys_groupid`, `sys_perm_user`, `sys_perm_group`, `sys_perm_other`, `active`, `ca_name`, `ca_issue`, `ca_wildcard`, `ca_iodef`, `ca_critical`) VALUES
+(NULL, 1, 1, 'riud', 'riud', '', 'Y', 'AC Camerfirma', 'camerfirma.com', 'Y', '', 0),
+(NULL, 1, 1, 'riud', 'riud', '', 'Y', 'ACCV', 'accv.es', 'Y', '', 0),
+(NULL, 1, 1, 'riud', 'riud', '', 'Y', 'Actalis', 'actalis.it', 'Y', '', 0),
+(NULL, 1, 1, 'riud', 'riud', '', 'Y', 'Amazon', 'amazon.com', 'Y', '', 0),
+(NULL, 1, 1, 'riud', 'riud', '', 'Y', 'Asseco', 'certum.pl', 'Y', '', 0),
+(NULL, 1, 1, 'riud', 'riud', '', 'Y', 'Buypass', 'buypass.com', 'Y', '', 0),
+(NULL, 1, 1, 'riud', 'riud', '', 'Y', 'CA Disig', 'disig.sk', 'Y', '', 0),
+(NULL, 1, 1, 'riud', 'riud', '', 'Y', 'CATCert', 'aoc.cat', 'Y', '', 0),
+(NULL, 1, 1, 'riud', 'riud', '', 'Y', 'Certinomis', 'www.certinomis.com', 'Y', '', 0),
+(NULL, 1, 1, 'riud', 'riud', '', 'Y', 'Certizen', 'hongkongpost.gov.hk', 'Y', '', 0),
+(NULL, 1, 1, 'riud', 'riud', '', 'Y', 'certSIGN', 'certsign.ro', 'Y', '', 0),
+(NULL, 1, 1, 'riud', 'riud', '', 'Y', 'CFCA', 'cfca.com.cn', 'Y', '', 0),
+(NULL, 1, 1, 'riud', 'riud', '', 'Y', 'Chunghwa Telecom', 'cht.com.tw', 'Y', '', 0),
+(NULL, 1, 1, 'riud', 'riud', '', 'Y', 'Sectigo / Comodo CA', 'comodoca.com', 'Y', '', 0),
+(NULL, 1, 1, 'riud', 'riud', '', 'Y', 'D-TRUST', 'd-trust.net', 'Y', '', 0),
+(NULL, 1, 1, 'riud', 'riud', '', 'Y', 'DigiCert', 'digicert.com', 'Y', '', 0),
+(NULL, 1, 1, 'riud', 'riud', '', 'Y', 'DocuSign', 'docusign.fr', 'Y', '', 0),
+(NULL, 1, 1, 'riud', 'riud', '', 'Y', 'e-tugra', 'e-tugra.com', 'Y', '', 0),
+(NULL, 1, 1, 'riud', 'riud', '', 'Y', 'EDICOM', 'edicomgroup.com', 'Y', '', 0),
+(NULL, 1, 1, 'riud', 'riud', '', 'Y', 'Entrust', 'entrust.net', 'Y', '', 0),
+(NULL, 1, 1, 'riud', 'riud', '', 'Y', 'Firmaprofesional', 'firmaprofesional.com', 'Y', '', 0),
+(NULL, 1, 1, 'riud', 'riud', '', 'Y', 'FNMT', 'fnmt.es', 'Y', '', 0),
+(NULL, 1, 1, 'riud', 'riud', '', 'Y', 'GlobalSign', 'globalsign.com', 'Y', '', 0),
+(NULL, 1, 1, 'riud', 'riud', '', 'Y', 'GoDaddy', 'godaddy.com', 'Y', '', 0),
+(NULL, 1, 1, 'riud', 'riud', '', 'Y', 'Google Trust Services', 'pki.goog', 'Y', '', 0),
+(NULL, 1, 1, 'riud', 'riud', '', 'Y', 'GRCA', 'gca.nat.gov.tw', 'Y', '', 0),
+(NULL, 1, 1, 'riud', 'riud', '', 'Y', 'HARICA', 'harica.gr', 'Y', '', 0),
+(NULL, 1, 1, 'riud', 'riud', '', 'Y', 'IdenTrust', 'identrust.com', 'Y', '', 0),
+(NULL, 1, 1, 'riud', 'riud', '', 'Y', 'Izenpe', 'izenpe.com', 'Y', '', 0),
+(NULL, 1, 1, 'riud', 'riud', '', 'Y', 'Kamu SM', 'kamusm.gov.tr', 'Y', '', 0),
+(NULL, 1, 1, 'riud', 'riud', '', 'Y', 'Let''s Encrypt', 'letsencrypt.org', 'Y', '', 0),
+(NULL, 1, 1, 'riud', 'riud', '', 'Y', 'Microsec e-Szigno', 'e-szigno.hu', 'Y', '', 0),
+(NULL, 1, 1, 'riud', 'riud', '', 'Y', 'NetLock', 'netlock.hu', 'Y', '', 0),
+(NULL, 1, 1, 'riud', 'riud', '', 'Y', 'PKIoverheid', 'www.pkioverheid.nl', 'Y', '', 0),
+(NULL, 1, 1, 'riud', 'riud', '', 'Y', 'PROCERT', 'procert.net.ve', 'Y', '', 0),
+(NULL, 1, 1, 'riud', 'riud', '', 'Y', 'QuoVadis', 'quovadisglobal.com', 'Y', '', 0),
+(NULL, 1, 1, 'riud', 'riud', '', 'Y', 'SECOM', 'secomtrust.net', 'Y', '', 0),
+(NULL, 1, 1, 'riud', 'riud', '', 'Y', 'Sertifitseerimiskeskuse', 'sk.ee', 'Y', '', 0),
+(NULL, 1, 1, 'riud', 'riud', '', 'Y', 'StartCom', 'startcomca.com', 'Y', '', 0),
+(NULL, 1, 1, 'riud', 'riud', '', 'Y', 'SwissSign', 'swisssign.com', 'Y', '', 0),
+(NULL, 1, 1, 'riud', 'riud', '', 'Y', 'Symantec / Thawte / GeoTrust', 'symantec.com', 'Y', '', 0),
+(NULL, 1, 1, 'riud', 'riud', '', 'Y', 'T-Systems', 'telesec.de', 'Y', '', 0),
+(NULL, 1, 1, 'riud', 'riud', '', 'Y', 'Telia', 'telia.com', 'Y', '', 0),
+(NULL, 1, 1, 'riud', 'riud', '', 'Y', 'Trustwave', 'trustwave.com', 'Y', '', 0),
+(NULL, 1, 1, 'riud', 'riud', '', 'Y', 'Web.com', 'web.com', 'Y', '', 0),
+(NULL, 1, 1, 'riud', 'riud', '', 'Y', 'WISeKey', 'wisekey.com', 'Y', '', 0),
+(NULL, 1, 1, 'riud', 'riud', '', 'Y', 'WoSign', 'wosign.com', 'Y', '', 0);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table  `dns_soa`
--- 
+--
 
 CREATE TABLE `dns_soa` (
   `id` int(10) unsigned NOT NULL auto_increment,
@@ -547,23 +621,24 @@ CREATE TABLE `dns_soa` (
   `minimum` int(11) unsigned NOT NULL default '3600',
   `ttl` int(11) unsigned NOT NULL default '3600',
   `active` enum('N','Y') NOT NULL DEFAULT 'N',
-  `xfer` varchar(255) NOT NULL DEFAULT '',
-  `also_notify` varchar(255) default NULL,
+  `xfer` TEXT NULL,
+  `also_notify` TEXT NULL,
   `update_acl` varchar(255) default NULL,
   `dnssec_initialized` ENUM('Y','N') NOT NULL DEFAULT 'N',
   `dnssec_wanted` ENUM('Y','N') NOT NULL DEFAULT 'N',
+  `dnssec_algo` SET('NSEC3RSASHA1','ECDSAP256SHA256') NOT NULL DEFAULT 'ECDSAP256SHA256',
   `dnssec_last_signed` BIGINT NOT NULL DEFAULT '0',
   `dnssec_info` TEXT NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `origin` (`origin`),
   KEY `active` (`active`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table  `dns_template`
--- 
+--
 
 CREATE TABLE `dns_template` (
   `template_id` int(11) unsigned NOT NULL auto_increment,
@@ -577,7 +652,7 @@ CREATE TABLE `dns_template` (
   `template` text,
   `visible` enum('N','Y') NOT NULL default 'Y',
   PRIMARY KEY  (`template_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 --
 -- Table structure for table  `domain`
@@ -593,13 +668,13 @@ CREATE TABLE `domain` (
   `domain` varchar(255) NOT NULL default '',
   PRIMARY KEY  (`domain_id`),
   UNIQUE KEY `domain` (`domain`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ;
+) DEFAULT CHARSET=utf8 ;
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table  `firewall`
--- 
+--
 
 CREATE TABLE `firewall` (
   `firewall_id` int(11) unsigned NOT NULL auto_increment,
@@ -609,17 +684,17 @@ CREATE TABLE `firewall` (
   `sys_perm_group` varchar(5) default NULL,
   `sys_perm_other` varchar(5) default NULL,
   `server_id` int(11) unsigned NOT NULL default '0',
-  `tcp_port` varchar(255) default NULL,
-  `udp_port` varchar(255) default NULL,
+  `tcp_port` text,
+  `udp_port` text,
   `active` enum('n','y') NOT NULL default 'y',
   PRIMARY KEY  (`firewall_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table  `ftp_user`
--- 
+--
 
 CREATE TABLE `ftp_user` (
   `ftp_user_id` int(11) unsigned NOT NULL auto_increment,
@@ -632,7 +707,7 @@ CREATE TABLE `ftp_user` (
   `parent_domain_id` int(11) unsigned NOT NULL default '0',
   `username` varchar(64) default NULL,
   `username_prefix` varchar(50) NOT NULL default '',
-  `password` varchar(64) default NULL,
+  `password` varchar(200) default NULL,
   `quota_size` bigint(20) NOT NULL default '-1',
   `active` enum('n','y') NOT NULL default 'y',
   `uid` varchar(64) default NULL,
@@ -651,13 +726,13 @@ CREATE TABLE `ftp_user` (
   KEY `server_id` (`server_id`),
   KEY `username` (`username`),
   KEY `quota_files` (`quota_files`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table  `ftp_traffic`
--- 
+--
 
 CREATE TABLE `ftp_traffic` (
   `hostname` varchar(255) NOT NULL,
@@ -665,7 +740,7 @@ CREATE TABLE `ftp_traffic` (
   `in_bytes` bigint(32) unsigned NOT NULL,
   `out_bytes` bigint(32) unsigned NOT NULL,
   UNIQUE KEY (`hostname`,`traffic_date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -685,7 +760,7 @@ CREATE TABLE `help_faq` (
   `sys_perm_group` varchar(5) DEFAULT NULL,
   `sys_perm_other` varchar(5) DEFAULT NULL,
   PRIMARY KEY (`hf_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+)  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -703,7 +778,7 @@ CREATE TABLE `help_faq_sections` (
   `sys_perm_group` varchar(5) DEFAULT NULL,
   `sys_perm_other` varchar(5) DEFAULT NULL,
   PRIMARY KEY (`hfs_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+)  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -724,13 +799,13 @@ CREATE TABLE `iptables` (
   `target` varchar(10) DEFAULT NULL COMMENT 'ACCEPT DROP REJECT LOG',
   `active` enum('n','y') NOT NULL DEFAULT 'y',
   PRIMARY KEY (`iptables_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+) AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table  `mail_access`
--- 
+--
 
 CREATE TABLE `mail_access` (
   `access_id` int(11) unsigned NOT NULL auto_increment,
@@ -746,7 +821,7 @@ CREATE TABLE `mail_access` (
   `active` enum('n','y') NOT NULL default 'y',
   PRIMARY KEY  (`access_id`),
   KEY `server_id` (`server_id`,`source`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -764,13 +839,13 @@ CREATE TABLE `mail_backup` (
   `filename` varchar(255) NOT NULL DEFAULT '',
   `filesize` VARCHAR(20) NOT NULL DEFAULT '',
   PRIMARY KEY (`backup_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table  `mail_content_filter`
--- 
+--
 
 CREATE TABLE `mail_content_filter` (
   `content_filter_id` int(11) unsigned NOT NULL auto_increment,
@@ -786,13 +861,13 @@ CREATE TABLE `mail_content_filter` (
   `action` varchar(255) default NULL,
   `active` varchar(255) NOT NULL default 'y',
   PRIMARY KEY  (`content_filter_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table  `mail_domain`
--- 
+--
 
 CREATE TABLE `mail_domain` (
   `domain_id` int(11) unsigned NOT NULL auto_increment,
@@ -811,13 +886,13 @@ CREATE TABLE `mail_domain` (
   PRIMARY KEY  (`domain_id`),
   KEY `server_id` (`server_id`,`domain`),
   KEY `domain_active` (`domain`,`active`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table  `mail_forwarding`
--- 
+--
 
 CREATE TABLE `mail_forwarding` (
   `forwarding_id` int(11) unsigned NOT NULL auto_increment,
@@ -836,13 +911,13 @@ CREATE TABLE `mail_forwarding` (
   PRIMARY KEY  (`forwarding_id`),
   KEY `server_id` (`server_id`,`source`),
   KEY `type` (`type`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table  `mail_get`
--- 
+--
 
 CREATE TABLE `mail_get` (
   `mailget_id` int(11) unsigned NOT NULL auto_increment,
@@ -861,7 +936,7 @@ CREATE TABLE `mail_get` (
   `destination` varchar(255) default NULL,
   `active` varchar(255) NOT NULL default 'y',
   PRIMARY KEY  (`mailget_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -882,7 +957,7 @@ CREATE TABLE `mail_mailinglist` (
   `email` varchar(255) NOT NULL DEFAULT '',
   `password` varchar(255) NOT NULL DEFAULT '',
   PRIMARY KEY  (`mailinglist_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -902,13 +977,13 @@ CREATE TABLE IF NOT EXISTS `mail_relay_recipient` (
   `access` varchar(255) NOT NULL DEFAULT 'OK',
   `active` varchar(255) NOT NULL DEFAULT 'y',
   PRIMARY KEY (`relay_recipient_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table  `mail_traffic`
--- 
+--
 
 CREATE TABLE `mail_traffic` (
   `traffic_id` int(11) unsigned NOT NULL auto_increment,
@@ -917,13 +992,13 @@ CREATE TABLE `mail_traffic` (
   `traffic` bigint(20) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY  (`traffic_id`),
   KEY `mailuser_id` (`mailuser_id`,`month`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table  `mail_transport`
--- 
+--
 
 CREATE TABLE `mail_transport` (
   `transport_id` int(11) unsigned NOT NULL auto_increment,
@@ -940,13 +1015,13 @@ CREATE TABLE `mail_transport` (
   PRIMARY KEY  (`transport_id`),
   KEY `server_id` (`server_id`,`transport`),
   KEY `server_id_2` (`server_id`,`domain`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table  `mail_user`
--- 
+--
 
 CREATE TABLE `mail_user` (
   `mailuser_id` int(11) unsigned NOT NULL auto_increment,
@@ -965,7 +1040,8 @@ CREATE TABLE `mail_user` (
   `maildir` varchar(255) NOT NULL default '',
   `maildir_format` varchar(255) NOT NULL default 'maildir',
   `quota` bigint(20) NOT NULL default '-1',
-  `cc` varchar(255) NOT NULL default '',
+  `cc` text,
+  `forward_in_lda` enum('n','y') NOT NULL default 'n',
   `sender_cc` varchar(255) NOT NULL default '',
   `homedir` varchar(255) NOT NULL default '',
   `autoresponder` enum('n','y') NOT NULL default 'n',
@@ -973,7 +1049,9 @@ CREATE TABLE `mail_user` (
   `autoresponder_end_date` datetime NULL default NULL,
   `autoresponder_subject` varchar(255) NOT NULL default 'Out of office reply',
   `autoresponder_text` mediumtext NULL,
-  `move_junk` enum('n','y') NOT NULL default 'n',
+  `move_junk` enum('y','a','n') NOT NULL default 'y',
+  `purge_trash_days` INT NOT NULL DEFAULT '0',
+  `purge_junk_days` INT NOT NULL DEFAULT '0',
   `custom_mailfilter` mediumtext,
   `postfix` enum('n','y') NOT NULL default 'y',
   `greylisting` enum('n','y' ) NOT NULL DEFAULT 'n',
@@ -987,19 +1065,21 @@ CREATE TABLE `mail_user` (
   `disablelda` enum('n','y') NOT NULL default 'n',
   `disablelmtp` enum('n','y') NOT NULL default 'n',
   `disabledoveadm` enum('n','y') NOT NULL default 'n',
+  `disablequota-status` enum('n','y') NOT NULL default 'n',
+  `disableindexer-worker` enum('n','y') NOT NULL default 'n',
   `last_quota_notification` date NULL default NULL,
   `backup_interval` VARCHAR( 255 ) NOT NULL default 'none',
   `backup_copies` INT NOT NULL DEFAULT '1',
   PRIMARY KEY  (`mailuser_id`),
   KEY `server_id` (`server_id`,`email`),
   KEY `email_access` (`email`,`access`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table  `mail_user_filter`
--- 
+--
 
 CREATE TABLE `mail_user_filter` (
   `filter_id` int(11) unsigned NOT NULL auto_increment,
@@ -1017,7 +1097,7 @@ CREATE TABLE `mail_user_filter` (
   `target` varchar(255) default NULL,
   `active` enum('n','y') NOT NULL default 'y',
   PRIMARY KEY  (`filter_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -1032,7 +1112,7 @@ CREATE TABLE `monitor_data` (
   `data` mediumtext,
   `state` enum('no_state','unknown','ok','info','warning','critical','error') NOT NULL DEFAULT 'unknown',
   PRIMARY KEY (`server_id`,`type`,`created`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ;
+) DEFAULT CHARSET=utf8 ;
 
 -- --------------------------------------------------------
 
@@ -1053,7 +1133,7 @@ CREATE TABLE IF NOT EXISTS `openvz_ip` (
   `reserved` varchar(255) NOT NULL DEFAULT 'n',
   `additional` varchar(255) NOT NULL DEFAULT 'n',
   PRIMARY KEY (`ip_address_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 ;
+)  DEFAULT CHARSET=utf8 ;
 
 --
 -- Dumping data for table `openvz_ip`
@@ -1079,7 +1159,7 @@ CREATE TABLE IF NOT EXISTS `openvz_ostemplate` (
   `active` varchar(255) NOT NULL DEFAULT 'y',
   `description` text,
   PRIMARY KEY (`ostemplate_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 ;
+)  DEFAULT CHARSET=utf8 ;
 
 --
 -- Dumping data for table `openvz_ostemplate`
@@ -1142,7 +1222,7 @@ CREATE TABLE IF NOT EXISTS `openvz_template` (
   `iptables` varchar(255) DEFAULT NULL,
   `custom` text,
   PRIMARY KEY (`template_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 ;
+)  DEFAULT CHARSET=utf8 ;
 
 --
 -- Dumping data for table `openvz_template`
@@ -1161,7 +1241,7 @@ CREATE TABLE IF NOT EXISTS `openvz_traffic` (
   `traffic_date` date NULL DEFAULT NULL,
   `traffic_bytes` bigint(32) unsigned NOT NULL DEFAULT '0',
   UNIQUE KEY (`veid`,`traffic_date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `openvz_traffic`
@@ -1210,7 +1290,7 @@ CREATE TABLE IF NOT EXISTS `openvz_vm` (
   `config` mediumtext,
   `custom` text,
   PRIMARY KEY (`vm_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 ;
+)  DEFAULT CHARSET=utf8 ;
 
 --
 -- Dumping data for table `openvz_vm`
@@ -1218,9 +1298,9 @@ CREATE TABLE IF NOT EXISTS `openvz_vm` (
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table  `remote_session`
--- 
+--
 
 CREATE TABLE `remote_session` (
   `remote_session` varchar(64) NOT NULL DEFAULT '',
@@ -1229,13 +1309,13 @@ CREATE TABLE `remote_session` (
   `client_login` tinyint(1) unsigned NOT NULL default '0',
   `tstamp` int(10) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY  (`remote_session`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ;
+) DEFAULT CHARSET=utf8 ;
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table  `remote_user`
--- 
+--
 
 CREATE TABLE `remote_user` (
   `remote_userid` int(11) unsigned NOT NULL auto_increment,
@@ -1250,13 +1330,13 @@ CREATE TABLE `remote_user` (
   `remote_ips` TEXT,
   `remote_functions` text,
   PRIMARY KEY  (`remote_userid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table  `server`
--- 
+--
 
 CREATE TABLE `server` (
   `server_id` int(11) unsigned NOT NULL auto_increment,
@@ -1281,13 +1361,13 @@ CREATE TABLE `server` (
   `dbversion` int(11) unsigned NOT NULL default '1',
   `active` tinyint(1) NOT NULL default '1',
   PRIMARY KEY  (`server_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table  `server_ip`
--- 
+--
 
 CREATE TABLE `server_ip` (
   `server_ip_id` int(11) unsigned NOT NULL auto_increment,
@@ -1303,13 +1383,13 @@ CREATE TABLE `server_ip` (
   `virtualhost` enum('n','y') NOT NULL default 'y',
   `virtualhost_port` varchar(255) default '80,443',
   PRIMARY KEY  (`server_ip_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table  `server_ip_map`
--- 
+--
 
 CREATE TABLE `server_ip_map` (
   `server_ip_map_id` int(11) unsigned NOT NULL AUTO_INCREMENT,
@@ -1323,7 +1403,7 @@ CREATE TABLE `server_ip_map` (
   `destination_ip` varchar(35) DEFAULT '',
   `active` enum('n','y') NOT NULL DEFAULT 'y',
   PRIMARY KEY (`server_ip_map_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -1348,7 +1428,7 @@ CREATE TABLE `server_php` (
   `php_fpm_pool_dir` varchar(255) DEFAULT NULL,
   `active` enum('n','y') NOT NULL DEFAULT 'y',
   PRIMARY KEY (`server_php_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -1367,7 +1447,7 @@ CREATE TABLE `shell_user` (
   `parent_domain_id` int(11) unsigned NOT NULL default '0',
   `username` varchar(64) default NULL,
   `username_prefix` varchar(50) NOT NULL default '',
-  `password` varchar(64) default NULL,
+  `password` varchar(200) default NULL,
   `quota_size` bigint(20) NOT NULL default '-1',
   `active` enum('n','y') NOT NULL default 'y',
   `puser` varchar(255) default NULL,
@@ -1377,13 +1457,13 @@ CREATE TABLE `shell_user` (
   `chroot` varchar(255) NOT NULL DEFAULT '',
   `ssh_rsa` text,
   PRIMARY KEY  (`shell_user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table  `software_package`
--- 
+--
 
 CREATE TABLE `software_package` (
   `package_id` int(11) unsigned NOT NULL auto_increment,
@@ -1400,13 +1480,13 @@ CREATE TABLE `software_package` (
   `package_config` text,
   PRIMARY KEY  (`package_id`),
   UNIQUE KEY `package_name` (`package_name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table  `software_repo`
--- 
+--
 
 CREATE TABLE `software_repo` (
   `software_repo_id` int(11) unsigned NOT NULL auto_increment,
@@ -1421,13 +1501,13 @@ CREATE TABLE `software_repo` (
   `repo_password` varchar(64) default NULL,
   `active` enum('n','y') NOT NULL default 'y',
   PRIMARY KEY  (`software_repo_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table  `software_update`
--- 
+--
 
 CREATE TABLE `software_update` (
   `software_update_id` int(11) unsigned NOT NULL auto_increment,
@@ -1443,13 +1523,13 @@ CREATE TABLE `software_update` (
   `v4` tinyint(1) NOT NULL default '0',
   `type` enum('full','update') NOT NULL default 'full',
   PRIMARY KEY  (`software_update_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table  `software_update_inst`
--- 
+--
 
 CREATE TABLE `software_update_inst` (
   `software_update_inst_id` int(11) unsigned NOT NULL auto_increment,
@@ -1459,13 +1539,13 @@ CREATE TABLE `software_update_inst` (
   `status` enum('none','installing','installed','deleting','deleted','failed') NOT NULL default 'none',
   PRIMARY KEY  (`software_update_inst_id`),
   UNIQUE KEY `software_update_id` (`software_update_id`,`package_name`,`server_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table  `spamfilter_policy`
--- 
+--
 
 CREATE TABLE `spamfilter_policy` (
   `id` int(11) unsigned NOT NULL auto_increment,
@@ -1516,14 +1596,19 @@ CREATE TABLE `spamfilter_policy` (
   `policyd_quota_out` int(11) NOT NULL DEFAULT  '-1',
   `policyd_quota_out_period` int(11) NOT NULL DEFAULT  '24',
   `policyd_greylist` ENUM(  'Y',  'N' ) NOT NULL DEFAULT  'N',
+  `rspamd_greylisting` enum('n','y') NOT NULL DEFAULT 'n',
+  `rspamd_spam_greylisting_level` decimal(5,2) DEFAULT NULL,
+  `rspamd_spam_tag_level` decimal(5,2) DEFAULT NULL,
+  `rspamd_spam_tag_method` enum('add_header','rewrite_subject') NOT NULL DEFAULT 'rewrite_subject',
+  `rspamd_spam_kill_level` decimal(5,2) DEFAULT NULL,
   PRIMARY KEY  (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table  `spamfilter_users`
--- 
+--
 
 CREATE TABLE `spamfilter_users` (
   `id` int(11) unsigned NOT NULL auto_increment,
@@ -1540,13 +1625,13 @@ CREATE TABLE `spamfilter_users` (
   `local` varchar(1) default NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table  `spamfilter_wblist`
--- 
+--
 
 CREATE TABLE `spamfilter_wblist` (
   `wblist_id` int(11) unsigned NOT NULL auto_increment,
@@ -1562,13 +1647,13 @@ CREATE TABLE `spamfilter_wblist` (
   `priority` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `active` enum('y','n') NOT NULL default 'y',
   PRIMARY KEY  (`wblist_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table  `support_message`
--- 
+--
 
 CREATE TABLE `support_message` (
   `support_message_id` int(11) unsigned NOT NULL auto_increment,
@@ -1583,7 +1668,7 @@ CREATE TABLE `support_message` (
   `message` text default NULL,
   `tstamp` int(11) NOT NULL default '0',
   PRIMARY KEY  (`support_message_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -1596,7 +1681,7 @@ CREATE TABLE `sys_config` (
   `name` varchar(64) NOT NULL DEFAULT '',
   `value` varchar(255) NOT NULL DEFAULT '',
   PRIMARY KEY (`group`, `name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) DEFAULT CHARSET=utf8;
 
 
 -- --------------------------------------------------------
@@ -1611,7 +1696,7 @@ CREATE TABLE IF NOT EXISTS `sys_cron` (
   `next_run` datetime NULL DEFAULT NULL,
   `running` tinyint(1) UNSIGNED NOT NULL DEFAULT '0',
   PRIMARY KEY (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) DEFAULT CHARSET=utf8;
 
 
 -- --------------------------------------------------------
@@ -1631,15 +1716,16 @@ CREATE TABLE `sys_datalog` (
   `data` longtext,
   `status` set('pending','ok','warning','error') NOT NULL default 'ok',
   `error` mediumtext,
+  `session_id` varchar(64) NOT NULL DEFAULT '',
   PRIMARY KEY  (`datalog_id`),
   KEY `server_id` (`server_id`,`status`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table  `sys_dbsync`
--- 
+--
 
 CREATE TABLE `sys_dbsync` (
   `id` int(11) unsigned NOT NULL auto_increment,
@@ -1657,13 +1743,13 @@ CREATE TABLE `sys_dbsync` (
   `last_datalog_id` int(11) unsigned NOT NULL default '0',
   PRIMARY KEY  (`id`),
   KEY `last_datalog_id` (`last_datalog_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table  `sys_filesync`
--- 
+--
 
 CREATE TABLE `sys_filesync` (
   `id` int(11) unsigned NOT NULL auto_increment,
@@ -1677,13 +1763,13 @@ CREATE TABLE `sys_filesync` (
   `wput_options` varchar(255) NOT NULL default '--timestamping --reupload --dont-continue',
   `active` tinyint(1) NOT NULL default '1',
   PRIMARY KEY  (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table  `sys_group`
--- 
+--
 
 CREATE TABLE `sys_group` (
   `groupid` int(11) unsigned NOT NULL auto_increment,
@@ -1691,13 +1777,13 @@ CREATE TABLE `sys_group` (
   `description` text,
   `client_id` int(11) unsigned NOT NULL default '0',
   PRIMARY KEY  (`groupid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table  `sys_ini`
--- 
+--
 
 CREATE TABLE `sys_ini` (
   `sysini_id` int(11) unsigned NOT NULL auto_increment,
@@ -1705,13 +1791,13 @@ CREATE TABLE `sys_ini` (
   `default_logo` text NOT NULL,
   `custom_logo` text NOT NULL,
   PRIMARY KEY  (`sysini_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table  `sys_log`
--- 
+--
 
 CREATE TABLE `sys_log` (
   `syslog_id` int(11) unsigned NOT NULL auto_increment,
@@ -1721,7 +1807,7 @@ CREATE TABLE `sys_log` (
   `tstamp` int(11) unsigned NOT NULL DEFAULT '0',
   `message` text,
   PRIMARY KEY  (`syslog_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -1739,7 +1825,7 @@ CREATE TABLE `sys_remoteaction` (
   `response` mediumtext,
   PRIMARY KEY (`action_id`),
   KEY `server_id` (`server_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -1755,7 +1841,7 @@ CREATE TABLE `sys_session` (
   `session_data` longtext,
   PRIMARY KEY (`session_id`),
   KEY `last_updated` (`last_updated`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ;
+) DEFAULT CHARSET=utf8 ;
 
 -- --------------------------------------------------------
 
@@ -1774,23 +1860,23 @@ CREATE TABLE IF NOT EXISTS `sys_theme` (
   `username` varchar(64) NOT NULL DEFAULT '',
   `logo_url` varchar(255) NOT NULL DEFAULT '',
   PRIMARY KEY (`var_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ;
+) DEFAULT CHARSET=utf8 ;
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table  `sys_user`
--- 
+--
 
 CREATE TABLE `sys_user` (
   `userid` int(11) unsigned NOT NULL auto_increment,
-  `sys_userid` int(11) unsigned NOT NULL default '1',
-  `sys_groupid` int(11) unsigned NOT NULL default '1',
+  `sys_userid` int(11) unsigned NOT NULL default '1' COMMENT 'Created by userid',
+  `sys_groupid` int(11) unsigned NOT NULL default '1' COMMENT 'Created by groupid',
   `sys_perm_user` varchar(5) NOT NULL default 'riud',
   `sys_perm_group` varchar(5) NOT NULL default 'riud',
   `sys_perm_other` varchar(5) NOT NULL default '',
   `username` varchar(64) NOT NULL default '',
-  `passwort` varchar(64) NOT NULL default '',
+  `passwort` varchar(200) NOT NULL default '',
   `modules` varchar(255) NOT NULL default '',
   `startmodule` varchar(255) NOT NULL default '',
   `app_theme` varchar(32) NOT NULL default 'default',
@@ -1806,7 +1892,7 @@ CREATE TABLE `sys_user` (
   `lost_password_hash` VARCHAR(50) NOT NULL default '',
   `lost_password_reqtime` DATETIME NULL default NULL,
   PRIMARY KEY  (`userid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -1825,11 +1911,11 @@ CREATE TABLE `webdav_user` (
   `parent_domain_id` int(11) unsigned NOT NULL DEFAULT '0',
   `username` varchar(64) DEFAULT NULL,
   `username_prefix` varchar(50) NOT NULL default '',
-  `password` varchar(64) DEFAULT NULL,
+  `password` varchar(200) DEFAULT NULL,
   `active` enum('n','y') NOT NULL DEFAULT 'y',
   `dir` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`webdav_user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -1843,11 +1929,13 @@ CREATE TABLE `web_backup` (
   `parent_domain_id` int(10) unsigned NOT NULL DEFAULT '0',
   `backup_type` enum('web','mysql','mongodb') NOT NULL DEFAULT 'web',
   `backup_mode` varchar(64) NOT NULL DEFAULT  '',
+  `backup_format` varchar(64) NOT NULL DEFAULT '',
   `tstamp` int(10) unsigned NOT NULL DEFAULT '0',
   `filename` varchar(255) NOT NULL DEFAULT '',
   `filesize` VARCHAR(20) NOT NULL DEFAULT '',
+  `backup_password` VARCHAR(255) NOT NULL DEFAULT '',
   PRIMARY KEY (`backup_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -1881,7 +1969,7 @@ CREATE TABLE `web_database` (
   PRIMARY KEY (`database_id`),
   KEY `database_user_id` (`database_user_id`),
   KEY `database_ro_user_id` (`database_ro_user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -1902,13 +1990,13 @@ CREATE TABLE IF NOT EXISTS `web_database_user` (
   `database_password` varchar(64) DEFAULT NULL,
   `database_password_mongo` varchar(32) DEFAULT NULL,
   PRIMARY KEY (`database_user_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+)  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table  `web_domain`
--- 
+--
 
 CREATE TABLE `web_domain` (
   `domain_id` int(11) unsigned NOT NULL auto_increment,
@@ -1961,10 +2049,11 @@ CREATE TABLE `web_domain` (
   `stats_password` varchar(255) default NULL,
   `stats_type` varchar(255) default 'awstats',
   `allow_override` varchar(255) NOT NULL default 'All',
-  `apache_directives` mediumtext,
-  `nginx_directives` mediumtext,
+  `apache_directives` mediumtext NULL DEFAULT NULL,
+  `nginx_directives` mediumtext NULL DEFAULT NULL,
   `php_fpm_use_socket` ENUM('n','y') NOT NULL DEFAULT 'y',
-  `pm` enum('static','dynamic','ondemand') NOT NULL DEFAULT 'dynamic',
+  `php_fpm_chroot` enum('n','y') NOT NULL DEFAULT 'n',
+  `pm` enum('static','dynamic','ondemand') NOT NULL DEFAULT 'ondemand',
   `pm_max_children` int(11) NOT NULL DEFAULT '10',
   `pm_start_servers` int(11) NOT NULL DEFAULT '2',
   `pm_min_spare_servers` int(11) NOT NULL DEFAULT '1',
@@ -1975,12 +2064,14 @@ CREATE TABLE `web_domain` (
   `custom_php_ini` mediumtext,
   `backup_interval` VARCHAR( 255 ) NOT NULL DEFAULT 'none',
   `backup_copies` INT NOT NULL DEFAULT '1',
+  `backup_format_web` VARCHAR( 255 ) NOT NULL default 'default',
+  `backup_format_db` VARCHAR( 255 ) NOT NULL default 'gzip',
+  `backup_encrypt` enum('n','y') NOT NULL DEFAULT 'n',
+  `backup_password` VARCHAR( 255 ) NOT NULL DEFAULT '',
   `backup_excludes` mediumtext,
   `active` enum('n','y') NOT NULL default 'y',
   `traffic_quota_lock` enum('n','y') NOT NULL default 'n',
-  `fastcgi_php_version` varchar(255) DEFAULT NULL,
   `proxy_directives` mediumtext,
-  `enable_spdy` ENUM('y','n') NULL DEFAULT 'n',
   `last_quota_notification` date NULL default NULL,
   `rewrite_rules` mediumtext,
   `added_date` date NULL DEFAULT NULL,
@@ -1991,9 +2082,16 @@ CREATE TABLE `web_domain` (
   `https_port` int(11) unsigned NOT NULL DEFAULT '443',
   `folder_directive_snippets` text,
   `log_retention` int(11) NOT NULL DEFAULT '10',
+  `proxy_protocol` enum('n','y') NOT NULL default 'n',
+  `server_php_id` INT(11) UNSIGNED NOT NULL DEFAULT 0,
+  `jailkit_chroot_app_sections` mediumtext NULL DEFAULT NULL,
+  `jailkit_chroot_app_programs` mediumtext NULL DEFAULT NULL,
+  `delete_unused_jailkit` enum('n','y') NOT NULL default 'n',
+  `last_jailkit_update` date NULL DEFAULT NULL,
+  `last_jailkit_hash` varchar(255) DEFAULT NULL,
   PRIMARY KEY  (`domain_id`),
   UNIQUE KEY `serverdomain` (  `server_id` , `ip_address`,  `domain` )
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -2013,7 +2111,7 @@ CREATE TABLE IF NOT EXISTS `web_folder` (
   `path` varchar(255) DEFAULT NULL,
   `active` varchar(255) NOT NULL DEFAULT 'y',
   PRIMARY KEY (`web_folder_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `web_folder`
@@ -2039,7 +2137,7 @@ CREATE TABLE IF NOT EXISTS `web_folder_user` (
   `password` varchar(255) DEFAULT NULL,
   `active` varchar(255) NOT NULL DEFAULT 'y',
   PRIMARY KEY (`web_folder_user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `web_folder_user`
@@ -2056,7 +2154,7 @@ CREATE TABLE `web_traffic` (
   `traffic_date` date NULL DEFAULT NULL,
   `traffic_bytes` bigint(32) unsigned NOT NULL default '0',
   UNIQUE KEY  (`hostname`,`traffic_date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ;
+) DEFAULT CHARSET=utf8 ;
 
 -- --------------------------------------------------------
 
@@ -2115,7 +2213,7 @@ CREATE TABLE `xmpp_domain` (
   PRIMARY KEY  (`domain_id`),
   KEY `server_id` (`server_id`,`domain`),
   KEY `domain_active` (`domain`,`active`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -2137,7 +2235,7 @@ CREATE TABLE `xmpp_user` (
   PRIMARY KEY  (`xmppuser_id`),
   KEY `server_id` (`server_id`,`jid`),
   KEY `jid_active` (`jid`,`active`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -2405,81 +2503,81 @@ INSERT INTO `country` (`iso`, `name`, `printable_name`, `iso3`, `numcode`, `eu`)
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Dumping data for table `dns_template`
--- 
+--
 
-INSERT INTO `dns_template` (`template_id`, `sys_userid`, `sys_groupid`, `sys_perm_user`, `sys_perm_group`, `sys_perm_other`, `name`, `fields`, `template`, `visible`) VALUES (1, 1, 1, 'riud', 'riud', '', 'Default', 'DOMAIN,IP,NS1,NS2,EMAIL,DKIM,DNSSEC', '[ZONE]\norigin={DOMAIN}.\nns={NS1}.\nmbox={EMAIL}.\nrefresh=7200\nretry=540\nexpire=604800\nminimum=3600\nttl=3600\n\n[DNS_RECORDS]\nA|{DOMAIN}.|{IP}|0|3600\nA|www|{IP}|0|3600\nA|mail|{IP}|0|3600\nNS|{DOMAIN}.|{NS1}.|0|3600\nNS|{DOMAIN}.|{NS2}.|0|3600\nMX|{DOMAIN}.|mail.{DOMAIN}.|10|3600\nTXT|{DOMAIN}.|v=spf1 mx a ~all|0|3600', 'y');
+INSERT INTO `dns_template` (`template_id`, `sys_userid`, `sys_groupid`, `sys_perm_user`, `sys_perm_group`, `sys_perm_other`, `name`, `fields`, `template`, `visible`) VALUES (1, 1, 1, 'riud', 'riud', '', 'Default', 'DOMAIN,IP,NS1,NS2,EMAIL,DKIM,DNSSEC', '[ZONE]\norigin={DOMAIN}.\nns={NS1}.\nmbox={EMAIL}.\nrefresh=7200\nretry=540\nexpire=604800\nminimum=3600\nttl=3600\ndnssec_algo=ECDSAP256SHA256\n\n[DNS_RECORDS]\nA|{DOMAIN}.|{IP}|0|3600\nA|www|{IP}|0|3600\nA|mail|{IP}|0|3600\nNS|{DOMAIN}.|{NS1}.|0|3600\nNS|{DOMAIN}.|{NS2}.|0|3600\nMX|{DOMAIN}.|mail.{DOMAIN}.|10|3600\nTXT|{DOMAIN}.|v=spf1 mx a ~all|0|3600', 'y');
 
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Dumping data for table `help_faq`
--- 
+--
 
 INSERT INTO `help_faq` VALUES (1,1,0,'I would like to know ...','Yes, of course.',1,1,'riud','riud','r');
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Dumping data for table `help_faq_sections`
--- 
+--
 
 INSERT INTO `help_faq_sections` VALUES (1,'General',0,NULL,NULL,NULL,NULL,NULL);
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Dumping data for table `software_repo`
--- 
+--
 
 INSERT INTO `software_repo` (`software_repo_id`, `sys_userid`, `sys_groupid`, `sys_perm_user`, `sys_perm_group`, `sys_perm_other`, `repo_name`, `repo_url`, `repo_username`, `repo_password`, `active`) VALUES (1, 1, 1, 'riud', 'riud', '', 'ISPConfig Addons', 'http://repo.ispconfig.org/addons/', '', '', 'n');
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Dumping data for table `spamfilter_policy`
--- 
+--
 
-INSERT INTO `spamfilter_policy` (`id`, `sys_userid`, `sys_groupid`, `sys_perm_user`, `sys_perm_group`, `sys_perm_other`, `policy_name`, `virus_lover`, `spam_lover`, `banned_files_lover`, `bad_header_lover`, `bypass_virus_checks`, `bypass_spam_checks`, `bypass_banned_checks`, `bypass_header_checks`, `spam_modifies_subj`, `virus_quarantine_to`, `spam_quarantine_to`, `banned_quarantine_to`, `bad_header_quarantine_to`, `clean_quarantine_to`, `other_quarantine_to`, `spam_tag_level`, `spam_tag2_level`, `spam_kill_level`, `spam_dsn_cutoff_level`, `spam_quarantine_cutoff_level`, `addr_extension_virus`, `addr_extension_spam`, `addr_extension_banned`, `addr_extension_bad_header`, `warnvirusrecip`, `warnbannedrecip`, `warnbadhrecip`, `newvirus_admin`, `virus_admin`, `banned_admin`, `bad_header_admin`, `spam_admin`, `spam_subject_tag`, `spam_subject_tag2`, `message_size_limit`, `banned_rulenames`) VALUES(1, 1, 0, 'riud', 'riud', 'r', 'Non-paying', 'N', 'N', 'N', 'N', 'Y', 'Y', 'Y', 'N', 'Y', '', '', '', '', '', '', 3, 7, 10, 0, 0, '', '', '', '', 'N', 'N', 'N', '', '', '', '', '', '', '', 0, '');
-INSERT INTO `spamfilter_policy` (`id`, `sys_userid`, `sys_groupid`, `sys_perm_user`, `sys_perm_group`, `sys_perm_other`, `policy_name`, `virus_lover`, `spam_lover`, `banned_files_lover`, `bad_header_lover`, `bypass_virus_checks`, `bypass_spam_checks`, `bypass_banned_checks`, `bypass_header_checks`, `spam_modifies_subj`, `virus_quarantine_to`, `spam_quarantine_to`, `banned_quarantine_to`, `bad_header_quarantine_to`, `clean_quarantine_to`, `other_quarantine_to`, `spam_tag_level`, `spam_tag2_level`, `spam_kill_level`, `spam_dsn_cutoff_level`, `spam_quarantine_cutoff_level`, `addr_extension_virus`, `addr_extension_spam`, `addr_extension_banned`, `addr_extension_bad_header`, `warnvirusrecip`, `warnbannedrecip`, `warnbadhrecip`, `newvirus_admin`, `virus_admin`, `banned_admin`, `bad_header_admin`, `spam_admin`, `spam_subject_tag`, `spam_subject_tag2`, `message_size_limit`, `banned_rulenames`) VALUES(2, 1, 0, 'riud', 'riud', 'r', 'Uncensored', 'Y', 'Y', 'Y', 'Y', 'N', 'N', 'N', 'N', 'N', NULL, NULL, NULL, NULL, NULL, NULL, 3, 999, 999, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO `spamfilter_policy` (`id`, `sys_userid`, `sys_groupid`, `sys_perm_user`, `sys_perm_group`, `sys_perm_other`, `policy_name`, `virus_lover`, `spam_lover`, `banned_files_lover`, `bad_header_lover`, `bypass_virus_checks`, `bypass_spam_checks`, `bypass_banned_checks`, `bypass_header_checks`, `spam_modifies_subj`, `virus_quarantine_to`, `spam_quarantine_to`, `banned_quarantine_to`, `bad_header_quarantine_to`, `clean_quarantine_to`, `other_quarantine_to`, `spam_tag_level`, `spam_tag2_level`, `spam_kill_level`, `spam_dsn_cutoff_level`, `spam_quarantine_cutoff_level`, `addr_extension_virus`, `addr_extension_spam`, `addr_extension_banned`, `addr_extension_bad_header`, `warnvirusrecip`, `warnbannedrecip`, `warnbadhrecip`, `newvirus_admin`, `virus_admin`, `banned_admin`, `bad_header_admin`, `spam_admin`, `spam_subject_tag`, `spam_subject_tag2`, `message_size_limit`, `banned_rulenames`) VALUES(3, 1, 0, 'riud', 'riud', 'r', 'Wants all spam', 'N', 'Y', 'N', 'N', 'N', 'N', 'N', 'N', 'Y', NULL, NULL, NULL, NULL, NULL, NULL, 3, 999, 999, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO `spamfilter_policy` (`id`, `sys_userid`, `sys_groupid`, `sys_perm_user`, `sys_perm_group`, `sys_perm_other`, `policy_name`, `virus_lover`, `spam_lover`, `banned_files_lover`, `bad_header_lover`, `bypass_virus_checks`, `bypass_spam_checks`, `bypass_banned_checks`, `bypass_header_checks`, `spam_modifies_subj`, `virus_quarantine_to`, `spam_quarantine_to`, `banned_quarantine_to`, `bad_header_quarantine_to`, `clean_quarantine_to`, `other_quarantine_to`, `spam_tag_level`, `spam_tag2_level`, `spam_kill_level`, `spam_dsn_cutoff_level`, `spam_quarantine_cutoff_level`, `addr_extension_virus`, `addr_extension_spam`, `addr_extension_banned`, `addr_extension_bad_header`, `warnvirusrecip`, `warnbannedrecip`, `warnbadhrecip`, `newvirus_admin`, `virus_admin`, `banned_admin`, `bad_header_admin`, `spam_admin`, `spam_subject_tag`, `spam_subject_tag2`, `message_size_limit`, `banned_rulenames`) VALUES(4, 1, 0, 'riud', 'riud', 'r', 'Wants viruses', 'Y', 'N', 'Y', 'Y', 'N', 'N', 'N', 'N', 'Y', NULL, NULL, NULL, NULL, NULL, NULL, 3, 6.9, 6.9, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO `spamfilter_policy` (`id`, `sys_userid`, `sys_groupid`, `sys_perm_user`, `sys_perm_group`, `sys_perm_other`, `policy_name`, `virus_lover`, `spam_lover`, `banned_files_lover`, `bad_header_lover`, `bypass_virus_checks`, `bypass_spam_checks`, `bypass_banned_checks`, `bypass_header_checks`, `spam_modifies_subj`, `virus_quarantine_to`, `spam_quarantine_to`, `banned_quarantine_to`, `bad_header_quarantine_to`, `clean_quarantine_to`, `other_quarantine_to`, `spam_tag_level`, `spam_tag2_level`, `spam_kill_level`, `spam_dsn_cutoff_level`, `spam_quarantine_cutoff_level`, `addr_extension_virus`, `addr_extension_spam`, `addr_extension_banned`, `addr_extension_bad_header`, `warnvirusrecip`, `warnbannedrecip`, `warnbadhrecip`, `newvirus_admin`, `virus_admin`, `banned_admin`, `bad_header_admin`, `spam_admin`, `spam_subject_tag`, `spam_subject_tag2`, `message_size_limit`, `banned_rulenames`) VALUES(5, 1, 0, 'riud', 'riud', 'r', 'Normal', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'Y', '', '', '', '', '', '', 1, 4.5, 50, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', '***SPAM***', NULL, NULL);
-INSERT INTO `spamfilter_policy` (`id`, `sys_userid`, `sys_groupid`, `sys_perm_user`, `sys_perm_group`, `sys_perm_other`, `policy_name`, `virus_lover`, `spam_lover`, `banned_files_lover`, `bad_header_lover`, `bypass_virus_checks`, `bypass_spam_checks`, `bypass_banned_checks`, `bypass_header_checks`, `spam_modifies_subj`, `virus_quarantine_to`, `spam_quarantine_to`, `banned_quarantine_to`, `bad_header_quarantine_to`, `clean_quarantine_to`, `other_quarantine_to`, `spam_tag_level`, `spam_tag2_level`, `spam_kill_level`, `spam_dsn_cutoff_level`, `spam_quarantine_cutoff_level`, `addr_extension_virus`, `addr_extension_spam`, `addr_extension_banned`, `addr_extension_bad_header`, `warnvirusrecip`, `warnbannedrecip`, `warnbadhrecip`, `newvirus_admin`, `virus_admin`, `banned_admin`, `bad_header_admin`, `spam_admin`, `spam_subject_tag`, `spam_subject_tag2`, `message_size_limit`, `banned_rulenames`) VALUES(6, 1, 0, 'riud', 'riud', 'r', 'Trigger happy', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'Y', NULL, NULL, NULL, NULL, NULL, NULL, 3, 5, 5, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO `spamfilter_policy` (`id`, `sys_userid`, `sys_groupid`, `sys_perm_user`, `sys_perm_group`, `sys_perm_other`, `policy_name`, `virus_lover`, `spam_lover`, `banned_files_lover`, `bad_header_lover`, `bypass_virus_checks`, `bypass_spam_checks`, `bypass_banned_checks`, `bypass_header_checks`, `spam_modifies_subj`, `virus_quarantine_to`, `spam_quarantine_to`, `banned_quarantine_to`, `bad_header_quarantine_to`, `clean_quarantine_to`, `other_quarantine_to`, `spam_tag_level`, `spam_tag2_level`, `spam_kill_level`, `spam_dsn_cutoff_level`, `spam_quarantine_cutoff_level`, `addr_extension_virus`, `addr_extension_spam`, `addr_extension_banned`, `addr_extension_bad_header`, `warnvirusrecip`, `warnbannedrecip`, `warnbadhrecip`, `newvirus_admin`, `virus_admin`, `banned_admin`, `bad_header_admin`, `spam_admin`, `spam_subject_tag`, `spam_subject_tag2`, `message_size_limit`, `banned_rulenames`) VALUES(7, 1, 0, 'riud', 'riud', 'r', 'Permissive', 'N', 'N', 'N', 'Y', 'N', 'N', 'N', 'N', 'Y', NULL, NULL, NULL, NULL, NULL, NULL, 3, 10, 20, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `spamfilter_policy` (`id`, `sys_userid`, `sys_groupid`, `sys_perm_user`, `sys_perm_group`, `sys_perm_other`, `policy_name`, `virus_lover`, `spam_lover`, `banned_files_lover`, `bad_header_lover`, `bypass_virus_checks`, `bypass_spam_checks`, `bypass_banned_checks`, `bypass_header_checks`, `spam_modifies_subj`, `virus_quarantine_to`, `spam_quarantine_to`, `banned_quarantine_to`, `bad_header_quarantine_to`, `clean_quarantine_to`, `other_quarantine_to`, `spam_tag_level`, `spam_tag2_level`, `spam_kill_level`, `spam_dsn_cutoff_level`, `spam_quarantine_cutoff_level`, `addr_extension_virus`, `addr_extension_spam`, `addr_extension_banned`, `addr_extension_bad_header`, `warnvirusrecip`, `warnbannedrecip`, `warnbadhrecip`, `newvirus_admin`, `virus_admin`, `banned_admin`, `bad_header_admin`, `spam_admin`, `spam_subject_tag`, `spam_subject_tag2`, `message_size_limit`, `banned_rulenames`, `rspamd_greylisting`, `rspamd_spam_greylisting_level`, `rspamd_spam_tag_level`, `rspamd_spam_tag_method`, `rspamd_spam_kill_level`) VALUES(1, 1, 0, 'riud', 'riud', 'r', 'Non-paying', 'N', 'N', 'N', 'N', 'Y', 'Y', 'Y', 'N', 'Y', '', '', '', '', '', '', 3, 7, 10, 0, 0, '', '', '', '', 'N', 'N', 'N', '', '', '', '', '', '', '', 0, '', 'n', 6.00, 8.00, 'rewrite_subject', 12.00);
+INSERT INTO `spamfilter_policy` (`id`, `sys_userid`, `sys_groupid`, `sys_perm_user`, `sys_perm_group`, `sys_perm_other`, `policy_name`, `virus_lover`, `spam_lover`, `banned_files_lover`, `bad_header_lover`, `bypass_virus_checks`, `bypass_spam_checks`, `bypass_banned_checks`, `bypass_header_checks`, `spam_modifies_subj`, `virus_quarantine_to`, `spam_quarantine_to`, `banned_quarantine_to`, `bad_header_quarantine_to`, `clean_quarantine_to`, `other_quarantine_to`, `spam_tag_level`, `spam_tag2_level`, `spam_kill_level`, `spam_dsn_cutoff_level`, `spam_quarantine_cutoff_level`, `addr_extension_virus`, `addr_extension_spam`, `addr_extension_banned`, `addr_extension_bad_header`, `warnvirusrecip`, `warnbannedrecip`, `warnbadhrecip`, `newvirus_admin`, `virus_admin`, `banned_admin`, `bad_header_admin`, `spam_admin`, `spam_subject_tag`, `spam_subject_tag2`, `message_size_limit`, `banned_rulenames`, `rspamd_greylisting`, `rspamd_spam_greylisting_level`, `rspamd_spam_tag_level`, `rspamd_spam_tag_method`, `rspamd_spam_kill_level`) VALUES(2, 1, 0, 'riud', 'riud', 'r', 'Uncensored', 'Y', 'Y', 'Y', 'Y', 'N', 'N', 'N', 'N', 'N', NULL, NULL, NULL, NULL, NULL, NULL, 3, 999, 999, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'n', 999.00, 999.00, 'rewrite_subject', 999.00);
+INSERT INTO `spamfilter_policy` (`id`, `sys_userid`, `sys_groupid`, `sys_perm_user`, `sys_perm_group`, `sys_perm_other`, `policy_name`, `virus_lover`, `spam_lover`, `banned_files_lover`, `bad_header_lover`, `bypass_virus_checks`, `bypass_spam_checks`, `bypass_banned_checks`, `bypass_header_checks`, `spam_modifies_subj`, `virus_quarantine_to`, `spam_quarantine_to`, `banned_quarantine_to`, `bad_header_quarantine_to`, `clean_quarantine_to`, `other_quarantine_to`, `spam_tag_level`, `spam_tag2_level`, `spam_kill_level`, `spam_dsn_cutoff_level`, `spam_quarantine_cutoff_level`, `addr_extension_virus`, `addr_extension_spam`, `addr_extension_banned`, `addr_extension_bad_header`, `warnvirusrecip`, `warnbannedrecip`, `warnbadhrecip`, `newvirus_admin`, `virus_admin`, `banned_admin`, `bad_header_admin`, `spam_admin`, `spam_subject_tag`, `spam_subject_tag2`, `message_size_limit`, `banned_rulenames`, `rspamd_greylisting`, `rspamd_spam_greylisting_level`, `rspamd_spam_tag_level`, `rspamd_spam_tag_method`, `rspamd_spam_kill_level`) VALUES(3, 1, 0, 'riud', 'riud', 'r', 'Wants all spam', 'N', 'Y', 'N', 'N', 'N', 'N', 'N', 'N', 'Y', NULL, NULL, NULL, NULL, NULL, NULL, 3, 999, 999, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'n', 999.00, 999.00, 'rewrite_subject', 999.00);
+INSERT INTO `spamfilter_policy` (`id`, `sys_userid`, `sys_groupid`, `sys_perm_user`, `sys_perm_group`, `sys_perm_other`, `policy_name`, `virus_lover`, `spam_lover`, `banned_files_lover`, `bad_header_lover`, `bypass_virus_checks`, `bypass_spam_checks`, `bypass_banned_checks`, `bypass_header_checks`, `spam_modifies_subj`, `virus_quarantine_to`, `spam_quarantine_to`, `banned_quarantine_to`, `bad_header_quarantine_to`, `clean_quarantine_to`, `other_quarantine_to`, `spam_tag_level`, `spam_tag2_level`, `spam_kill_level`, `spam_dsn_cutoff_level`, `spam_quarantine_cutoff_level`, `addr_extension_virus`, `addr_extension_spam`, `addr_extension_banned`, `addr_extension_bad_header`, `warnvirusrecip`, `warnbannedrecip`, `warnbadhrecip`, `newvirus_admin`, `virus_admin`, `banned_admin`, `bad_header_admin`, `spam_admin`, `spam_subject_tag`, `spam_subject_tag2`, `message_size_limit`, `banned_rulenames`, `rspamd_greylisting`, `rspamd_spam_greylisting_level`, `rspamd_spam_tag_level`, `rspamd_spam_tag_method`, `rspamd_spam_kill_level`) VALUES(4, 1, 0, 'riud', 'riud', 'r', 'Wants viruses', 'Y', 'N', 'Y', 'Y', 'N', 'N', 'N', 'N', 'Y', NULL, NULL, NULL, NULL, NULL, NULL, 3, 6.9, 6.9, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'y', 4.00, 6.00, 'rewrite_subject', 10.00);
+INSERT INTO `spamfilter_policy` (`id`, `sys_userid`, `sys_groupid`, `sys_perm_user`, `sys_perm_group`, `sys_perm_other`, `policy_name`, `virus_lover`, `spam_lover`, `banned_files_lover`, `bad_header_lover`, `bypass_virus_checks`, `bypass_spam_checks`, `bypass_banned_checks`, `bypass_header_checks`, `spam_modifies_subj`, `virus_quarantine_to`, `spam_quarantine_to`, `banned_quarantine_to`, `bad_header_quarantine_to`, `clean_quarantine_to`, `other_quarantine_to`, `spam_tag_level`, `spam_tag2_level`, `spam_kill_level`, `spam_dsn_cutoff_level`, `spam_quarantine_cutoff_level`, `addr_extension_virus`, `addr_extension_spam`, `addr_extension_banned`, `addr_extension_bad_header`, `warnvirusrecip`, `warnbannedrecip`, `warnbadhrecip`, `newvirus_admin`, `virus_admin`, `banned_admin`, `bad_header_admin`, `spam_admin`, `spam_subject_tag`, `spam_subject_tag2`, `message_size_limit`, `banned_rulenames`, `rspamd_greylisting`, `rspamd_spam_greylisting_level`, `rspamd_spam_tag_level`, `rspamd_spam_tag_method`, `rspamd_spam_kill_level`) VALUES(5, 1, 0, 'riud', 'riud', 'r', 'Normal', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'Y', '', '', '', '', '', '', 1, 4.5, 50, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', '***SPAM***', NULL, NULL, 'y', 4.00, 6.00, 'rewrite_subject', 10.00);
+INSERT INTO `spamfilter_policy` (`id`, `sys_userid`, `sys_groupid`, `sys_perm_user`, `sys_perm_group`, `sys_perm_other`, `policy_name`, `virus_lover`, `spam_lover`, `banned_files_lover`, `bad_header_lover`, `bypass_virus_checks`, `bypass_spam_checks`, `bypass_banned_checks`, `bypass_header_checks`, `spam_modifies_subj`, `virus_quarantine_to`, `spam_quarantine_to`, `banned_quarantine_to`, `bad_header_quarantine_to`, `clean_quarantine_to`, `other_quarantine_to`, `spam_tag_level`, `spam_tag2_level`, `spam_kill_level`, `spam_dsn_cutoff_level`, `spam_quarantine_cutoff_level`, `addr_extension_virus`, `addr_extension_spam`, `addr_extension_banned`, `addr_extension_bad_header`, `warnvirusrecip`, `warnbannedrecip`, `warnbadhrecip`, `newvirus_admin`, `virus_admin`, `banned_admin`, `bad_header_admin`, `spam_admin`, `spam_subject_tag`, `spam_subject_tag2`, `message_size_limit`, `banned_rulenames`, `rspamd_greylisting`, `rspamd_spam_greylisting_level`, `rspamd_spam_tag_level`, `rspamd_spam_tag_method`, `rspamd_spam_kill_level`) VALUES(6, 1, 0, 'riud', 'riud', 'r', 'Trigger happy', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'Y', NULL, NULL, NULL, NULL, NULL, NULL, 3, 5, 5, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'y', 2.00, 4.00, 'rewrite_subject', 8.00);
+INSERT INTO `spamfilter_policy` (`id`, `sys_userid`, `sys_groupid`, `sys_perm_user`, `sys_perm_group`, `sys_perm_other`, `policy_name`, `virus_lover`, `spam_lover`, `banned_files_lover`, `bad_header_lover`, `bypass_virus_checks`, `bypass_spam_checks`, `bypass_banned_checks`, `bypass_header_checks`, `spam_modifies_subj`, `virus_quarantine_to`, `spam_quarantine_to`, `banned_quarantine_to`, `bad_header_quarantine_to`, `clean_quarantine_to`, `other_quarantine_to`, `spam_tag_level`, `spam_tag2_level`, `spam_kill_level`, `spam_dsn_cutoff_level`, `spam_quarantine_cutoff_level`, `addr_extension_virus`, `addr_extension_spam`, `addr_extension_banned`, `addr_extension_bad_header`, `warnvirusrecip`, `warnbannedrecip`, `warnbadhrecip`, `newvirus_admin`, `virus_admin`, `banned_admin`, `bad_header_admin`, `spam_admin`, `spam_subject_tag`, `spam_subject_tag2`, `message_size_limit`, `banned_rulenames`, `rspamd_greylisting`, `rspamd_spam_greylisting_level`, `rspamd_spam_tag_level`, `rspamd_spam_tag_method`, `rspamd_spam_kill_level`) VALUES(7, 1, 0, 'riud', 'riud', 'r', 'Permissive', 'N', 'N', 'N', 'Y', 'N', 'N', 'N', 'N', 'Y', NULL, NULL, NULL, NULL, NULL, NULL, 3, 10, 20, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'n', 7.00, 10.00, 'rewrite_subject', 20.00);
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Dumping data for table `sys_group`
--- 
+--
 
 INSERT INTO `sys_group` (`groupid`, `name`, `description`, `client_id`) VALUES (1, 'admin', 'Administrators group', 0);
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Dumping data for table `sys_ini`
--- 
+--
 
 INSERT INTO `sys_ini` (`sysini_id`, `config`, `default_logo`, `custom_logo`) VALUES (1, '', 'data:image/png;base64,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', '');
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Dumping data for table `sys_user`
--- 
+--
 
 INSERT INTO `sys_theme` (`var_id`, `tpl_name`, `username`, `logo_url`) VALUES (NULL, 'default', 'global', 'themes/default/images/header_logo.png');
 INSERT INTO `sys_theme` (`var_id`, `tpl_name`, `username`, `logo_url`) VALUES (NULL, 'default-v2', 'global', 'themes/default-v2/images/header_logo.png');
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Dumping data for table `sys_user`
--- 
+--
 
 INSERT INTO `sys_user` (`userid`, `sys_userid`, `sys_groupid`, `sys_perm_user`, `sys_perm_group`, `sys_perm_other`, `username`, `passwort`, `modules`, `startmodule`, `app_theme`, `typ`, `active`, `language`, `groups`, `default_group`, `client_id`) VALUES (1, 1, 0, 'riud', 'riud', '', 'admin', '21232f297a57a5a743894a0e4a801fc3', 'dashboard,admin,client,mail,monitor,sites,dns,vm,tools,help', 'dashboard', 'default', 'admin', 1, 'en', '1,2', 1, 0);
 
@@ -2489,7 +2587,7 @@ INSERT INTO `sys_user` (`userid`, `sys_userid`, `sys_groupid`, `sys_perm_user`, 
 -- Dumping data for table `sys_config`
 --
 
-INSERT INTO sys_config VALUES ('db','db_version','3.1dev');
+INSERT INTO sys_config VALUES ('db','db_version','3.2dev');
 INSERT INTO sys_config VALUES ('interface','session_timeout','0');
 
 SET FOREIGN_KEY_CHECKS = 1;

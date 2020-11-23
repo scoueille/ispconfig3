@@ -48,17 +48,15 @@ if ((isset($_SESSION['s_old']) && ($_SESSION['s_old']['user']['typ'] == 'admin' 
 	echo '
 		<br /> <br />	<br /> <br />
 		'.str_replace('{UTYPE}', $utype, $wb['login_as_or_logout_txt']).'<br />
-		<div style="visibility:hidden">
-			<input type="text" name="username" value="' . $_SESSION['s_old']['user']['username'] . '" />
-			<input type="password" name="password" value="' . $_SESSION['s_old']['user']['passwort'] .'" />
-		</div>
+		<input type="hidden" name="username" value="' . $_SESSION['s_old']['user']['username'] . '" />
+		<input type="hidden" name="password" value="' . $_SESSION['s_old']['user']['passwort'] .'" />
 		<input type="hidden" name="s_mod" value="login" />
 		<input type="hidden" name="s_pg" value="index" />
 		<input type="hidden" name="login_as" value="1" />
 	    <div class="wf_actions buttons">
-	      <button class="btn btn-default formbutton-success" type="button" value="Yes, re-login as ' . $utype . '" data-submit-form="pageForm" data-form-action="/login/index.php"><span>Yes, re-login as ' . $utype . '</span></button>
-	      <button class="btn btn-default formbutton-default" type="button" value="No, logout" data-load-content="login/logout.php?l=1"><span>No, logout</span></button>
-	    </div>
+			  <button class="btn btn-default formbutton-success" type="button" value="' . sprintf($wb['btn_reloginas_txt'], $utype) . '" data-submit-form="pageForm" data-form-action="/login/index.php"><span>' . sprintf($wb['btn_reloginas_txt'], $utype) . '</span></button>
+				<button class="btn btn-default formbutton-default" type="button" value="' . $wb['btn_nologout_txt'] . '" data-load-content="login/logout.php?l=1"><span>' . $wb['btn_nologout_txt'] . '</span></button>
+			</div>
 	';
 	exit;
 }

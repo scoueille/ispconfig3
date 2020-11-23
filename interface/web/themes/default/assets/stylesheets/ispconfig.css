@@ -1,5 +1,6 @@
 body {
-  overflow-y: scroll; }
+  overflow-y: scroll;
+  overflow-x: hidden; }
 
 .left {
   float: left; }
@@ -25,6 +26,9 @@ body {
 .form-group input[type='checkbox'] {
   margin-top: 10px; }
 
+.form-group .checkbox-inline input[type='checkbox'] {
+  margin-top: 4px; }
+
 .control-label {
   font-weight: normal; }
   .control-label:after {
@@ -32,6 +36,10 @@ body {
 
 .control-label-plain:after {
     content: ""; }
+
+.inlineLabel {
+  font-weight: 400;
+}
 
 .formbutton-default {
   padding: 6px 10px;
@@ -120,6 +128,10 @@ body {
   .btn-group-justified .btn:last-of-type {
     border-right-width: 1px; }
 
+.dns-record-btn {
+  margin-top: 3px;
+}
+
 #content {
   width: 78%; }
 
@@ -137,7 +149,9 @@ body {
 
 #sidebar {
   margin-top: 27px;
-  width: 18%;
+  min-width: 18%;
+  max-width: 21%;
+  width: auto;
   border-style: solid;
   border-width: 1px;
   border-radius: 4px; }
@@ -418,7 +432,7 @@ ul.gs-resultbox li.gs-cheader p.gs-cheader-limit {
 ul.df-resultbox li.df-cdata img,
 ul.gs-resultbox li.gs-cdata img {
   margin-right: 12px; }
-    
+
 ul.df-resultbox li.df-cdata p span.df-cdata-title,
 ul.gs-resultbox li.gs-cdata p span.gs-cdata-title {
   font-weight: bold; }
@@ -778,4 +792,20 @@ span.notification_text {
     margin-bottom: auto;
     font-family: inherit;
     color: white;
+}
+.finediff {
+	font-family: monospace;
+}
+.finediff ins {
+	color: green;
+	background: #dfd;
+	text-decoration: none;
+}
+.finediff del {
+	color: red;
+	background: #fdd;
+	text-decoration: none;
+}
+#apache_directives, #nginx_directives, #proxy_directives {
+	font-family: Consolas, "Courier New", Courier, monospace;
 }

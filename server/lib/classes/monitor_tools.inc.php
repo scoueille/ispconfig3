@@ -44,12 +44,12 @@ class monitor_tools {
 
 	//** Debian or Ubuntu
 	if(file_exists('/etc/debian_version')) {
-		
+
 		// Check if this is Ubuntu and not Debian
 		if (strstr(trim(file_get_contents('/etc/issue')), 'Ubuntu') || (is_file('/etc/os-release') && stristr(file_get_contents('/etc/os-release'), 'Ubuntu'))) {
-			
+
 			$issue = file_get_contents('/etc/issue');
-			
+
 			// Use content of /etc/issue file
 			if(strstr($issue,'Ubuntu')) {
 				if (strstr(trim($issue), 'LTS')) {
@@ -75,7 +75,7 @@ class monitor_tools {
 				} else {
 					$lts = "";
 				}
-				
+
 				$distname = 'Ubuntu';
 				$distid = 'debian40';
 				$distbaseid = 'debian';
@@ -87,6 +87,10 @@ class monitor_tools {
 				$mainver = $ver;
 			}
 			switch ($mainver){
+			case "20.04":
+				$relname = "(Focal Fossa)";
+				$distconfid = 'ubuntu2004';
+				break;
 			case "18.04":
 				$relname = "(Bionic Beaver)";
 				$distconfid = 'ubuntu1804';
@@ -200,15 +204,21 @@ class monitor_tools {
 			$distver = 'Wheezy/Sid';
 			$distid = 'debian60';
 			$distbaseid = 'debian';
-		} elseif(strstr(trim(file_get_contents('/etc/debian_version')), '8') || substr(trim(file_get_contents('/etc/debian_version')),0,1) == '8') {
+		} elseif(substr(trim(file_get_contents('/etc/debian_version')),0,1) == '8') {
 			$distname = 'Debian';
 			$distver = 'Jessie';
 			$distid = 'debian60';
 			$distbaseid = 'debian';
-		} elseif(strstr(trim(file_get_contents('/etc/debian_version')), '9') || substr(trim(file_get_contents('/etc/debian_version')),0,1) == '9') {
+		} elseif(substr(trim(file_get_contents('/etc/debian_version')),0,1) == '9') {
 			$distname = 'Debian';
 			$distver = 'Stretch';
 			$distconfid = 'debian90';
+			$distid = 'debian60';
+			$distbaseid = 'debian';
+		} elseif(substr(trim(file_get_contents('/etc/debian_version')),0,2) == '10') {
+			$distname = 'Debian';
+			$distver = 'Buster';
+			$distconfid = 'debian100';
 			$distid = 'debian60';
 			$distbaseid = 'debian';
 		} elseif(strstr(trim(file_get_contents('/etc/debian_version')), '/sid')) {
@@ -220,7 +230,8 @@ class monitor_tools {
 		} else {
 			$distname = 'Debian';
 			$distver = 'Unknown';
-			$distid = 'debian40';
+			$distid = 'debian60';
+			$distconfid = 'debian100';
 			$distbaseid = 'debian';
 		}
 	}
@@ -240,6 +251,14 @@ class monitor_tools {
 		} elseif(stristr(file_get_contents('/etc/SuSE-release'), '11.2')) {
 			$distname = 'openSUSE';
 			$distver = '11.2';
+			$distid = 'opensuse112';
+			$distbaseid = 'opensuse';
+		} elseif(stristr(file_get_contents('/etc/os-release'), 'opensuse')) {
+			$content = file_get_contents('/etc/os-release');
+            preg_match_all('/NAME=\"([\w ]+)\"/m', $content, $name);
+            preg_match_all('/VERSION_ID=\"([0-9]{1,2})\.?([0-9]{0,2})\.?([0-9]*).$/m', $content, $version);
+			$distname = is_array($name) ? $name[1][0] : 'openSUSE';
+			$distver = is_array($version) ? implode('.', array_filter(array($version[1][0],$version[2][0],$version[3][0]),'strlen')) : 'Unknown';
 			$distid = 'opensuse112';
 			$distbaseid = 'opensuse';
 		}  else {
@@ -292,8 +311,9 @@ class monitor_tools {
 			$distid = 'centos53';
 			$distbaseid = 'fedora';
 		} elseif(stristr($content, 'CentOS Linux release 7')) {
+			preg_match_all('/([0-9]{1,2})\.?([0-9]{0,2})\.?([0-9]*)/', $content, $version);
 			$distname = 'CentOS';
-			$distver = 'Unknown';
+			$distver = is_array($version)? implode('.', array_filter(array($version[1][0],$version[2][0],$version[3][0]),'strlen')) :'Unknown';
 			$distbaseid = 'fedora';
 			$var=explode(" ", $content);
 			$var=explode(".", $var[3]);
@@ -303,6 +323,14 @@ class monitor_tools {
 			} else {
 				$distid = 'centos72';
 			}
+		} elseif(stristr($content, 'CentOS Linux release 8')) {
+			preg_match_all('/([0-9]{1,2})\.?([0-9]{0,2})\.?([0-9]*)/', $content, $version);
+			$distname = 'CentOS';
+			$distver = is_array($version)? implode('.', array_filter(array($version[1][0],$version[2][0],$version[3][0]),'strlen')) :'Unknown';
+			$distbaseid = 'fedora';
+			$var=explode(" ", $content);
+			$var=explode(".", $var[3]);
+			$var=$var[0].".".$var[1];
 		} else {
 			$distname = 'Redhat';
 			$distver = 'Unknown';
@@ -325,7 +353,7 @@ class monitor_tools {
 	} else {
 		die('Unrecognized GNU/Linux distribution');
 	}
-	
+
 	// Set $distconfid to distid, if no different id for the config is defined
 	if(!isset($distconfid)) $distconfid = $distid;
 
@@ -532,6 +560,32 @@ class monitor_tools {
 				$logfile = '/var/log/cron';
 			}
 			break;
+		case 'log_letsencrypt':
+				$check_files = array();
+				if(file_exists($conf['ispconfig_log_dir'].'/acme.log')) {
+					$check_files[] = $conf['ispconfig_log_dir'].'/acme.log';
+				}
+				if(file_exists('/root/.acme.sh/acme.sh') && file_exists('/root/.acme.sh/acme.sh.log')) {
+					$check_files[] = '/root/.acme.sh/acme.sh.log';
+				}
+				if(file_exists('/usr/local/ispconfig/server/scripts/acme.sh') && file_exists('/usr/local/ispconfig/server/scripts/acme.sh.log')) {
+					$check_files[] = '/usr/local/ispconfig/server/scripts/acme.sh.log';
+				}
+				if(file_exists('/var/log/letsencrypt/letsencrypt.log')) {
+					$check_files[] = '/var/log/letsencrypt/letsencrypt.log';
+				}
+				$logfile = '';
+				$newest = 0;
+
+				foreach($check_files as $file) {
+					$mtime = filemtime($file);
+					if($mtime > $newest) {
+						$newest = $mtime;
+						$logfile = $file;
+					}
+				}
+				unset($check_files);
+			break;
 		case 'log_freshclam':
 			if ($dist == 'debian') {
 				$logfile = '/var/log/clamav/freshclam.log';
@@ -586,13 +640,12 @@ class monitor_tools {
 
 		// Getting the logfile content
 		if ($logfile != '') {
-			$logfile = escapeshellcmd($logfile);
 			if (stristr($logfile, ';') or substr($logfile, 0, 9) != '/var/log/' or stristr($logfile, '..')) {
 				$log = 'Logfile path error.';
 			} else {
 				$log = '';
 				if (is_readable($logfile)) {
-					$fd = popen('tail -n 100 ' . $logfile, 'r');
+					$fd = popen('tail -n 100 ' . escapeshellarg($logfile), 'r');
 					if ($fd) {
 						while (!feof($fd)) {
 							$log .= fgets($fd, 4096);
@@ -780,7 +833,8 @@ class monitor_tools {
 		$mailSubject = '';
 		$inHeader = true;
 		for($l = 0; $l < count($lines); $l++) {
-			if(trim($lines[$l]) == '') {
+			/* Trim only in headers */
+			if($inHeader && trim($lines[$l]) == '') {
 				$inHeader = false;
 				continue;
 			}
@@ -804,7 +858,7 @@ class monitor_tools {
 		$mailBody = strtr($mailBody, $placeholders);
 
 		for($r = 0; $r < count($recipients); $r++) {
-			mail($recipients[$r], $mailSubject, $mailBody, $mailHeaders);
+			$app->functions->mail($recipients[$r], $mailSubject, $mailBody, $mailHeaders);
 		}
 
 		unset($mailSubject);

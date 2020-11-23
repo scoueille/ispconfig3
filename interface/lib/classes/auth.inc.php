@@ -141,12 +141,18 @@ class auth {
 		}
 	}
 
-	public function check_module_permissions($module) {
+
+       /**
+        * Check that the user has access to the given module.
+        *
+        * @return boolean
+        */
+       public function verify_module_permissions($module)  {
 		// Check if the current user has the permissions to access this module
 		$module = trim(preg_replace('@\s+@', '', $module));
 		$user_modules = explode(',',$_SESSION["s"]["user"]["modules"]);
+               $can_use_module = false;
 		if(strpos($module, ',') !== false){
-			$can_use_module = false;
 			$tmp_modules = explode(',', $module);
 			if(is_array($tmp_modules) && !empty($tmp_modules)){
 				foreach($tmp_modules as $tmp_module){
@@ -158,17 +164,21 @@ class auth {
 					}
 				}
 			}
-			if(!$can_use_module){
-				// echo "LOGIN_REDIRECT:/index.php";
-				header("Location: /index.php");
-				exit;
-			}
-		} else {
-			if(!in_array($module,$user_modules)) {
-				// echo "LOGIN_REDIRECT:/index.php";
-				header("Location: /index.php");
-				exit;
-			}
+               }
+               elseif(in_array($module,$user_modules)) {
+                       $can_use_module = true;
+               }
+               return $can_use_module;
+       }
+
+       /**
+        * Check that the user has access to the given module, redirect and exit on failure.
+        */
+       public function check_module_permissions($module)  {
+               if(!$this->verify_module_permissions($module)) {
+                       // echo "LOGIN_REDIRECT:/index.php";
+                       header("Location: /index.php");
+                       exit;
 		}
 	}
 	
@@ -188,6 +198,36 @@ class auth {
 		
 	}
 
+	/**
+	 * Get the minimum password length.
+	 */
+	public function get_min_password_length() {
+		global $app;
+		$server_config_array = $app->getconf->get_global_config();
+		$min_password_length = 8;
+		if(isset($server_config_array['misc']['min_password_length'])) $min_password_length = $server_config_array['misc']['min_password_length'];
+		return $min_password_length;
+	}
+
+	/**
+	 * Get the minimum password strength.
+	 */
+	public function get_min_password_strength() {
+		global $app;
+		$server_config_array = $app->getconf->get_global_config();
+		$min_password_strength = 0;
+		if(isset($server_config_array['misc']['min_password_strength'])) $min_password_strength = $server_config_array['misc']['min_password_strength'];
+		return $min_password_strength;
+	}
+
+	/**
+	 * Generate a ranmdom password.
+	 *
+	 * @param int $minLength
+	 *   Minimum number of characters.
+	 * @param boolean $special
+	 *   Include special characters, like # and !
+	 */
 	public function get_random_password($minLength = 8, $special = false) {
 		if($minLength < 8) $minLength = 8;
 		$maxLength = $minLength + 5;
@@ -231,12 +271,27 @@ class auth {
 		if($charset != 'UTF-8') {
 			$cleartext_password = mb_convert_encoding($cleartext_password, $charset, 'UTF-8');
 		}
-		$salt="$1$";
-		$base64_alphabet='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-		for ($n=0;$n<8;$n++) {
-			$salt.=$base64_alphabet[mt_rand(0, 63)];
+		
+		if(defined('CRYPT_SHA512') && CRYPT_SHA512 == 1) {
+			$salt = '$6$rounds=5000$';
+			$salt_length = 16;
+		} elseif(defined('CRYPT_SHA256') && CRYPT_SHA256 == 1) {
+			$salt = '$5$rounds=5000$';
+			$salt_length = 16;
+		} else {
+			$salt = '$1$';
+			$salt_length = 12;
 		}
-		$salt.="$";
+		
+		if(function_exists('openssl_random_pseudo_bytes')) {
+			$salt .= substr(bin2hex(openssl_random_pseudo_bytes($salt_length)), 0, $salt_length);
+		} else {
+			$base64_alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789./';
+			for($n = 0; $n < $salt_length; $n++) {
+				$salt .= $base64_alphabet[mt_rand(0, 63)];
+			}
+		}
+		$salt .= "$";
 		return crypt($cleartext_password, $salt);
 	}
 	
@@ -253,16 +308,27 @@ class auth {
 		return array('csrf_id' => $_csrf_id,'csrf_key' => $_csrf_key);
 	}
 	
-	public function csrf_token_check() {
+	public function csrf_token_check($method = 'POST') {
 		global $app;
 		
-		if(isset($_POST) && is_array($_POST)) {
+		if($method == 'POST') {
+			$input_vars = $_POST;
+		} elseif ($method == 'GET') {
+			$input_vars = $_GET;
+		} else {
+			$app->error('Unknown CSRF verification method.');
+		}
+		
+		//print_r($input_vars);
+		//die(print_r($_SESSION['_csrf']));
+		
+		if(isset($input_vars) && is_array($input_vars)) {
 			$_csrf_valid = false;
-			if(isset($_POST['_csrf_id']) && isset($_POST['_csrf_key'])) {
-				$_csrf_id = trim($_POST['_csrf_id']);
-				$_csrf_key = trim($_POST['_csrf_key']);
+			if(isset($input_vars['_csrf_id']) && isset($input_vars['_csrf_key'])) {
+				$_csrf_id = trim($input_vars['_csrf_id']);
+				$_csrf_key = trim($input_vars['_csrf_key']);
 				if(isset($_SESSION['_csrf']) && isset($_SESSION['_csrf'][$_csrf_id]) && isset($_SESSION['_csrf_timeout']) && isset($_SESSION['_csrf_timeout'][$_csrf_id])) {
-					if($_SESSION['_csrf'][$_csrf_id] === $_csrf_key && $_SESSION['_csrf_timeout'] >= time()) $_csrf_valid = true;
+					if($_SESSION['_csrf'][$_csrf_id] === $_csrf_key && $_SESSION['_csrf_timeout'][$_csrf_id] >= time()) $_csrf_valid = true;
 				}
 			}
 			if($_csrf_valid !== true) {

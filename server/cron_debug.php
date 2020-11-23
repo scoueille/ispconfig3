@@ -39,7 +39,7 @@ ini_set('error_reporting', E_ALL & ~E_NOTICE);
 $conf['server_id'] = intval($conf['server_id']);
 
 // Load required base-classes
-$app->uses('ini_parser,file,services,getconf,system,cron,functions');
+$app->uses('modules,plugins,ini_parser,file,services,getconf,system,cron,functions');
 $app->load('libdatetime,cronjob');
 
 // Path settings
@@ -52,7 +52,7 @@ if(isset($cmd_opt['cronjob']) && is_file($path.'/'.$cmd_opt['cronjob'])) {
 	// Cronjob that shell be run
 	$cronjob_file = $cmd_opt['cronjob'];
 } else {
-	die('Usage example: php cron_debug.php --cronjob=100-mailbox_stats.inc.php');
+	die('Usage example: php cron_debug.php --cronjob=100-mailbox_stats.inc.php'."\n");
 }
 
 // Load and run the cronjob
@@ -61,12 +61,8 @@ if(preg_match('/^\d+\-(.*)$/', $name, $match)) $name = $match[1]; // strip numer
 include $path . '/' . $cronjob_file;
 $class_name = 'cronjob_' . $name;
 $cronjob = new $class_name();
+$cronjob->run(true);
 
-$cronjob->onPrepare();
-$cronjob->onBeforeRun();
-$cronjob->onRunJob();
-$cronjob->onAfterRun();
-
-die("finished.\n");
+die("finished cron debug.\n");
 
 ?>

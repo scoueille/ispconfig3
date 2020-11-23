@@ -1,9 +1,10 @@
 <?php
+$wb['users_txt'] = 'Users';
 $wb['username_txt'] = 'Käyttäjätunnus';
 $wb['username_err'] = 'Käyttäjätunnus on liian pitkä tai sisältää kiellettyjä merkkejä.';
 $wb['username_empty'] = 'Käyttäjätunnus on tyhjä.';
 $wb['username_unique'] = 'Tämä käyttäjätunnus on jo olemassa.';
-$wb['passwort_txt'] = 'Salasana';
+$wb['password_txt'] = 'Salasana';
 $wb['modules_txt'] = 'Ohjelmaosiot';
 $wb['startmodule_txt'] = 'Aloitusosio';
 $wb['app_theme_txt'] = 'Teema';

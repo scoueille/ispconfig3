@@ -249,6 +249,15 @@ class ApsGUIController extends ApsBase
 			$settings['main_database_host'] = 'localhost';
 			$mysql_db_remote_access = 'n';
 			$mysql_db_remote_ips = '';
+
+			// If we are dealing with chrooted PHP-FPM, use a network connection instead because the MySQL socket file
+			// does not exist within the chroot.
+			$php_fpm_chroot = $app->db->queryOneRecord("SELECT php_fpm_chroot FROM web_domain WHERE domain_id = ?", $websrv['domain_id']);
+			if ($php_fpm_chroot['php_fpm_chroot'] === 'y') {
+				$settings['main_database_host'] = '127.0.0.1';
+				$mysql_db_remote_access = 'y';
+				$mysql_db_remote_ips = '127.0.0.1';
+			}
 		} else {
 			//* get the default database server of the client
 			$client = $app->db->queryOneRecord("SELECT default_dbserver FROM sys_group, client WHERE sys_group.client_id = client.client_id and sys_group.groupid = ?", $websrv['sys_groupid']);
@@ -331,6 +340,8 @@ class ApsGUIController extends ApsBase
 								 "remote_access" => $mysql_db_remote_access,
 								 "remote_ips" => $mysql_db_remote_ips,
 								 "backup_copies" => $websrv['backup_copies'],
+								 "backup_format_web" => $websrv['backup_format_web'],
+								 "backup_format_db" => $websrv['backup_format_db'],
 								 "active" => 'y', 
 								 "backup_interval" => $websrv['backup_interval']
 								 );
@@ -558,6 +569,16 @@ class ApsGUIController extends ApsBase
 		}
 		else $error[] = $app->lng('error_main_domain');
 
+		if(isset($postinput['admin_password']))
+		{
+			$app->uses('validate_password');
+
+			$passwordError = $app->validate_password->password_check('', $postinput['admin_password'], '');
+			if ($passwordError) {
+				$error[] = $passwordError;
+			}
+		}
+
 		// Main location (not obligatory but must be supplied)
 		if(isset($postinput['main_location']))
 		{
@@ -618,8 +639,24 @@ class ApsGUIController extends ApsBase
 						// The location might be empty but the DB return must not be false!
 						if($location_for_domain) $used_path .= $location_for_domain['value'];
 
+						// If user is trying to install into exactly the same path, give an error
 						if($new_path == $used_path)
 						{
+							$temp_errstr = $app->lng('error_used_location');
+							break;
+						}
+
+						// If the new path is _below_ an existing path, give an error because the
+						// installation will delete the files of the existing APS installation
+						if (mb_substr($used_path, 0, mb_strlen($new_path)) === $new_path) {
+							$temp_errstr = $app->lng('error_used_location');
+							break;
+						}
+
+						// If the new path is _within_ an existing path, give an error. Even if
+						// installation would proceed fine in theory, deleting the "lower" package
+						// in the future would also inadvertedly delete the "nested" package
+						if (mb_substr($new_path, 0, mb_strlen($used_path)) === $used_path) {
 							$temp_errstr = $app->lng('error_used_location');
 							break;
 						}

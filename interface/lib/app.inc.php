@@ -49,7 +49,7 @@ class app {
 	private $_loaded_classes = array();
 	private $_conf;
 	private $_security_config;
-	
+
 	public $loaded_plugins = array();
 
 	public function __construct() {
@@ -58,26 +58,42 @@ class app {
 		if (isset($_REQUEST['GLOBALS']) || isset($_FILES['GLOBALS']) || isset($_REQUEST['s']) || isset($_REQUEST['s_old']) || isset($_REQUEST['conf'])) {
 			die('Internal Error: var override attempt detected');
 		}
-		
+
 		$this->_conf = $conf;
 		if($this->_conf['start_db'] == true) {
 			$this->load('db_'.$this->_conf['db_type']);
-			$this->db = new db;
+			try {
+				$this->db = new db;
+			} catch (Exception $e) {
+				$this->db = false;
+			}
 		}
+		$this->uses('functions'); // we need this before all others!
+		$this->uses('auth,plugin,ini_parser,getconf');
 
+	}
+
+	public function __get($prop) {
+		if(property_exists($this, $prop)) return $this->{$prop};
+
+		$this->uses($prop);
+		if(property_exists($this, $prop)) return $this->{$prop};
+		else trigger_error('Undefined property ' . $prop . ' of class app', E_USER_WARNING);
+	}
+
+	public function __destruct() {
+		session_write_close();
+	}
+
+	public function initialize_session() {
 		//* Start the session
 		if($this->_conf['start_session'] == true) {
-
+			session_name('ISPCSESS');
 			$this->uses('session');
 			$sess_timeout = $this->conf('interface', 'session_timeout');
-			$cookie_domain = (isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : $_SERVER['HTTP_HOST']);
-			
-			// Workaround for Nginx servers
-			if($cookie_domain == '_') {
-				$tmp = explode(':',$_SERVER["HTTP_HOST"]);
-				$cookie_domain = $tmp[0];
-				unset($tmp);
-			}
+			$cookie_domain = $this->get_cookie_domain();
+			$this->log("cookie_domain is ".$cookie_domain,0);
+			$cookie_domain = '';
 			$cookie_secure = ($_SERVER["HTTPS"] == 'on')?true:false;
 			if($sess_timeout) {
 				/* check if user wants to stay logged in */
@@ -102,7 +118,7 @@ class app {
 			} else {
 				session_set_cookie_params(0,'/',$cookie_domain,$cookie_secure,true); // until browser is closed
 			}
-			
+
 			session_set_save_handler( array($this->session, 'open'),
 				array($this->session, 'close'),
 				array($this->session, 'read'),
@@ -111,28 +127,13 @@ class app {
 				array($this->session, 'gc'));
 
 			session_start();
-			
+
 			//* Initialize session variables
 			if(!isset($_SESSION['s']['id']) ) $_SESSION['s']['id'] = session_id();
 			if(empty($_SESSION['s']['theme'])) $_SESSION['s']['theme'] = $conf['theme'];
 			if(empty($_SESSION['s']['language'])) $_SESSION['s']['language'] = $conf['language'];
 		}
 
-		$this->uses('functions'); // we need this before all others!
-		$this->uses('auth,plugin,ini_parser,getconf');
-		
-	}
-
-	public function __get($prop) {
-		if(property_exists($this, $prop)) return $this->{$prop};
-		
-		$this->uses($prop);
-		if(property_exists($this, $prop)) return $this->{$prop};
-		else return null;
-	}
-	
-	public function __destruct() {
-		session_write_close();
 	}
 
 	public function uses($classes) {
@@ -159,7 +160,7 @@ class app {
 			}
 		}
 	}
-	
+
 	public function conf($plugin, $key, $value = null) {
 		if(is_null($value)) {
 			$tmpconf = $this->db->queryOneRecord("SELECT `value` FROM `sys_config` WHERE `group` = ? AND `name` = ?", $plugin, $key);
@@ -191,14 +192,14 @@ class app {
 			/*
 			if (is_writable($this->_conf['log_file'])) {
 				if (!$fp = fopen ($this->_conf['log_file'], 'a')) {
-					$this->error('Unable to open logfile.');
+					$this->error('Unable to open logfile: ' . $this->_conf['log_file']);
 				}
 				if (!fwrite($fp, date('d.m.Y-H:i').' - '. $msg."\r\n")) {
-					$this->error('Unable to write to logfile.');
+					$this->error('Unable to write to logfile: ' . $this->_conf['log_file']);
 				}
 				fclose($fp);
 			} else {
-				$this->error('Unable to write to logfile.');
+				$this->error('Unable to write to logfile: ' . $this->_conf['log_file']);
 			}
 			*/
 		}
@@ -247,7 +248,7 @@ class app {
 			}
 			$this->_language_inc = 1;
 		}
-		if(isset($this->_wb[$text]) && $this->wb[$text] !== '') {
+		if(isset($this->_wb[$text]) && $this->_wb[$text] !== '') {
 			$text = $this->_wb[$text];
 		} else {
 			if($this->_conf['debug_language']) {
@@ -283,6 +284,7 @@ class app {
 			$this->tpl->setVar('datalog_changes_end_txt', $this->lng('datalog_changes_end_txt'));
 			$this->tpl->setVar('datalog_changes_count', $datalog['count']);
 			$this->tpl->setLoop('datalog_changes', $datalog['entries']);
+			$this->tpl->setVar('datalog_changes_close_txt', $this->lng('datalog_changes_close_txt'));
 		} else {
 			$this->tpl->setVar('app_version', '');
 		}
@@ -333,15 +335,71 @@ class app {
 		$this->tpl->setVar('globalsearch_searchfield_watermark_txt', $this->lng('globalsearch_searchfield_watermark_txt'));
 	}
 
+	public function is_under_maintenance() {
+		$system_config_misc = $this->getconf->get_global_config('misc');
+		$maintenance_mode = 'n';
+		$maintenance_mode_exclude_ips = [];
+
+		if (!empty($system_config_misc['maintenance_mode'])) {
+			$maintenance_mode = $system_config_misc['maintenance_mode'];
+		}
+
+		if (!empty($system_config_misc['maintenance_mode_exclude_ips'])) {
+			$maintenance_mode_exclude_ips = array_map('trim', explode(',', $system_config_misc['maintenance_mode_exclude_ips']));
+		}
+
+		return 'y' === $maintenance_mode && !in_array($_SERVER['REMOTE_ADDR'], $maintenance_mode_exclude_ips);
+	}
+
+	private function get_cookie_domain() {
+		$sec_config = $this->getconf->get_security_config('permissions');
+		$proxy_panel_allowed = $sec_config['reverse_proxy_panel_allowed'];
+		if ($proxy_panel_allowed == 'all') {
+			return '';
+		}
+		/*
+		 * See ticket #5238: It should be ensured, that _SERVER_NAME is always set.
+		 * Otherwise the security improvement doesn't work with nginx. If this is done,
+		 * the check for HTTP_HOST and workaround for nginx is obsolete.
+		 */
+		$cookie_domain = (isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : $_SERVER['HTTP_HOST']);
+		// Workaround for Nginx servers
+		if($cookie_domain == '_') {
+			$tmp = explode(':',$_SERVER["HTTP_HOST"]);
+			$cookie_domain = $tmp[0];
+			unset($tmp);
+		}
+		if($proxy_panel_allowed == 'sites') {
+			$forwarded_host = (isset($_SERVER['HTTP_X_FORWARDED_HOST']) ? $_SERVER['HTTP_X_FORWARDED_HOST'] : null );
+			if($forwarded_host !== null && $forwarded_host !== $cookie_domain) {
+				// Just check for complete domain name and not auto subdomains
+				$sql = "SELECT domain_id from web_domain where domain = ?";
+				$recs = $this->db->queryOneRecord($sql, $forwarded_host);
+				if($recs !== null) {
+					$cookie_domain = $forwarded_host;
+				}
+				unset($forwarded_host);
+			}
+		}
+
+		return $cookie_domain;
+	}
+
 } // end class
 
 //** Initialize application (app) object
 //* possible future =  new app($conf);
 $app = new app();
+/*
+   split session creation out of constructor is IMHO better.
+   otherwise we have some circular references to global $app like in
+   getconfig property of App - RA
+*/
+$app->initialize_session();
 
 // load and enable PHP Intrusion Detection System (PHPIDS)
 $ids_security_config = $app->getconf->get_security_config('ids');
-		
+
 if(is_dir(ISPC_CLASS_PATH.'/IDS') && !defined('REMOTE_API_CALL') && ($ids_security_config['ids_anon_enabled'] == 'yes' || $ids_security_config['ids_user_enabled'] == 'yes' || $ids_security_config['ids_admin_enabled'] == 'yes')) {
 	$app->uses('ids');
 	$app->ids->start();

@@ -131,7 +131,7 @@ class remoting_lib extends tform_base {
 			$this->sys_userid            = $user['userid'];
 			$this->sys_default_group     = $user['default_group'];
 			$this->sys_groups             = $user['groups'];
-			// we have to force admin priveliges for the remoting API as some function calls might fail otherwise.
+			// we have to force admin privileges for the remoting API as some function calls might fail otherwise.
 			if($client_login == false) $_SESSION["s"]["user"]["typ"] = 'admin';
 		}
 
@@ -225,10 +225,10 @@ class remoting_lib extends tform_base {
 		return $sql;
 	}
 
-	function getDataRecord($primary_id) {
+       function getDataRecord($primary_id, $client_id = 0) {
 		global $app;
 		$escape = '`';
-		$this->loadUserProfile();
+               $this->loadUserProfile($client_id);
 		if(@is_numeric($primary_id)) {
 			if($primary_id > 0) {
 				// Return a single record
@@ -309,6 +309,7 @@ class remoting_lib extends tform_base {
 		$username = $params["username"];
 		$clear_password = $params["password"];
 		$language = $params['language'];
+		$modules = $params['modules'];
 		$client_id = $app->functions->intval($client_id);
 
 		if(!isset($params['_ispconfig_pw_crypted']) || $params['_ispconfig_pw_crypted'] != 1) $password = $app->auth->crypt_password(stripslashes($clear_password));
@@ -327,8 +328,14 @@ class remoting_lib extends tform_base {
 			$params[] = $language;
 		}
 
+		$modulesstring = '';
+		if (!empty($modules)) {
+			$modulesstring = ', modules = ?';
+			$params[] = $modules;
+		}
+
 		$params[] = $client_id;
-		$sql = "UPDATE sys_user set username = ? $pwstring $langstring WHERE client_id = ?";
+		$sql = "UPDATE sys_user set username = ? $pwstring $langstring $modulesstring WHERE client_id = ?";
 		$app->db->query($sql, true, $params);
 	}
 

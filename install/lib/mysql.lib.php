@@ -192,6 +192,8 @@ class db
 	}
 
 	private function _query($sQuery = '') {
+		
+		$aArgs = func_get_args();
 		$this->do_connect();
 
 		if ($sQuery == '') {
@@ -227,7 +229,6 @@ class db
 			}
 		} while($ok == false);
 
-		$aArgs = func_get_args();
 		$sQuery = call_user_func_array(array(&$this, '_build_query_string'), $aArgs);
 
 		$this->_iQueryId = mysqli_query($this->_iConnId, $sQuery);
@@ -283,10 +284,17 @@ class db
 	 * @return array result row or NULL if none found
 	 */
 	public function queryOneRecord($sQuery = '') {
-		if(!preg_match('/limit \d+\s*,\s*\d+$/i', $sQuery)) $sQuery .= ' LIMIT 0,1';
-
+		
 		$aArgs = func_get_args();
-		$oResult = call_user_func_array(array(&$this, 'query'), $aArgs);
+		if(!empty($aArgs)) {
+			$sQuery = array_shift($aArgs);
+			if($sQuery && !preg_match('/limit \d+(\s*,\s*\d+)?$/i', $sQuery)) {
+				$sQuery .= ' LIMIT 0,1';
+		}
+		array_unshift($aArgs, $sQuery);
+		}
+  
+		$oResult = call_user_func_array([&$this, 'query'], $aArgs);
 		if(!$oResult) return null;
 
 		$aReturn = $oResult->get();
@@ -753,6 +761,41 @@ class db
 			break;
 		}
 	}
+	
+	/**
+	 * Get the database type (mariadb or mysql)
+	 *
+	 * @access public
+	 * @return string 'mariadb' or string 'mysql'
+	 */
+	
+	public function getDatabaseType() {
+		$tmp = $this->queryOneRecord('SELECT VERSION() as version');
+		if(stristr($tmp['version'],'mariadb')) {
+			return 'mariadb';
+		} else {
+			return 'mysql';
+		}
+	}
+	
+	/**
+	 * Get the database version
+	 *
+	 * @access public
+	 * @param bool   $major_version_only = true will return the major version only, e.g. 8 for MySQL 8
+	 * @return string version number
+	 */
+	
+	public function getDatabaseVersion($major_version_only = false) {
+		$tmp = $this->queryOneRecord('SELECT VERSION() as version');
+		$version = explode('-', $tmp['version']);
+		if($major_version_only == true) {
+			$version_parts = explode('.', $version[0]);
+			return $version_parts[0];
+		} else {
+			return $version[0];
+		}
+	}
 
 }
 
@@ -956,7 +999,7 @@ class fakedb_result {
 
 		if(!is_array($this->aLimitedData)) return $aItem;
 
-		if(list($vKey, $aItem) = each($this->aLimitedData)) {
+		foreach($this->aLimitedData as $vKey => $aItem) {
 			if(!$aItem) $aItem = null;
 		}
 		return $aItem;

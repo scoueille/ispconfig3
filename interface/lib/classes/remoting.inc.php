@@ -59,11 +59,6 @@ class remoting {
 		$app->uses('remoting_lib');
 
 		$this->_methods = $methods;
-
-		/*
-        $this->app = $app;
-        $this->conf = $conf;
-		*/
 	}
 
 	//* remote login function
@@ -72,9 +67,7 @@ class remoting {
 		global $app, $conf;
 
 		// Maintenance mode
-		$app->uses('ini_parser,getconf');
-		$server_config_array = $app->getconf->get_global_config('misc');
-		if($server_config_array['maintenance_mode'] == 'y'){
+		if($app->is_under_maintenance()){
 			throw new SoapFault('maintenance_mode', 'This ISPConfig installation is currently under maintenance. We should be back shortly. Thank you for your patience.');
 			return false;
 		}
@@ -99,28 +92,22 @@ class remoting {
 			if($user) {
 				$saved_password = stripslashes($user['passwort']);
 
-				if(substr($saved_password, 0, 3) == '$1$') {
+				if(preg_match('/^\$[156]\$/', $saved_password)) {
 					//* The password is crypt-md5 encrypted
-					$salt = '$1$'.substr($saved_password, 3, 8).'$';
-
-					if(crypt(stripslashes($password), $salt) != $saved_password) {
+					if(crypt(stripslashes($password), $saved_password) != $saved_password) {
 						throw new SoapFault('client_login_failed', 'The login failed. Username or password wrong.');
-						return false;
 					}
 				} else {
 					//* The password is md5 encrypted
 					if(md5($password) != $saved_password) {
 						throw new SoapFault('client_login_failed', 'The login failed. Username or password wrong.');
-						return false;
 					}
 				}
 			} else {
 				throw new SoapFault('client_login_failed', 'The login failed. Username or password wrong.');
-				return false;
 			}
 			if($user['active'] != 1) {
 				throw new SoapFault('client_login_failed', 'The login failed. User is blocked.');
-				return false;
 			}
 
 			// now we need the client data
@@ -383,7 +370,7 @@ class remoting {
 		$app->remoting_lib->loadFormDef($formdef_file);
 		
 		//* get old record and merge with params, so only new values have to be set in $params
-		$old_rec = $app->remoting_lib->getDataRecord($primary_id);
+               $old_rec = $app->remoting_lib->getDataRecord($primary_id, $client_id);
 		
 		foreach ($app->remoting_lib->formDef['fields'] as $fieldName => $fieldConf)
         {

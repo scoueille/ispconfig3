@@ -7,14 +7,14 @@ All rights reserved.
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
-    * Redistributions of source code must retain the above copyright notice,
-      this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright notice,
-      this list of conditions and the following disclaimer in the documentation
-      and/or other materials provided with the distribution.
-    * Neither the name of ISPConfig nor the names of its contributors
-      may be used to endorse or promote products derived from this software without
-      specific prior written permission.
+	* Redistributions of source code must retain the above copyright notice,
+	  this list of conditions and the following disclaimer.
+	* Redistributions in binary form must reproduce the above copyright notice,
+	  this list of conditions and the following disclaimer in the documentation
+	  and/or other materials provided with the distribution.
+	* Neither the name of ISPConfig nor the names of its contributors
+	  may be used to endorse or promote products derived from this software without
+	  specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -97,7 +97,7 @@ class powerdns_plugin {
 
 
 	/*
-	 	This function is called when the plugin is loaded
+		This function is called when the plugin is loaded
 	*/
 
 	function onLoad() {
@@ -151,6 +151,8 @@ class powerdns_plugin {
 
 		//* tell pdns to rediscover zones in DB
 		$this->zoneRediscover();
+		//* handle dnssec
+		$this->handle_dnssec($data);
 		//* tell pdns to use 'pdnssec rectify' on the new zone
 		$this->rectifyZone($data);
 		//* tell pdns to send notify to slave
@@ -181,10 +183,6 @@ class powerdns_plugin {
 				$ttl = $data["new"]["ttl"];
 				$app->db->query("UPDATE powerdns.records SET name = ?, content = ?, ttl = ?, change_date = UNIX_TIMESTAMP() WHERE ispconfig_id = ? AND type = 'SOA'", $origin, $content, $ttl, $data["new"]["id"]);
 
-				//* tell pdns to use 'pdnssec rectify' on the new zone
-				$this->rectifyZone($data);
-				//* tell pdns to send notify to slave
-				$this->notifySlave($data);
 			} else {
 				$this->soa_insert($event_name, $data);
 				$ispconfig_id = $data["new"]["id"];
@@ -196,11 +194,14 @@ class powerdns_plugin {
 						$this->rr_insert("dns_rr_insert", $data);
 					}
 				}
-				//* tell pdns to use 'pdnssec rectify' on the new zone
-				$this->rectifyZone($data);
-				//* tell pdns to send notify to slave
-				$this->notifySlave($data);
 			}
+
+			//* handle dnssec
+			$this->handle_dnssec($data);
+			//* tell pdns to use 'pdnssec rectify' on the new zone
+			$this->rectifyZone($data);
+			//* tell pdns to send notify to slave
+			$this->notifySlave($data);
 		}
 	}
 
@@ -420,15 +421,23 @@ class powerdns_plugin {
 		}
 	}
 
-	function find_pdns_pdnssec() {
+	function find_pdns_pdnssec_or_pdnsutil() {
 		$output = array();
 		$retval = '';
+
+		// The command is named pdnssec in PowerDNS 3
 		exec("type -p pdnssec", $output, $retval);
 		if ($retval == 0 && is_file($output[0])){
 			return $output[0];
-		} else {
-			return false;
 		}
+
+		// But in PowerNDS 4 they renamed it to pdnsutil
+		exec("type -p pdnsutil", $output, $retval);
+		if ($retval == 0 && is_file($output[0])){
+			return $output[0];
+		}
+
+		return false;
 	}
 
 	function zoneRediscover() {
@@ -439,16 +448,20 @@ class powerdns_plugin {
 	}
 
 	function notifySlave($data) {
+		global $app;
+
 		$pdns_control = $this->find_pdns_control();
 		if ( $pdns_control != false ) {
-			exec($pdns_control . ' notify ' . rtrim($data["new"]["origin"],"."));
+			$app->system->exec_safe($pdns_control . ' notify ?', rtrim($data["new"]["origin"],"."));
 		}
 	}
 
 	function fetchFromMaster($data) {
+		global $app;
+
 		$pdns_control = $this->find_pdns_control();
 		if ( $pdns_control != false ) {
-			exec($pdns_control . ' retrieve ' . rtrim($data["new"]["origin"],"."));
+			$app->system->exec_safe($pdns_control . ' retrieve ?', rtrim($data["new"]["origin"],"."));
 		}
 	}
 
@@ -465,19 +478,230 @@ class powerdns_plugin {
 		}
 	}
 
+	function is_pdns_version_supported() {
+		if (preg_match('/^[34]/',$this->get_pdns_version())) {
+			return true;
+		}
+
+		return false;
+	}
+
+	function handle_dnssec($data) {
+		// If origin changed, delete keys first
+		if ($data['old']['origin'] != $data['new']['origin']) {
+			if (@$data['old']['dnssec_initialized'] == 'Y' && strlen(@$data['old']['origin']) > 3) {
+				$this->soa_dnssec_delete($data);
+			}
+		}
+
+		// If DNSSEC is disabled, but was enabled before, just disable DNSSEC but leave the keys in dns_info
+		if ($data['new']['dnssec_wanted'] === 'N' && $data['old']['dnssec_wanted'] === 'Y') {
+			$this->soa_dnssec_disable($data);
+
+			return;
+		}
+
+		// If DNSSEC is wanted, enable it
+		if ($data['new']['dnssec_wanted'] === 'Y' && (is_null($data['old']['dnssec_wanted']) || $data['old']['dnssec_wanted'] === 'N')) {
+			$this->soa_dnssec_create($data);
+		}
+	}
+
+	function soa_dnssec_create($data) {
+		global $app;
+
+		if (false === $this->is_pdns_version_supported()) {
+			return;
+		}
+
+		$pdns_pdnssec = $this->find_pdns_pdnssec_or_pdnsutil();
+		if ($pdns_pdnssec === false) {
+			return;
+		}
+
+		$zone = rtrim($data['new']['origin'],'.');
+		$log = array();
+
+		// We don't log the actual commands here, because having commands in the dnssec_info field will trigger
+		// the IDS if you try to save the record using the interface afterwards.
+		$cmd_add_zone_key_ksk = sprintf('%s add-zone-key %s ksk active 2048 rsasha256', $pdns_pdnssec, $zone);
+		$log[] = sprintf("\r\n%s %s", date('c'), 'Running add-zone-key ksk command...');
+		exec($cmd_add_zone_key_ksk, $log);
+
+		$cmd_add_zone_key_zsk = sprintf('%s add-zone-key %s zsk active 1024 rsasha256', $pdns_pdnssec, $zone);
+		$log[] = sprintf("\r\n%s %s", date('c'), 'Running add-zone-key zsk command...');
+		exec($cmd_add_zone_key_zsk, $log);
+
+		$cmd_set_nsec3 = sprintf('%s set-nsec3 %s "1 0 10 deadbeef" 2>&1', $pdns_pdnssec, $zone);
+		$log[] = sprintf("\r\n%s %s", date('c'), 'Running set-nsec3 command...');
+		exec($cmd_set_nsec3, $log);
+
+		$pubkeys = array();
+		$cmd_show_zone = sprintf('%s show-zone %s 2>&1', $pdns_pdnssec, $zone);
+		$log[] = sprintf("\r\n%s %s", date('c'), 'Running show-zone command...');
+		exec($cmd_show_zone, $pubkeys);
+
+		$log = array_merge($log, $pubkeys);
+
+		$dnssec_info = array_merge($this->format_dnssec_pubkeys($pubkeys), array('', '== Raw log ============================'), $log);
+		$dnssec_info = implode("\r\n", $dnssec_info);
+
+		if ($app->dbmaster !== $app->db) {
+			$app->dbmaster->query('UPDATE dns_soa SET dnssec_info=?, dnssec_initialized=? WHERE id=?', $dnssec_info, 'Y', intval($data['new']['id']));
+		}
+		$app->db->query('UPDATE dns_soa SET dnssec_info=?, dnssec_initialized=? WHERE id=?', $dnssec_info, 'Y', intval($data['new']['id']));
+	}
+
+	function format_dnssec_pubkeys($lines) {
+		$formatted = array();
+
+		// We don't care about the first two lines about presigning and NSEC
+		array_shift($lines);
+		array_shift($lines);
+
+		foreach ($lines as $line) {
+			switch ($part = substr($line, 0, 3)) {
+				case 'ID ':
+					// Only process active keys
+					// 'Active: 1' is pdnssec (PowerDNS 3.x) output
+					// 'Active (' is pdnsutil (PowerDNS 4.x) output
+					if (!strpos($line, 'Active: 1') && !strpos($line, 'Active ( ')) {
+						break;
+					}
+
+					// Determine key type (KSK, ZSK or CSK)
+					preg_match('/(KSK|ZSK|CSK)/', $line, $matches_key_type);
+					$key_type = $matches_key_type[1];
+
+					// We only care about the KSK or CSK
+					if (!in_array($key_type, array('KSK', 'CSK'), true)) {
+						break;
+					}
+
+					// Determine key tag
+					preg_match('/ tag = (\d+),/', $line, $matches_key_tag);
+					$formatted[] = sprintf('%s key tag: %d', $key_type, $matches_key_tag[1]);
+
+					// Determine algorithm
+					preg_match('/ algo = (\d+),/', $line, $matches_algo_id);
+					preg_match('/ \( (.*) \)$/', $line, $matches_algo_name);
+					$formatted[] = sprintf('Algo: %d (%s)', $matches_algo_id[1], $matches_algo_name[1]);
+
+					// Determine bits
+					preg_match('/ bits = (\d+)/', $line, $matches_bits);
+					$formatted[] = sprintf('Bits: %d', $matches_bits[1]);
+
+					break;
+
+				case 'KSK':
+				case 'CSK':
+					// Determine DNSKEY
+					preg_match('/ IN DNSKEY \d+ \d+ \d+ (.*) ;/', $line, $matches_dnskey);
+					$formatted[] = sprintf('DNSKEY: %s', $matches_dnskey[1]);
+
+					break;
+
+				case 'DS ':
+					// Determine key tag
+					preg_match('/ IN DS (\d+) \d+ \d+ /', $line, $matches_ds_key_tag);
+					$formatted[] = sprintf('  - DS key tag: %d', $matches_ds_key_tag[1]);
+
+					// Determine key tag
+					preg_match('/ IN DS \d+ (\d+) \d+ /', $line, $matches_ds_algo);
+					$formatted[] = sprintf('    Algo: %d', $matches_ds_algo[1]);
+
+					// Determine digest
+					preg_match('/ IN DS \d+ \d+ (\d+) /', $line, $matches_ds_digest_id);
+					preg_match('/ \( (.*) \)$/', $line, $matches_ds_digest_name);
+					$formatted[] = sprintf('    Digest: %d (%s)', $matches_ds_digest_id[1], $matches_ds_digest_name[1]);
+
+					// Determine public key
+					preg_match('/ IN DS \d+ \d+ \d+ (.*) ;/', $line, $matches_ds_key);
+					$formatted[] = sprintf('    Public key: %s', $matches_ds_key[1]);
+					break;
+
+				default:
+					break;
+			}
+		}
+
+		return $formatted;
+	}
+
+	function soa_dnssec_disable($data) {
+		global $app;
+
+		if (false === $this->is_pdns_version_supported()) {
+			return;
+		}
+
+		$pdns_pdnssec = $this->find_pdns_pdnssec_or_pdnsutil();
+		if ($pdns_pdnssec === false) {
+			return;
+		}
+
+		$zone = rtrim($data['new']['origin'],'.');
+		$log = array();
+
+		// We don't log the actual commands here, because having commands in the dnssec_info field will trigger
+		// the IDS if you try to save the record using the interface afterwards.
+		$cmd_disable_dnssec = sprintf('%s disable-dnssec %s 2>&1', $pdns_pdnssec, $zone);
+		$log[] = sprintf("\r\n%s %s", date('c'), 'Running disable-dnssec command...');
+		exec($cmd_disable_dnssec, $log);
+
+		if ($app->dbmaster !== $app->db) {
+			$app->dbmaster->query('UPDATE dns_soa SET dnssec_initialized=? WHERE id=?', 'N', intval($data['new']['id']));
+		}
+		$app->db->query('UPDATE dns_soa SET dnssec_initialized=? WHERE id=?', 'N', intval($data['new']['id']));
+	}
+
+	function soa_dnssec_delete($data) {
+		global $app;
+
+		if (false === $this->is_pdns_version_supported()) {
+			return;
+		}
+
+		$pdns_pdnssec = $this->find_pdns_pdnssec_or_pdnsutil();
+		if ($pdns_pdnssec === false) {
+			return;
+		}
+
+		$zone = rtrim($data['old']['origin'],'.');
+		$log = array();
+
+		// We don't log the actual commands here, because having commands in the dnssec_info field will trigger
+		// the IDS if you try to save the record using the interface afterwards.
+		$cmd_disable_dnssec = sprintf('%s disable-dnssec %s 2>&1', $pdns_pdnssec, $zone);
+		$log[] = sprintf("\r\n%s %s", date('c'), 'Running disable-dnssec command...');
+		exec($cmd_disable_dnssec, $log);
+
+
+		$dnssec_info = array_merge(array('== Raw log ============================'), $log);
+		$dnssec_info = implode("\r\n", $dnssec_info);
+
+		if ($app->dbmaster !== $app->db) {
+			$app->dbmaster->query('UPDATE dns_soa SET dnssec_info=?, dnssec_initialized=? WHERE id=?', $dnssec_info, 'N', intval($data['new']['id']));
+		}
+		$app->db->query('UPDATE dns_soa SET dnssec_info=?, dnssec_initialized=? WHERE id=?', $dnssec_info, 'N', intval($data['new']['id']));
+	}
+
 	function rectifyZone($data) {
 		global $app, $conf;
-		if ( preg_match('/^3/',$this->get_pdns_version()) ) {
-			$pdns_pdnssec = $this->find_pdns_pdnssec();
-			if ( $pdns_pdnssec != false ) {
-				if (isset($data["new"]["origin"])) {
-					//* data has origin field only for SOA recordtypes
-					exec($pdns_pdnssec . ' rectify-zone ' . rtrim($data["new"]["origin"],"."));
-				} else {
-					// get origin from DB for all other recordtypes
-					$zn = $app->db->queryOneRecord("SELECT d.name AS name FROM powerdns.domains d, powerdns.records r WHERE r.ispconfig_id=? AND r.domain_id = d.id", $data["new"]["id"]);
-					exec($pdns_pdnssec . ' rectify-zone ' . trim($zn["name"]));
-				}
+
+		if (false === $this->is_pdns_version_supported()) {
+			return;
+		}
+
+		$pdns_pdnssec = $this->find_pdns_pdnssec_or_pdnsutil();
+		if ( $pdns_pdnssec != false ) {
+			if (isset($data["new"]["origin"])) {
+				//* data has origin field only for SOA recordtypes
+				$app->system->exec_safe($pdns_pdnssec . ' rectify-zone ?', rtrim($data["new"]["origin"],"."));
+			} else {
+				// get origin from DB for all other recordtypes
+				$zn = $app->db->queryOneRecord("SELECT d.name AS name FROM powerdns.domains d, powerdns.records r WHERE r.ispconfig_id=? AND r.domain_id = d.id", $data["new"]["id"]);
+				$app->system->exec_safe($pdns_pdnssec . ' rectify-zone ?', trim($zn["name"]));
 			}
 		}
 	}

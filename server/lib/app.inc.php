@@ -36,6 +36,10 @@ class app {
 	var $loaded_modules = array();
 	var $loaded_plugins = array();
 	var $_calling_script = '';
+	/**
+	 * @var db
+	 */
+	public $db;
 
 	function __construct() {
 
@@ -43,7 +47,11 @@ class app {
 
 		if($conf['start_db'] == true) {
 			$this->load('db_'.$conf['db_type']);
-			$this->db = new db;
+			try {
+				$this->db = new db;
+			} catch (Exception $e) {
+				$this->db = false;
+			}
 
 			/*
 					Initialize the connection to the master DB,
@@ -51,7 +59,11 @@ class app {
 					*/
 
 			if($conf['dbmaster_host'] != '' && ($conf['dbmaster_host'] != $conf['db_host'] || ($conf['dbmaster_host'] == $conf['db_host'] && $conf['dbmaster_database'] != $conf['db_database']))) {
-				$this->dbmaster = new db($conf['dbmaster_host'], $conf['dbmaster_user'], $conf['dbmaster_password'], $conf['dbmaster_database'], $conf['dbmaster_port'], $conf['dbmaster_client_flags']);
+				try {
+					$this->dbmaster = new db($conf['dbmaster_host'], $conf['dbmaster_user'], $conf['dbmaster_password'], $conf['dbmaster_database'], $conf['dbmaster_port'], $conf['dbmaster_client_flags']);
+				} catch (Exception $e) {
+					$this->dbmaster = false;
+				}
 			} else {
 				$this->dbmaster = $this->db;
 			}
@@ -61,6 +73,22 @@ class app {
 
 	}
 
+	public function __get($name) {
+		$valid_names = array('functions', 'getconf', 'letsencrypt', 'modules', 'plugins', 'services', 'system');
+		if(!in_array($name, $valid_names)) {
+			trigger_error('Undefined property ' . $name . ' of class app', E_USER_WARNING);
+		}
+		if(property_exists($this, $name)) {
+			return $this->{$name};
+		}
+		$this->uses($name);
+		if(property_exists($this, $name)) {
+			return $this->{$name};
+		} else {
+			trigger_error('Undefined property ' . $name . ' of class app', E_USER_WARNING);
+		}
+	}
+	
 	function setCaller($caller) {
 		$this->_calling_script = $caller;
 	}

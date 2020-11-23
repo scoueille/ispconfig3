@@ -101,7 +101,7 @@ $conf['web']['apps_vhost_group'] = 'ispapps';
 //* Fastcgi
 $conf['fastcgi']['fastcgi_phpini_path'] = '/etc/php/7.0/cgi/';
 $conf['fastcgi']['fastcgi_starter_path'] = '/var/www/php-fcgi-scripts/[system_user]/';
-$conf['fastcgi']['fastcgi_bin'] = '/usr/bin/php-cgi';
+$conf['fastcgi']['fastcgi_bin'] = '/usr/bin/php-cgi7.0';
 
 //* Postfix
 $conf['postfix']['installed'] = false; // will be detected automatically during installation
@@ -152,6 +152,11 @@ $conf['saslauthd']['init_script'] = 'saslauthd';
 $conf['amavis']['installed'] = false; // will be detected automatically during installation
 $conf['amavis']['config_dir'] = '/etc/amavis';
 $conf['amavis']['init_script'] = 'amavis';
+
+//* Rspamd
+$conf['rspamd']['installed'] = false; // will be detected automatically during installation
+$conf['rspamd']['config_dir'] = '/etc/rspamd';
+$conf['rspamd']['init_script'] = 'rspamd';
 
 //* ClamAV
 $conf['clamav']['installed'] = false; // will be detected automatically during installation

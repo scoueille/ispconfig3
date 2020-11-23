@@ -76,10 +76,10 @@ $form["tabs"]['firewall'] = array (
 			'datatype' => 'VARCHAR',
 			'formtype' => 'TEXT',
 			'validators' => array (  0 => array ( 'type' => 'REGEX',
-					'regex' => '/^[\s0-9\,\:]{0,255}$/',
+					'regex' => '/^$|\d{1,5}(?::\d{1,5})?(?:,\d{1,5}(?::\d{1,5})?)*$/',
 					'errmsg'=> 'tcp_ports_error_regex'),
 			),
-			'default' => '20,21,22,25,53,80,110,143,443,587,993,995,3306,8080,8081,10000',
+			'default' => '20,21,22,25,53,80,110,143,443,465,587,993,995,3306,8080,8081,10000',
 			'value'  => '',
 			'width'  => '30',
 			'maxlength' => '255'
@@ -88,8 +88,8 @@ $form["tabs"]['firewall'] = array (
 			'datatype' => 'VARCHAR',
 			'formtype' => 'TEXT',
 			'validators' => array (  0 => array ( 'type' => 'REGEX',
-					'regex' => '/^[\s0-9\,\:]{0,255}$/',
-					'errmsg'=> 'tcp_ports_error_regex'),
+					'regex' => '/^$|\d{1,5}(?::\d{1,5})?(?:,\d{1,5}(?::\d{1,5})?)*$/',
+					'errmsg'=> 'udp_ports_error_regex'),
 			),
 			'default' => '53,3306',
 			'value'  => '',
@@ -103,7 +103,7 @@ $form["tabs"]['firewall'] = array (
 			'value'  => array(0 => 'n', 1 => 'y')
 		),
 		//#################################
-		// ENDE Datatable fields
+		// END Datatable fields
 		//#################################
 	)
 );

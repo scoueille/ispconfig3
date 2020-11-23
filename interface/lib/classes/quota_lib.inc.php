@@ -54,28 +54,28 @@ class quota_lib {
 					if($used_ratio >= 1) $sites[$i]['display_colour'] = '#cc0000';
 			
 					if($sites[$i]['used'] > 1024) {
-						$sites[$i]['used'] = round($sites[$i]['used'] / 1024, 2).' MB';
+						$sites[$i]['used'] = round($sites[$i]['used'] / 1024, 1).' MB';
 					} else {
 						if ($sites[$i]['used'] != '') $sites[$i]['used'] .= ' KB';
 					}
 			
 					if($sites[$i]['soft'] > 1024) {
-						$sites[$i]['soft'] = round($sites[$i]['soft'] / 1024, 2).' MB';
+						$sites[$i]['soft'] = round($sites[$i]['soft'] / 1024, 1).' MB';
 					} else {
 						$sites[$i]['soft'] .= ' KB';
 					}
 			
 					if($sites[$i]['hard'] > 1024) {
-						$sites[$i]['hard'] = round($sites[$i]['hard'] / 1024, 2).' MB';
+						$sites[$i]['hard'] = round($sites[$i]['hard'] / 1024, 1).' MB';
 					} else {
 						$sites[$i]['hard'] .= ' KB';
 					}
 			
-					if($sites[$i]['soft'] == " KB") $sites[$i]['soft'] = $app->lng('unlimited');
-					if($sites[$i]['hard'] == " KB") $sites[$i]['hard'] = $app->lng('unlimited');
+					if($sites[$i]['soft'] == " KB") $sites[$i]['soft'] = $app->lng('unlimited_txt');
+					if($sites[$i]['hard'] == " KB") $sites[$i]['hard'] = $app->lng('unlimited_txt');
 					
-					if($sites[$i]['soft'] == '0 B' || $sites[$i]['soft'] == '0 KB' || $sites[$i]['soft'] == '0') $sites[$i]['soft'] = $app->lng('unlimited');
-					if($sites[$i]['hard'] == '0 B' || $sites[$i]['hard'] == '0 KB' || $sites[$i]['hard'] == '0') $sites[$i]['hard'] = $app->lng('unlimited');
+					if($sites[$i]['soft'] == '0 B' || $sites[$i]['soft'] == '0 KB' || $sites[$i]['soft'] == '0') $sites[$i]['soft'] = $app->lng('unlimited_txt');
+					if($sites[$i]['hard'] == '0 B' || $sites[$i]['hard'] == '0 KB' || $sites[$i]['hard'] == '0') $sites[$i]['hard'] = $app->lng('unlimited_txt');
 					
 					/*
 					 if(!strstr($sites[$i]['used'],'M') && !strstr($sites[$i]['used'],'K')) $sites[$i]['used'].= ' B';
@@ -266,16 +266,16 @@ class quota_lib {
 					if($used_ratio >= 1) $emails[$i]['display_colour'] = '#cc0000';
 			
 					if($emails[$i]['quota'] == 0){
-						$emails[$i]['quota'] = $app->lng('unlimited');
+						$emails[$i]['quota'] = $app->lng('unlimited_txt');
 					} else {
-						$emails[$i]['quota'] = round($emails[$i]['quota'] / 1048576, 4).' MB';
+                                               $emails[$i]['quota'] = round($emails[$i]['quota'] / 1048576, 1).' MB';
 					}
 			
 			
 					if($emails[$i]['used'] < 1544000) {
-						$emails[$i]['used'] = round($emails[$i]['used'] / 1024, 4).' KB';
+                                               $emails[$i]['used'] = round($emails[$i]['used'] / 1024, 1).' KB';
 					} else {
-						$emails[$i]['used'] = round($emails[$i]['used'] / 1048576, 4).' MB';
+                                               $emails[$i]['used'] = round($emails[$i]['used'] / 1048576, 1).' MB';
 					}
 				}
 			}
@@ -327,16 +327,16 @@ class quota_lib {
 					if($used_ratio >= 1) $databases[$i]['display_colour'] = '#cc0000';
 						
 					if($databases[$i]['database_quota'] == 0){
-						$databases[$i]['database_quota'] = $app->lng('unlimited');
+						$databases[$i]['database_quota'] = $app->lng('unlimited_txt');
 					} else {
 						$databases[$i]['database_quota'] = $databases[$i]['database_quota'] . ' MB';
 					}
 						
 						
 					if($databases[$i]['used'] < 1544000) {
-						$databases[$i]['used'] = round($databases[$i]['used'] / 1024, 4).' KB';
+						$databases[$i]['used'] = round($databases[$i]['used'] / 1024, 1).' KB';
 					} else {
-						$databases[$i]['used'] = round($databases[$i]['used'] / 1048576, 4).' MB';
+						$databases[$i]['used'] = round($databases[$i]['used'] / 1048576, 1).' MB';
 					}
 				}
 			}

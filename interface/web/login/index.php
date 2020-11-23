@@ -48,9 +48,8 @@ $app->load_language_file('web/login/lib/lang/'.$conf["language"].'.lng');
 // Maintenance mode
 $maintenance_mode = false;
 $maintenance_mode_error = '';
-$app->uses('ini_parser,getconf');
 $server_config_array = $app->getconf->get_global_config('misc');
-if($server_config_array['maintenance_mode'] == 'y'){
+if($app->is_under_maintenance()) {
 	$maintenance_mode = true;
 	$maintenance_mode_error = $app->lng('error_maintenance_mode');
 }
@@ -208,7 +207,7 @@ if(count($_POST) > 0) {
 			if($user) {
 				if($user['active'] == 1) {
 					// Maintenance mode - allow logins only when maintenance mode is off or if the user is admin
-					if(!$maintenance_mode || $user['typ'] == 'admin'){
+					if(!$app->is_under_maintenance() || $user['typ'] == 'admin'){
 						
 						// User login right, so attempts can be deleted
 						$sql = "DELETE FROM `attempts_login` WHERE `ip`=?";
@@ -262,7 +261,7 @@ if(count($_POST) > 0) {
 						$app->plugin->raiseEvent('login', $username);
 						
 						//* Save successfull login message to var
-						$authlog = 'Successful login for user \''. $username .'\' from '. $_SERVER['REMOTE_ADDR'] .' at '. date('Y-m-d H:i:s');
+						$authlog = 'Successful login for user \''. $username .'\' from '. $_SERVER['REMOTE_ADDR'] .' at '. date('Y-m-d H:i:s') . ' with session ID ' .session_id();						
 						$authlog_handle = fopen($conf['ispconfig_log_dir'].'/auth.log', 'a');
 						fwrite($authlog_handle, $authlog ."\n");
 						fclose($authlog_handle);

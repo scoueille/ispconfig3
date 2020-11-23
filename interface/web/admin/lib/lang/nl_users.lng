@@ -1,9 +1,10 @@
 <?php
+$wb['users_txt'] = 'Gebruikers';
 $wb['username_txt'] = 'Gebruikersnaam';
 $wb['username_err'] = 'De gebruikersnaam is te lang of bevat ongeldige karakters.';
 $wb['username_empty'] = 'De gebruikersnaam is niet ingvuld.';
 $wb['username_unique'] = 'Er is al een een gebruiker met deze gebruikersnaam.';
-$wb['passwort_txt'] = 'Wachtwoord';
+$wb['password_txt'] = 'Wachtwoord';
 $wb['password_strength_txt'] = 'Wachtwoord sterkte';
 $wb['modules_txt'] = 'Module';
 $wb['startmodule_txt'] = 'Startmodule';
